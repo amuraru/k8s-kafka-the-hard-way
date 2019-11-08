@@ -22,8 +22,6 @@ Table of Contents
       * [Broker JVM dies, is PV/PVC re-used?](#broker-jvm-dies-is-pvpvc-re-used)
       * [Broker pod deleted, is PV/PVC re-used?](#broker-pod-deleted-is-pvpvc-re-used)
 
-Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
-
 
 This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operator](https://github.com/banzaicloud/kafka-operator) in a local multi-node kind cluster.
 
