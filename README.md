@@ -1,3 +1,30 @@
+
+Table of Contents
+=================
+
+   * [Table of Contents](#table-of-contents)
+   * [Install Kafka in a kind k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
+      * [Install kind](#install-kind)
+      * [Create a mini k8s cluster using kind](#create-a-mini-k8s-cluster-using-kind)
+         * [Create cluster configuration](#create-cluster-configuration)
+         * [Start k8s 1.14 cluster](#start-k8s-114-cluster)
+         * [Access k8s](#access-k8s)
+   * [BanzaiCloud Kafka](#banzaicloud-kafka)
+      * [Install pre-reqs](#install-pre-reqs)
+         * [Cert-manager](#cert-manager)
+         * [Install Zookeeper](#install-zookeeper)
+         * [Install Prometheus Operator](#install-prometheus-operator)
+         * [Install disk provisioner and custom storage class](#install-disk-provisioner-and-custom-storage-class)
+      * [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator)
+         * [Create a KafkaCluster](#create-a-kafkacluster)
+         * [Hack around](#hack-around)
+         * [Kafka samples](#kafka-samples)
+   * [Disaster scenarios](#disaster-scenarios)
+      * [Initial state](#initial-state)
+      * [Broker JVM dies, is PV/PVC re-used?](#broker-jvm-dies-is-pvpvc-re-used)
+      * [Broker pod deleted, is PV/PVC re-used?](#broker-pod-deleted-is-pvpvc-re-used)
+
+
 # Install Kafka in a `kind` k8s cluster
 
 ## Install `kind`
@@ -61,7 +88,7 @@ export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
 
 ## Install pre-reqs
 
-### 1. Cert-manager
+### Cert-manager
 
 
 ```sh
@@ -75,7 +102,7 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.1
 ```
 
 
-### 2. Install Zookeeper
+### Install Zookeeper
 
 
 ```sh
@@ -145,7 +172,8 @@ EOF
 ```
 
 
-### Install Kafka Operator
+## BanzaiCloud Kafka Operator
+
 
 
 ```sh
@@ -215,4 +243,123 @@ kubectl -n kafka run kafka-producer -it --image=wurstmeister/kafka:2.12-2.3.0 --
 
 /opt/kafka/bin/kafka-producer-perf-test.sh --topic perf-topic --num-records 1000000 --throughput 100000 --record-size 5000 --producer-props bootstrap.servers=kafka-headless:29092
 
+```
+
+
+# Disaster scenarios
+
+## Initial state
+
+```sh
+# Get Kakfa broker pods
+k get pod -l kafka_cr=kafka
+NAME         READY   STATUS    RESTARTS   AGE
+kafka7fwkf   1/1     Running   0          6h3m
+kafka8dksv   1/1     Running   0          6h
+kafka9kp6q   1/1     Running   0          6h1m
+kafkas6gh4   1/1     Running   0          6h2m
+kafkavbsff   1/1     Running   0          6h3m
+kafkawn4l6   1/1     Running   0          6h2m
+
+# Get PV and PVC
+k get pv,pvc  | grep examplestorageclass
+
+persistentvolume/pvc-1e0b15df-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storager5t9v                    examplestorageclass            6h59m
+persistentvolume/pvc-3ab64754-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storage7g8xd                    examplestorageclass            6h58m
+persistentvolume/pvc-3ae3ae0c-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storage6sss6                    examplestorageclass            6h58m
+persistentvolume/pvc-3b5fd2ad-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagezs7r7                    examplestorageclass            6h58m
+persistentvolume/pvc-a102806f-0239-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagecp57b                    examplestorageclass            6h33m
+persistentvolume/pvc-a12dafe5-0239-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagekg5j8                    examplestorageclass            6h33m
+
+persistentvolumeclaim/kafka-storage6sss6   Bound    pvc-3ae3ae0c-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h58m
+persistentvolumeclaim/kafka-storage7g8xd   Bound    pvc-3ab64754-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h58m
+persistentvolumeclaim/kafka-storagecp57b   Bound    pvc-a102806f-0239-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h33m
+persistentvolumeclaim/kafka-storagekg5j8   Bound    pvc-a12dafe5-0239-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h33m
+persistentvolumeclaim/kafka-storager5t9v   Bound    pvc-1e0b15df-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h59m
+persistentvolumeclaim/kafka-storagezs7r7   Bound    pvc-3b5fd2ad-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h58m
+
+
+```
+
+## Broker JVM dies, is PV/PVC re-used?
+
+
+Is the underlying PV/PVC retained and broker pod is rescheduled?
+**PASSSED**
+
+```sh
+# Kill one broker JVM
+k exec -it kafka7fwkf -- kill 1
+
+# Pod is recreated
+NAME         READY   STATUS    RESTARTS   AGE
+kafka8dksv   1/1     Running   0          6h2m
+kafka9kp6q   1/1     Running   0          6h4m
+kafkap4h7p   1/1     Running   0          56s  # <----
+kafkas6gh4   1/1     Running   0          6h4m
+kafkavbsff   1/1     Running   0          6h5m
+kafkawn4l6   1/1     Running   0          6h4m
+
+
+# PV/PVC reused, attached to the new POD : Good!
+
+k get pv,pvc  | grep examplestorageclass
+persistentvolume/pvc-1e0b15df-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storager5t9v                    examplestorageclass            7h7m
+persistentvolume/pvc-3ab64754-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storage7g8xd                    examplestorageclass            7h6m
+persistentvolume/pvc-3ae3ae0c-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storage6sss6                    examplestorageclass            7h6m
+persistentvolume/pvc-3b5fd2ad-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagezs7r7                    examplestorageclass            7h6m
+persistentvolume/pvc-a102806f-0239-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagecp57b                    examplestorageclass            6h42m
+persistentvolume/pvc-a12dafe5-0239-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagekg5j8                    examplestorageclass            6h42m
+persistentvolumeclaim/kafka-storage6sss6   Bound    pvc-3ae3ae0c-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   7h6m
+persistentvolumeclaim/kafka-storage7g8xd   Bound    pvc-3ab64754-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   7h6m
+persistentvolumeclaim/kafka-storagecp57b   Bound    pvc-a102806f-0239-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h42m
+persistentvolumeclaim/kafka-storagekg5j8   Bound    pvc-a12dafe5-0239-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h42m
+persistentvolumeclaim/kafka-storager5t9v   Bound    pvc-1e0b15df-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   7h7m
+persistentvolumeclaim/kafka-storagezs7r7   Bound    pvc-3b5fd2ad-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   7h6m
+
+```
+
+
+
+## Broker pod deleted, is PV/PVC re-used?
+
+**PASSED** - PV is reattached to the new pod
+
+```sh
+$ k get pod -l kafka_cr=kafka
+NAME         READY   STATUS    RESTARTS   AGE
+kafka8dksv   1/1     Running   0          6h12m
+kafka9kp6q   1/1     Running   0          6h13m
+kafkabvx7m   1/1     Running   0          6m59s
+kafkap4h7p   1/1     Running   0          10m
+kafkavbsff   1/1     Running   0          6h14m
+kafkawn4l6   1/1     Running   0          6h14m
+
+
+$ k delete pod kafka8dksv
+pod "kafka8dksv" deleted
+
+$ k get pod -l kafka_cr=kafka
+NAME         READY   STATUS    RESTARTS   AGE
+kafka8hn4d   1/1     Running   0          31s # <--recreated
+kafka9kp6q   1/1     Running   0          6h14m
+kafkabvx7m   1/1     Running   0          7m54s
+kafkap4h7p   1/1     Running   0          11m
+kafkavbsff   1/1     Running   0          6h15m
+kafkawn4l6   1/1     Running   0          6h14m
+
+$ k get pv,pvc -o wide  | grep examplestorageclass
+# Same PV/PVCs
+persistentvolume/pvc-1e0b15df-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storager5t9v                    examplestorageclass            7h17m
+persistentvolume/pvc-3ab64754-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storage7g8xd                    examplestorageclass            7h16m
+persistentvolume/pvc-3ae3ae0c-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storage6sss6                    examplestorageclass            7h16m
+persistentvolume/pvc-3b5fd2ad-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagezs7r7                    examplestorageclass            7h16m
+persistentvolume/pvc-a102806f-0239-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagecp57b                    examplestorageclass            6h52m
+persistentvolume/pvc-a12dafe5-0239-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagekg5j8                    examplestorageclass            6h52m
+persistentvolumeclaim/kafka-storage6sss6   Bound    pvc-3ae3ae0c-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   7h16m
+persistentvolumeclaim/kafka-storage7g8xd   Bound    pvc-3ab64754-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   7h16m
+persistentvolumeclaim/kafka-storagecp57b   Bound    pvc-a102806f-0239-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h52m
+persistentvolumeclaim/kafka-storagekg5j8   Bound    pvc-a12dafe5-0239-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h52m
+persistentvolumeclaim/kafka-storager5t9v   Bound    pvc-1e0b15df-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   7h17m
+persistentvolumeclaim/kafka-storagezs7r7   Bound    pvc-3b5fd2ad-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   7h16m
 ```
