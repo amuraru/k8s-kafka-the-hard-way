@@ -1,4 +1,4 @@
-# Local k8s cluster
+# Install Kafka in a `kind` k8s cluster
 
 ## Install `kind`
 
