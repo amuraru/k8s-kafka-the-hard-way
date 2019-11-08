@@ -1,8 +1,6 @@
-
 Table of Contents
 =================
 
-   * [Table of Contents](#table-of-contents)
    * [Install Kafka in a kind k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
       * [Install kind](#install-kind)
       * [Create a mini k8s cluster using kind](#create-a-mini-k8s-cluster-using-kind)
@@ -23,6 +21,12 @@ Table of Contents
       * [Initial state](#initial-state)
       * [Broker JVM dies, is PV/PVC re-used?](#broker-jvm-dies-is-pvpvc-re-used)
       * [Broker pod deleted, is PV/PVC re-used?](#broker-pod-deleted-is-pvpvc-re-used)
+
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+
+
+This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operator](https://github.com/banzaicloud/kafka-operator) in a local multi-node kind cluster.
+
 
 
 # Install Kafka in a `kind` k8s cluster
