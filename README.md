@@ -48,7 +48,7 @@ mv ./kind ~/bin
 ### Create cluster configuration
 ```bash
 mkdir ~/.kind
-# Create a 7 node cluster configuration
+# Create a 6 node cluster configuration
 cat > ~/.kind/kind-config.yaml <<EOF
 kind: Cluster
 apiVersion: kind.sigs.k8s.io/v1alpha3
@@ -82,6 +82,17 @@ export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
 ```
 
 
+### Emulate multi-az nodes
+
+```
+# place all nodes in the same region
+kubectl label nodes kind-worker kind-worker2 kind-worker3 kind-worker4  kind-worker5 kind-worker6 failure-domain.beta.kubernetes.io/region=same_region
+
+# emulate 3 AZs:
+kubectl label nodes kind-worker  kind-worker2 failure-domain.beta.kubernetes.io/zone=az1
+kubectl label nodes kind-worker3 kind-worker4 failure-domain.beta.kubernetes.io/zone=az2
+kubectl label nodes kind-worker5 kind-worker6 failure-domain.beta.kubernetes.io/zone=az3
+```
 
 # BanzaiCloud Kafka
 
