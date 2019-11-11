@@ -201,7 +201,7 @@ rm -rf charts/kafka-operator
 helm fetch banzaicloud-stable/kafka-operator --version 0.2.4 --untar -d charts/
 
 kubectl create ns kafka
-helm template --name=kafka-operator --namespace=kafka  charts/kafka-operator -f koperator/config/samples/example-prometheus-alerts.yaml > kafka-operator.yaml
+helm template --name=kafka-operator --namespace=kafka  charts/kafka-operator  > kafka-operator.yaml
 kubectl apply -n kafka  -f kafka-operator.yaml
 
 # Check
