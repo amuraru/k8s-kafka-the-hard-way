@@ -211,13 +211,10 @@ Version 0.7.1
 
 
 ```
-cd git-koperator/
-cat config/samples/simplekafkacluster.yaml
-
-kubectl create -n kafka -f config/samples/simplekafkacluster.yaml
+kubectl create -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/simplekafkacluster.yaml
 
 # Create the ServiceMonitors for Prometheus
-kubectl create -n default -f config/samples/kafkacluster-prometheus.yaml
+kubectl create -n default -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus.yaml
 
 # Check CRD created
 k get KafkaCluster kafka -n kafka
