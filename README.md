@@ -98,6 +98,9 @@ kubectl label nodes kind-worker kind-worker2 kind-worker3 kind-worker4  kind-wor
 kubectl label nodes kind-worker  kind-worker2 failure-domain.beta.kubernetes.io/zone=az1
 kubectl label nodes kind-worker3 kind-worker4 failure-domain.beta.kubernetes.io/zone=az2
 kubectl label nodes kind-worker5 kind-worker6 failure-domain.beta.kubernetes.io/zone=az3
+
+# check
+kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failure-domain.beta.kubernetes.io/zone
 ```
 
 # BanzaiCloud Kafka
@@ -246,6 +249,12 @@ kubectl port-forward -n kafka svc/kafka-cruisecontrol-svc 18090:8090 --address 1
 kubectl port-forward -n default svc/prometheus-operated 19090:9090 --address 10.131.236.142
 # http://10.131.236.142:19090/graph?g0.range_input=1h&g0.expr=%7B__name__%20%3D~%27kafka.*%27%7D&g0.tab=1
 
+```
+
+#### Verify pod images
+
+```sh
+kubectl get pod -o=custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[*].image --all-namespaces
 ```
 
 
