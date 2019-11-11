@@ -1,12 +1,12 @@
-Table of Contents
-=================
-
+<!--ts-->
+   * [Intro](#intro)
    * [Install Kafka in a kind k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
       * [Install kind](#install-kind)
       * [Create a mini k8s cluster using kind](#create-a-mini-k8s-cluster-using-kind)
          * [Create cluster configuration](#create-cluster-configuration)
          * [Start k8s 1.14 cluster](#start-k8s-114-cluster)
          * [Access k8s](#access-k8s)
+      * [Emulate multi-az nodes](#emulate-multi-az-nodes)
    * [BanzaiCloud Kafka](#banzaicloud-kafka)
       * [Install pre-reqs](#install-pre-reqs)
          * [Cert-manager](#cert-manager)
@@ -22,6 +22,12 @@ Table of Contents
       * [Broker JVM dies, is PV/PVC re-used?](#broker-jvm-dies-is-pvpvc-re-used)
       * [Broker pod deleted, is PV/PVC re-used?](#broker-pod-deleted-is-pvpvc-re-used)
 
+<!-- Added by: amuraru, at: Mon Nov 11 11:50:01 EET 2019 -->
+
+<!--te-->
+
+
+# Intro
 
 This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operator](https://github.com/banzaicloud/kafka-operator) in a local multi-node kind cluster.
 
@@ -82,7 +88,7 @@ export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
 ```
 
 
-### Emulate multi-az nodes
+## Emulate multi-az nodes
 
 ```
 # place all nodes in the same region
