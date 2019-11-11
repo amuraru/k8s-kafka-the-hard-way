@@ -205,6 +205,9 @@ cat config/samples/simplekafkacluster.yaml
 
 kubectl create -n kafka -f config/samples/simplekafkacluster.yaml
 
+# Create the ServiceMonitors for Prometheus
+kubectl create -n default -f config/samples/kafkacluster-prometheus.yaml
+
 # Check CRD created
 k get KafkaCluster kafka -n kafka
 # See CRD state
