@@ -9,7 +9,7 @@
       * [Emulate multi-az nodes](#emulate-multi-az-nodes)
    * [BanzaiCloud Kafka](#banzaicloud-kafka)
       * [Install pre-reqs](#install-pre-reqs)
-         * [Cert-manager](#cert-manager)
+         * [Cert-Manager](#cert-manager)
          * [Install Zookeeper](#install-zookeeper)
          * [Install Prometheus Operator](#install-prometheus-operator)
          * [Install disk provisioner and custom storage class](#install-disk-provisioner-and-custom-storage-class)
@@ -156,7 +156,7 @@ kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cer
 helm install cert-manager --namespace cert-manager --version v0.11.0 jetstack/cert-manager
 ```
 
-#### Install Zookeeper Operator
+### Install Zookeeper Operator
 
 Make sure you use **`helm3`**
 
@@ -173,14 +173,14 @@ kubectl apply -n zookeeper -f ./charts/zookeeper-operator.yaml
 ```
 
 
-##### Create a ZK cluster with 3 zk nodes
+#### Create a ZK cluster with 3 zk nodes
 
 ```sh
 kubectl create --namespace zookeeper -f - <<EOF
 apiVersion: zookeeper.pravega.io/v1beta1
 kind: ZookeeperCluster
 metadata:
-  name: example-zookeepercluster
+  name: zk
   namespace: zookeeper
 spec:
   replicas: 3
@@ -190,7 +190,7 @@ EOF
 # Check
 k get all -n zookeeper
 # SS up?
-k get statefulset.apps/example-zookeepercluster -n zookeeper
+k get statefulset.apps/zk -n zookeeper
 # Good
 ```
 
