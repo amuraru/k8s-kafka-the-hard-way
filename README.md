@@ -103,40 +103,79 @@ kubectl label nodes kind-worker5 kind-worker6 failure-domain.beta.kubernetes.io/
 kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failure-domain.beta.kubernetes.io/zone
 ```
 
+
+## Install disk provisioner and custom storage class
+
+
+- Using https://github.com/rancher/local-path-provisioner as this emulates better individual disks
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+# Check
+kubectl get all -n local-path-storage
+
+# Create a custom storage class for Kafka
+kubectl apply -f - <<EOF
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: examplestorageclass
+provisioner: rancher.io/local-path
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+EOF
+
+```
+
 # BanzaiCloud Kafka
 
-- Version 0.7.1: https://github.com/banzaicloud/kafka-operator/blob/0.7.1/README.md#installation
+- Version 0.9.2: https://github.com/banzaicloud/kafka-operator/blob/0.9.2/README.md#installation
 
 
 ## Install pre-reqs
 
-### Cert-manager
+**Note: The installation below assumes you're using `helm3`**
 
+### Cert-Manager 0.11
 
 ```sh
-# pre-create cert-manager namespace and CRDs per their installation instructions
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.10.1/deploy/manifests/01-namespace.yaml
+# pre-create cert-manager namespace
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    cert-manager.io/disable-validation: "true"
+EOF
 
+# Create cert-manager CRDs
+kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml
 
-# Install the CustomResourceDefinitions and cert-manager itself
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.10.1/cert-manager.yaml
+helm install cert-manager --namespace cert-manager --version v0.11.0 jetstack/cert-manager
+```
 
+#### Install Zookeeper Operator
+
+Make sure you use **`helm3`**
+
+```sh
+rm -rf /tmp/zookeeper-operator
+git clone --single-branch --branch v0.2.5  https://github.com/pravega/zookeeper-operator /tmp/zookeeper-operator
+
+cd /tmp/zookeeper-operator
+
+kubectl create ns zookeeper
+
+helm template zookeeper-operator --namespace=zookeeper --set image.tag=0.2.5 ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
+kubectl apply -n zookeeper -f ./charts/zookeeper-operator.yaml
 ```
 
 
-### Install Zookeeper
-
+##### Create a ZK cluster with 3 zk nodes
 
 ```sh
-
-helm repo add banzaicloud-stable https://kubernetes-charts.banzaicloud.com/
-helm repo update
-helm fetch banzaicloud-stable/zookeeper-operator --untar -d charts/
-helm template --name zookeeper-operator --namespace=zookeeper charts/zookeeper-operator > zk.yaml
-kubectl create ns zookeeper
-kubectl apply -n zookeeper -f zk.yaml
-
-# Create a ZK cluster with 3 zk nodes
 kubectl create --namespace zookeeper -f - <<EOF
 apiVersion: zookeeper.pravega.io/v1beta1
 kind: ZookeeperCluster
@@ -169,42 +208,15 @@ k get all -A -l app.kubernetes.io/name=prometheus-operator
 ```
 
 
-### Install disk provisioner and custom storage class
-
-
-- Using https://github.com/rancher/local-path-provisioner as this emulates better individual disks
-
-```sh
-kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
-
-# Check
-kubectl get all -n local-path-storage
-
-# Create a custom storage class for Kafka
-kubectl apply -f - <<EOF
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: examplestorageclass
-provisioner: rancher.io/local-path
-volumeBindingMode: WaitForFirstConsumer
-reclaimPolicy: Retain
-EOF
-
-```
-
-
 ## BanzaiCloud Kafka Operator
-
-
 
 ```sh
 
 rm -rf charts/kafka-operator
-helm fetch banzaicloud-stable/kafka-operator --version 0.2.4 --untar -d charts/
+helm fetch banzaicloud-stable/kafka-operator --version 0.2.13 --untar -d charts/
 
 kubectl create ns kafka
-helm template --name=kafka-operator --namespace=kafka  charts/kafka-operator  > kafka-operator.yaml
+helm template kafka-operator --namespace=kafka  charts/kafka-operator  > kafka-operator.yaml
 kubectl apply -n kafka  -f kafka-operator.yaml
 
 # Check
@@ -216,7 +228,7 @@ k get all -n kafka
 
 ### Create a KafkaCluster
 
-Version 0.7.1
+Version 0.9.2
 
 
 ```
