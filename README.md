@@ -279,7 +279,7 @@ kubectl get pod -o=custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[*].
 ```sh
 kubectl -n kafka run kafka-producer -it --image=wurstmeister/kafka:2.12-2.3.0 --rm=true --restart=Never bash
 
-/opt/kafka/bin/kafka-topics.sh --zookeeper example-zookeepercluster-client.zookeeper:2181 --topic perf-topic --create --partitions 18 --replication-factor 3
+/opt/kafka/bin/kafka-topics.sh --zookeeper zk-client.zookeeper:2181 --topic perf-topic --create --partitions 18 --replication-factor 3
 
 /opt/kafka/bin/kafka-producer-perf-test.sh --topic perf-topic --num-records 1000000 --throughput 100000 --record-size 5000 --producer-props bootstrap.servers=kafka-headless:29092
 
