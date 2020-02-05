@@ -464,7 +464,7 @@ spec:
           {
             "brokerId": "-1",
             "capacity": {
-              "DISK": {"/kafka-logs1": "10000"},
+              "DISK": {"/kafka-logs1/kafka": "10000"},
               "CPU": {"num.cores": "5"},
               "NW_IN": "300000",
               "NW_OUT": "300000"
