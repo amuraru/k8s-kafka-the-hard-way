@@ -156,18 +156,18 @@ spec:
   brokers:
     - brokerConfigGroup: us_east_1a
       id: 100
-      readOnlyConfig: |
-        broker.rack=us-east-1,us-east-1a
+    - brokerConfigGroup: us_east_1a
+      id: 101
     - brokerConfigGroup: us_east_1b
       id: 200
-      readOnlyConfig: |
-        broker.rack=us-east-1,us-east-1b
+    - brokerConfigGroup: us_east_1b
+      id: 201
     - brokerConfigGroup: us_east_1c
       id: 300
-      readOnlyConfig: |
-        broker.rack=us-east-1,us-east-1c
+    - brokerConfigGroup: us_east_1c
+      id: 301
   rollingUpgradeConfig:
-    failureThreshold: 2
+    failureThreshold: 1
   listenersConfig:
     internalListeners:
       - type: "plaintext"
@@ -186,7 +186,7 @@ spec:
       memory: "1Gi"
       cpu: "4"
   cruiseControlConfig:
-    image: "amuraru/kafka-cruise-control:2.0.88"
+    image: "amuraru/kafka-cruise-control:2.0.88.1"
     topicConfig:
       partitions: 6
       replicationFactor: 3
@@ -202,10 +202,10 @@ spec:
     # through this property
     resourceRequirements:
      limits:
-       memory: "1Gi"
+       memory: "2Gi"
      requests:
-       memory: "1Gi"
-       cpu: "2"
+       memory: "2Gi"
+       cpu: "3"
     # serviceAccountName specifies the serviceAccount used for cc
     #serviceAccountName: "envoy"
     # imagePullSecrets specifies the secret to use when using private registry
