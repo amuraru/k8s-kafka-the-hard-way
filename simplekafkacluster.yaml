@@ -17,6 +17,7 @@ spec:
     min.insync.replicas=3
     num.network.threads=12
     num.replica.fetchers=4
+    cruise.control.metrics.reporter.acks=1
   rackAwareness:
     # operator will use these labels from the nodes to create the rack for Kafka
     labels:
@@ -405,7 +406,7 @@ spec:
       # Enable self healing for goal violation detector
       #self.healing.goal.violation.enabled=true
       # Enable self healing for metric anomaly detector
-      #self.healing.metric.anomaly.enabled=true
+      self.healing.metric.anomaly.enabled=false
       # Enable self healing for disk failure detector
       #self.healing.disk.failure.enabled=true
       # The multiplier applied to the threshold of distribution goals used by goal.violation.detector.
