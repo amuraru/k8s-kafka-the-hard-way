@@ -137,23 +137,21 @@ EOF
 
 **Note: The installation below assumes you're using `helm3`**
 
-### Cert-Manager 0.11
+### Cert-Manager 0.13
+
+See https://cert-manager.io/docs/installation/kubernetes/#steps
 
 ```sh
-# pre-create cert-manager namespace
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: cert-manager
-  labels:
-    cert-manager.io/disable-validation: "true"
-EOF
 
-# Create cert-manager CRDs
-kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml
+# Install separately CRDs
+kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.13.0/deploy/manifests/00-crds.yaml
+kubectl create namespace cert-manager
 
-helm install cert-manager --namespace cert-manager --version v0.11.0 jetstack/cert-manager
+# Install operator using helm3
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v0.13.0
+
 ```
 
 ### Install Zookeeper Operator
