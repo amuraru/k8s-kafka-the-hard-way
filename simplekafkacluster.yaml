@@ -55,7 +55,7 @@ spec:
       # imagePullSecrets specifies the secret to use when using private registry
       #imagePullSecrets: "k8ssecret"
       # kafkaHeapOpts specifies the jvm heap size for the broker
-      kafkaHeapOpts: "-Xmx8G -Xms2G"
+      kafkaHeapOpts: "-XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70"
       # kafkaJvmPerfOpts specifies the jvm performance configs for the broker
       kafkaJvmPerfOpts: "-server -XX:+UseG1GC -XX:MetaspaceSize=96m -XX:G1HeapRegionSize=16M -XX:MinMetaspaceFreeRatio=50 -XX:MaxMetaspaceFreeRatio=80 -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true -Dsun.net.inetaddr.ttl=60"
       storageConfigs:
@@ -98,7 +98,7 @@ spec:
       # imagePullSecrets specifies the secret to use when using private registry
       #imagePullSecrets: "k8ssecret"
       # kafkaHeapOpts specifies the jvm heap size for the broker
-      kafkaHeapOpts: "-Xmx8G -Xms2G"
+      kafkaHeapOpts: "-XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70"
       # kafkaJvmPerfOpts specifies the jvm performance configs for the broker
       kafkaJvmPerfOpts: "-server -XX:+UseG1GC -XX:MetaspaceSize=96m -XX:G1HeapRegionSize=16M -XX:MinMetaspaceFreeRatio=50 -XX:MaxMetaspaceFreeRatio=80 -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true -Dsun.net.inetaddr.ttl=60"
       storageConfigs:
@@ -141,7 +141,7 @@ spec:
       # imagePullSecrets specifies the secret to use when using private registry
       #imagePullSecrets: "k8ssecret"
       # kafkaHeapOpts specifies the jvm heap size for the broker
-      kafkaHeapOpts: "-Xmx8G -Xms2G"
+      kafkaHeapOpts: "-XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70"
       # kafkaJvmPerfOpts specifies the jvm performance configs for the broker
       kafkaJvmPerfOpts: "-server -XX:+UseG1GC -XX:MetaspaceSize=96m -XX:G1HeapRegionSize=16M -XX:MinMetaspaceFreeRatio=50 -XX:MaxMetaspaceFreeRatio=80 -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true -Dsun.net.inetaddr.ttl=60"
       storageConfigs:
