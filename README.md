@@ -174,7 +174,7 @@ kubectl apply -n zookeeper -f ./charts/zookeeper-operator.yaml
 #### Create a ZK cluster with 3 zk nodes
 
 ```sh
-kubectl create --namespace zookeeper -f - <<EOF
+kubectl apply --namespace zookeeper -f - <<EOF
 apiVersion: zookeeper.pravega.io/v1beta1
 kind: ZookeeperCluster
 metadata:
@@ -182,6 +182,10 @@ metadata:
   namespace: zookeeper
 spec:
   replicas: 3
+  image:
+    repository: amuraru/zookeeper
+    tag: 3.5.6
+    pullPolicy: Always
 EOF
 
 
