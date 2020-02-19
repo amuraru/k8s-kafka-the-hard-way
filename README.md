@@ -54,7 +54,7 @@ cat > ~/.kind/kind-config.yaml <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 networking:
-  apiServerAddress: "10.131.236.142"
+  apiServerAddress: "127.0.0.1"
 nodes:
 - role: control-plane
   kubeadmConfigPatches:
@@ -66,10 +66,10 @@ nodes:
         authorization-mode: "AlwaysAllow"
   extraPortMappings:
   - containerPort: 80
-    hostPort: 80
+    hostPort: 6680
     protocol: TCP
   - containerPort: 443
-    hostPort: 443
+    hostPort: 6643
     protocol: TCP
 - role: worker
 - role: worker
