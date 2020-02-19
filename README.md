@@ -54,7 +54,7 @@ cat > ~/.kind/kind-config.yaml <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 networking:
-  apiServerAddress: "127.0.0.1"
+  apiServerAddress: "10.131.236.142"
 nodes:
 - role: control-plane
   kubeadmConfigPatches:
@@ -89,16 +89,14 @@ kind create cluster \
 --image kindest/node:v1.14.6
 ```
 
-
-
-Debug: `kind` clusters are running in docker, check containers: `docker ps`
-
-### Access k8s
-
 Once the cluster is created your `KUBECONFIG` is updated to include
 the new `kind-kafka` cluster context.
 
 Run `kubectl cluster-info --context kind-kafka` to get more info.
+
+Debug: `kind` clusters are running in docker, check containers: `docker ps`
+
+### Access k8s
 
 ```sh
 export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
@@ -109,12 +107,12 @@ export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
 
 ```
 # place all nodes in the same region
-kubectl label nodes kind-worker kind-worker2 kind-worker3 kind-worker4  kind-worker5 kind-worker6 failure-domain.beta.kubernetes.io/region=same_region
+kubectl label nodes kafka-worker kafka-worker2 kafka-worker3 kafka-worker4  kafka-worker5 kafka-worker6 failure-domain.beta.kubernetes.io/region=same_region
 
 # emulate 3 AZs:
-kubectl label nodes kind-worker  kind-worker2 failure-domain.beta.kubernetes.io/zone=az1
-kubectl label nodes kind-worker3 kind-worker4 failure-domain.beta.kubernetes.io/zone=az2
-kubectl label nodes kind-worker5 kind-worker6 failure-domain.beta.kubernetes.io/zone=az3
+kubectl label nodes kafka-worker  kafka-worker2 failure-domain.beta.kubernetes.io/zone=az1
+kubectl label nodes kafka-worker3 kafka-worker4 failure-domain.beta.kubernetes.io/zone=az2
+kubectl label nodes kafka-worker5 kafka-worker6 failure-domain.beta.kubernetes.io/zone=az3
 
 # check
 kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failure-domain.beta.kubernetes.io/zone
