@@ -53,8 +53,24 @@ mkdir ~/.kind
 cat > ~/.kind/kind-config.yaml <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  apiServerAddress: "10.131.236.142"
 nodes:
 - role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+        authorization-mode: "AlwaysAllow"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
 - role: worker
 - role: worker
 - role: worker
@@ -68,13 +84,17 @@ EOF
 
 ```sh
 kind create cluster \
---name kind \
+--name kafka \
 --config ~/.kind/kind-config.yaml \
 --image kindest/node:v1.14.6
 ```
 
-`kind` clusters are running in docker, check containers: `docker ps`
+Once the cluster is created your `KUBECONFIG` is updated to include
+the new `kind-kind` cluster context.
 
+Run `kubectl cluster-info --context kind-kind` to get more info.
+
+Debug: `kind` clusters are running in docker, check containers: `docker ps`
 
 ### Access k8s
 
