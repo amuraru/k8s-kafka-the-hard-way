@@ -1,36 +1,31 @@
-<!--ts-->
-   * [Intro](#intro)
-   * [Install Kafka in a kind k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
-      * [Install kind](#install-kind)
-      * [Create a mini k8s cluster using kind](#create-a-mini-k8s-cluster-using-kind)
-         * [Create cluster configuration](#create-cluster-configuration)
-         * [Start k8s 1.14 cluster](#start-k8s-114-cluster)
-         * [Access k8s](#access-k8s)
-      * [Emulate multi-az nodes](#emulate-multi-az-nodes)
-   * [BanzaiCloud Kafka](#banzaicloud-kafka)
-      * [Install pre-reqs](#install-pre-reqs)
-         * [Cert-Manager](#cert-manager)
-         * [Install Zookeeper](#install-zookeeper)
-         * [Install Prometheus Operator](#install-prometheus-operator)
-         * [Install disk provisioner and custom storage class](#install-disk-provisioner-and-custom-storage-class)
-      * [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator)
-         * [Create a KafkaCluster](#create-a-kafkacluster)
-         * [Hack around](#hack-around)
-         * [Kafka samples](#kafka-samples)
-   * [Disaster scenarios](#disaster-scenarios)
-      * [Initial state](#initial-state)
-      * [Broker JVM dies, is PV/PVC re-used?](#broker-jvm-dies-is-pvpvc-re-used)
-      * [Broker pod deleted, is PV/PVC re-used?](#broker-pod-deleted-is-pvpvc-re-used)
-
-<!-- Added by: amuraru, at: Mon Nov 11 11:50:01 EET 2019 -->
-
-<!--te-->
-
+- [Intro](#intro)
+- [Install Kafka in a `kind` k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
+  - [Install `kind`](#install-kind)
+  - [Create a mini k8s cluster using `kind`](#create-a-mini-k8s-cluster-using-kind)
+    - [Create cluster configuration](#create-cluster-configuration)
+    - [Start k8s 1.14 cluster](#start-k8s-114-cluster)
+    - [Access k8s](#access-k8s)
+  - [Emulate multi-az nodes](#emulate-multi-az-nodes)
+  - [Install disk provisioner and custom storage class](#install-disk-provisioner-and-custom-storage-class)
+- [BanzaiCloud Kafka](#banzaicloud-kafka)
+  - [Install pre-reqs](#install-pre-reqs)
+    - [Cert-Manager 0.13](#cert-manager-013)
+    - [Install Zookeeper Operator](#install-zookeeper-operator)
+      - [Create a ZK cluster with 3 zk nodes](#create-a-zk-cluster-with-3-zk-nodes)
+    - [Install Prometheus Operator](#install-prometheus-operator)
+  - [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator)
+    - [Create a KafkaCluster](#create-a-kafkacluster)
+    - [Hack around](#hack-around)
+      - [Verify pod images](#verify-pod-images)
+    - [Kafka samples](#kafka-samples)
+- [Disaster scenarios](#disaster-scenarios)
+  - [Initial state](#initial-state)
+  - [Broker JVM dies, is PV/PVC re-used?](#broker-jvm-dies-is-pvpvc-re-used)
+  - [Broker pod deleted, is PV/PVC re-used?](#broker-pod-deleted-is-pvpvc-re-used)
 
 # Intro
 
 This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operator](https://github.com/banzaicloud/kafka-operator) in a local multi-node kind cluster.
-
 
 
 # Install Kafka in a `kind` k8s cluster
@@ -42,7 +37,7 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ```bash
 
-curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.5.1/kind-$(uname)-amd64
+curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
 chmod +x ./kind
 mv ./kind ~/bin
 
@@ -130,7 +125,7 @@ EOF
 
 # BanzaiCloud Kafka
 
-- Version 0.9.2: https://github.com/banzaicloud/kafka-operator/blob/0.9.2/README.md#installation
+- Version 0.10.0: https://github.com/banzaicloud/kafka-operator/blob/0.10.0/README.md#installation
 
 
 ## Install pre-reqs
@@ -215,7 +210,7 @@ k get all -A -l app.kubernetes.io/name=prometheus-operator
 ```sh
 
 rm -rf charts/kafka-operator
-helm fetch banzaicloud-stable/kafka-operator --version 0.2.13 --untar -d charts/
+helm fetch banzaicloud-stable/kafka-operator --version 0.2.14 --untar -d charts/
 
 kubectl create ns kafka
 helm template kafka-operator --namespace=kafka  charts/kafka-operator  > kafka-operator.yaml
@@ -230,7 +225,7 @@ k get all -n kafka
 
 ### Create a KafkaCluster
 
-Version 0.9.2
+Version 0.10.0
 
 
 ```
