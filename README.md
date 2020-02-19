@@ -89,14 +89,16 @@ kind create cluster \
 --image kindest/node:v1.14.6
 ```
 
-Once the cluster is created your `KUBECONFIG` is updated to include
-the new `kind-kind` cluster context.
 
-Run `kubectl cluster-info --context kind-kind` to get more info.
 
 Debug: `kind` clusters are running in docker, check containers: `docker ps`
 
 ### Access k8s
+
+Once the cluster is created your `KUBECONFIG` is updated to include
+the new `kind-kafka` cluster context.
+
+Run `kubectl cluster-info --context kind-kafka` to get more info.
 
 ```sh
 export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
