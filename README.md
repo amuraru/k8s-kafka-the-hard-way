@@ -251,8 +251,9 @@ Version 0.10.0
 ```
 kubectl create -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/simplekafkacluster.yaml
 
-# Create the ServiceMonitors for Prometheus
-kubectl create -n default -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus.yaml
+# Create Prometheus instance and Kafka ServiceMonitors in monitoring NS
+kubectl create ns monitoring
+kubectl create -n monitoring -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus.yaml
 
 # Check CRD created
 k get KafkaCluster kafka -n kafka
