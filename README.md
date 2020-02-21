@@ -234,7 +234,7 @@ helm install monitoring --namespace=default stable/prometheus-operator --set pro
 Prometheus, Grafana, and Alertmanager dashboards can be accessed quickly using `kubectl port-forward` after running the quickstart via the commands below. Kubernetes 1.10 or later is required.
 
 
-Prometheus
+##### Prometheus
 
 ```
 kubectl --namespace default port-forward svc/monitoring-prometheus-oper-prometheus 9090
@@ -242,7 +242,11 @@ kubectl --namespace default port-forward svc/monitoring-prometheus-oper-promethe
 
 Then access via [http://localhost:9090](http://localhost:9090)
 
-Grafana
+###### View all metrics in Prometheus
+
+http://localhost:9090/api/v1/label/__name__/values
+
+##### Grafana
 
 ```
 # get admin password
@@ -253,7 +257,7 @@ kubectl --namespace default port-forward svc/monitoring-grafana 3000
 
 Then access via [http://localhost:3000](http://localhost:3000) and use the default grafana user:password of `admin:admin`.
 
-Alert Manager
+#####  Alert Manager
 
 ```
 kubectl --namespace monitoring port-forward svc/monitoring-prometheus-oper-alertmanager 9093
