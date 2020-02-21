@@ -227,6 +227,7 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/ma
 
 helm install monitoring --namespace=default stable/prometheus-operator --set prometheusOperator.createCustomResource=false
 
+```
 
 #### Access the dashboards
 
@@ -235,7 +236,7 @@ Prometheus, Grafana, and Alertmanager dashboards can be accessed quickly using `
 
 Prometheus
 
-```shell
+```
 kubectl --namespace default port-forward svc/monitoring-prometheus-oper-prometheus 9090
 ```
 
@@ -243,7 +244,7 @@ Then access via [http://localhost:9090](http://localhost:9090)
 
 Grafana
 
-```shell
+```
 # get admin password
 kubectl get secret --namespace default monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 # proxy
@@ -254,12 +255,13 @@ Then access via [http://localhost:3000](http://localhost:3000) and use the defau
 
 Alert Manager
 
-```shell
+```
 kubectl --namespace monitoring port-forward svc/monitoring-prometheus-oper-alertmanager 9093
 ```
 
 Then access via [http://localhost:9093](http://localhost:9093)
 
+```
 # check all resources created by helm release
 k get all -A -l release=monitoring
 
