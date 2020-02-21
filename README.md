@@ -217,10 +217,51 @@ See more at https://github.com/pravega/zookeeper-operator
 ### Install Prometheus Operator
 
 ```sh
-kubectl apply -n default -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/bundle.yaml
 
-# check
-k get all -A -l app.kubernetes.io/name=prometheus-operator
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
+
+helm install monitoring --namespace=default stable/prometheus-operator --set prometheusOperator.createCustomResource=false
+
+
+#### Access the dashboards
+
+Prometheus, Grafana, and Alertmanager dashboards can be accessed quickly using `kubectl port-forward` after running the quickstart via the commands below. Kubernetes 1.10 or later is required.
+
+
+Prometheus
+
+```shell
+kubectl --namespace default port-forward svc/monitoring-prometheus-oper-prometheus 9090
+```
+
+Then access via [http://localhost:9090](http://localhost:9090)
+
+Grafana
+
+```shell
+# get admin password
+kubectl get secret --namespace default monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+# proxy
+kubectl --namespace default port-forward svc/monitoring-grafana 3000
+```
+
+Then access via [http://localhost:3000](http://localhost:3000) and use the default grafana user:password of `admin:admin`.
+
+Alert Manager
+
+```shell
+kubectl --namespace monitoring port-forward svc/monitoring-prometheus-oper-alertmanager 9093
+```
+
+Then access via [http://localhost:9093](http://localhost:9093)
+
+# check all resources created by helm release
+k get all -A -l release=monitoring
 
 ```
 
