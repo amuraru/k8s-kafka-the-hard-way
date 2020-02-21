@@ -5,6 +5,7 @@ metadata:
   labels:
     app: kafka
     kafka_cr: kafka
+    release: monitoring
 spec:
   selector:
     matchLabels:
@@ -45,6 +46,7 @@ metadata:
   labels:
     app: kafka
     kafka_cr: kafka
+    release: monitoring
 spec:
   selector:
     matchLabels:
