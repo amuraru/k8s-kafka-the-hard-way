@@ -32,7 +32,7 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                    - us-east-1a
+                    - az1
       resourceRequirements:
         limits:
           memory: "5Gi"
@@ -75,7 +75,7 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                    - us-east-1b
+                    - az2
       resourceRequirements:
         limits:
           memory: "5Gi"
@@ -118,7 +118,7 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                    - us-east-1c
+                    - az3
       resourceRequirements:
         limits:
           memory: "5Gi"
