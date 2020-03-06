@@ -199,7 +199,7 @@ spec:
   replicas: 3
   image:
     repository: amuraru/zookeeper
-    tag: 3.5.6
+    tag: 3.5.7
     pullPolicy: Always
 EOF
 
