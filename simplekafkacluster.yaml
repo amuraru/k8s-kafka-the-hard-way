@@ -24,7 +24,7 @@ spec:
       - "failure-domain.beta.kubernetes.io/region"
       - "failure-domain.beta.kubernetes.io/zone"
   brokerConfigGroups:
-    us_east_1a:
+    rack1:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
@@ -67,7 +67,7 @@ spec:
             resources:
               requests:
                 storage: 10Gi
-    us_east_1b:
+    rack2:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
@@ -110,7 +110,7 @@ spec:
             resources:
               requests:
                 storage: 10Gi
-    us_east_1c:
+    rack3:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
@@ -154,17 +154,17 @@ spec:
               requests:
                 storage: 10Gi
   brokers:
-    - brokerConfigGroup: us_east_1a
+    - brokerConfigGroup: rack1
       id: 100
-    - brokerConfigGroup: us_east_1a
+    - brokerConfigGroup: rack1
       id: 101
-    - brokerConfigGroup: us_east_1b
+    - brokerConfigGroup: rack2
       id: 200
-    - brokerConfigGroup: us_east_1b
+    - brokerConfigGroup: rack2
       id: 201
-    - brokerConfigGroup: us_east_1c
+    - brokerConfigGroup: rack3
       id: 300
-    - brokerConfigGroup: us_east_1c
+    - brokerConfigGroup: rack3
       id: 301
   rollingUpgradeConfig:
     failureThreshold: 1
