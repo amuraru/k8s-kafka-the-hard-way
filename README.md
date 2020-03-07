@@ -181,7 +181,7 @@ cd /tmp/zookeeper-operator
 
 kubectl create ns zookeeper
 
-helm template zookeeper-operator --namespace=zookeeper --set image.repository='amuraru/zookeeper-operator' --set image.tag='v0.2.5-13-adobe' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
+helm template zookeeper-operator --namespace=zookeeper --set image.repository='amuraru/zookeeper-operator' --set image.tag='v0.2.5-15-adobe' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
 kubectl apply -n zookeeper -f ./charts/zookeeper-operator.yaml
 ```
 
@@ -199,7 +199,7 @@ spec:
   replicas: 3
   image:
     repository: amuraru/zookeeper
-    tag: 3.5.7
+    tag: 3.5.7-1
     pullPolicy: Always
 EOF
 
