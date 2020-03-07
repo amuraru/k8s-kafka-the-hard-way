@@ -201,6 +201,14 @@ spec:
     repository: amuraru/zookeeper
     tag: 3.5.7-1
     pullPolicy: Always
+  persistence:
+    reclaimPolicy: Delete
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
 EOF
 
 
