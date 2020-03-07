@@ -186,7 +186,7 @@ spec:
       memory: "1Gi"
       cpu: "4"
   cruiseControlConfig:
-    image: "amuraru/kafka-cruise-control:2.0.88.1"
+    image: "amuraru/kafka-cruise-control:2.0.95"
     topicConfig:
       partitions: 6
       replicationFactor: 3
@@ -464,7 +464,7 @@ spec:
           {
             "brokerId": "-1",
             "capacity": {
-              "DISK": {"/kafka-logs1/kafka": "10000"},
+              "DISK": {"/kafka-logs1/kafka": "100000"},
               "CPU": {"num.cores": "5"},
               "NW_IN": "300000",
               "NW_OUT": "300000"
