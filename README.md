@@ -260,10 +260,10 @@ http://localhost:9090/api/v1/label/__name__/values
 # get admin password
 kubectl get secret --namespace default monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 # proxy
-kubectl --namespace default port-forward svc/monitoring-grafana 3000
+kubectl --namespace default port-forward svc/monitoring-grafana 3000:80
 ```
 
-Then access via [http://localhost:3000](http://localhost:3000) and use the default grafana user:password of `admin:admin`.
+Then access via [http://localhost:3000](http://localhost:3000) and use the  grafana user:password of `admin:prom-operator`.
 
 #####  Alert Manager
 
