@@ -179,12 +179,6 @@ spec:
         containerPort: 29093
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
-  resourceRequirements:
-    limits:
-      memory: "2Gi"
-    requests:
-      memory: "1Gi"
-      cpu: "4"
   cruiseControlConfig:
     image: "amuraru/kafka-cruise-control:2.0.95"
     topicConfig:
