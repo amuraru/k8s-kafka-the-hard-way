@@ -52,9 +52,23 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1583679577315,
+  "iteration": 1583679577362,
   "links": [],
   "panels": [
+    {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 106,
+      "panels": [],
+      "title": "Overview",
+      "type": "row"
+    },
     {
       "cacheTimeout": null,
       "colorBackground": false,
@@ -78,7 +92,7 @@
         "h": 4,
         "w": 3,
         "x": 0,
-        "y": 0
+        "y": 1
       },
       "id": 46,
       "interval": null,
@@ -164,7 +178,7 @@
         "h": 4,
         "w": 3,
         "x": 3,
-        "y": 0
+        "y": 1
       },
       "id": 36,
       "interval": null,
@@ -247,7 +261,7 @@
         "h": 4,
         "w": 3,
         "x": 6,
-        "y": 0
+        "y": 1
       },
       "id": 38,
       "interval": null,
@@ -330,7 +344,7 @@
         "h": 4,
         "w": 3,
         "x": 9,
-        "y": 0
+        "y": 1
       },
       "id": 40,
       "interval": null,
@@ -412,7 +426,7 @@
         "h": 4,
         "w": 3,
         "x": 12,
-        "y": 0
+        "y": 1
       },
       "id": 30,
       "interval": null,
@@ -495,7 +509,7 @@
         "h": 4,
         "w": 3,
         "x": 15,
-        "y": 0
+        "y": 1
       },
       "id": 102,
       "interval": null,
@@ -578,7 +592,7 @@
         "h": 4,
         "w": 3,
         "x": 18,
-        "y": 0
+        "y": 1
       },
       "id": 103,
       "interval": null,
@@ -661,7 +675,7 @@
         "h": 4,
         "w": 3,
         "x": 21,
-        "y": 0
+        "y": 1
       },
       "id": 32,
       "interval": null,
@@ -728,11 +742,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 5
       },
       "id": 28,
       "panels": [],
-      "title": "Kafka",
+      "title": "Resources",
       "type": "row"
     },
     {
@@ -742,13 +756,13 @@
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
       "description": "Kafka Broker Pods Memory Usage",
-      "fill": 1,
+      "fill": 0,
       "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 5
+        "y": 6
       },
       "hiddenSeries": false,
       "id": 82,
@@ -841,7 +855,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 5
+        "y": 6
       },
       "hiddenSeries": false,
       "id": 81,
@@ -934,7 +948,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 5
+        "y": 6
       },
       "hiddenSeries": false,
       "id": 83,
@@ -1026,7 +1040,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 12
+        "y": 13
       },
       "hiddenSeries": false,
       "id": 93,
@@ -1068,7 +1082,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "JVM Memory Used",
+      "title": "JVM Memory Usage",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1117,7 +1131,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 12
+        "y": 13
       },
       "hiddenSeries": false,
       "id": 95,
@@ -1208,7 +1222,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 12
+        "y": 13
       },
       "hiddenSeries": false,
       "id": 97,
@@ -1288,6 +1302,20 @@
       }
     },
     {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 110,
+      "panels": [],
+      "title": "Utilization",
+      "type": "row"
+    },
+    {
       "cacheTimeout": null,
       "colorBackground": false,
       "colorValue": true,
@@ -1310,7 +1338,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 19
+        "y": 21
       },
       "id": 98,
       "interval": null,
@@ -1395,7 +1423,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 19
+        "y": 21
       },
       "id": 99,
       "interval": null,
@@ -1480,7 +1508,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 19
+        "y": 21
       },
       "id": 100,
       "interval": null,
@@ -1565,7 +1593,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 19
+        "y": 21
       },
       "id": 101,
       "interval": null,
@@ -1633,14 +1661,114 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
+      "description": "Produce Request Rate.",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 25
+      },
+      "hiddenSeries": false,
+      "id": 50,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Total Produce Request Rate",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(irate(kafka_server_brokertopicmetrics_failedproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "Failed Produce Request Rate",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Produce Request Rate",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "reqps",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Byte Rate",
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 23
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 44,
@@ -1714,7 +1842,7 @@
       "yaxes": [
         {
           "decimals": null,
-          "format": "bytes",
+          "format": "Bps",
           "label": "",
           "logBase": 1,
           "max": null,
@@ -1744,10 +1872,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 23
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 58,
@@ -1806,107 +1934,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "Produce Request Rate.",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 31
-      },
-      "hiddenSeries": false,
-      "id": 50,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "paceLength": 10,
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Total Produce Request Rate",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(irate(kafka_server_brokertopicmetrics_failedproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "Failed Produce Request Rate",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Produce Request Rate",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
+          "format": "wps",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -1937,10 +1965,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 31
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 30
       },
       "hiddenSeries": false,
       "id": 56,
@@ -2005,99 +2033,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "Network Processor Avg Idle Percent",
-      "fill": 0,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 39
-      },
-      "hiddenSeries": false,
-      "id": 60,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "paceLength": 10,
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "kafka_network_socketserver_networkprocessoravgidlepercent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}*100",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{pod}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Network Processor Avg Idle Percent",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "percent",
+          "format": "reqps",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -2128,10 +2064,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 39
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 30
       },
       "hiddenSeries": false,
       "id": 62,
@@ -2217,16 +2153,17 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
+      "description": "Network Processor Avg Idle Percent",
       "fill": 0,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 47
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 30
       },
       "hiddenSeries": false,
-      "id": 91,
+      "id": 60,
       "legend": {
         "avg": false,
         "current": false,
@@ -2254,11 +2191,105 @@
       "steppedLine": false,
       "targets": [
         {
+          "expr": "kafka_network_socketserver_networkprocessoravgidlepercent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}*100",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Network Processor Avg Idle Percent",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percent",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 36
+      },
+      "hiddenSeries": false,
+      "id": 91,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": false,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
           "expr": "kafka_log_size{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\",topic=~\"$kafka_topic\",partition=~\"$kafka_partition\"}",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
-          "legendFormat": "{{topic}}:{{partition}}",
+          "legendFormat": "{{brokerId}}:{{topic}}:{{partition}}",
           "refId": "A"
         }
       ],
@@ -2315,20 +2346,23 @@
       "fillGradient": 0,
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 47
+        "w": 8,
+        "x": 8,
+        "y": 36
       },
       "hiddenSeries": false,
       "id": 104,
       "legend": {
+        "alignAsTable": true,
         "avg": false,
-        "current": false,
-        "max": false,
+        "current": true,
+        "max": true,
         "min": false,
         "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -2352,7 +2386,7 @@
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
-          "legendFormat": "{{topic}}:{{partition}}",
+          "legendFormat": "{{brokerId}}::{{topic}}:{{partition}}",
           "refId": "A"
         }
       ],
@@ -2360,7 +2394,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Log Size",
+      "title": "Log Segments",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -2553,5 +2587,5 @@
   "timezone": "",
   "title": "Kafka",
   "uid": "8wCTC5Tmz",
-  "version": 14
+  "version": 24
 }
