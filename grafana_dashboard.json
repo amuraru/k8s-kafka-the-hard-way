@@ -52,7 +52,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1583679577362,
+  "iteration": 1583679577365,
   "links": [],
   "panels": [
     {
@@ -2061,7 +2061,7 @@
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
       "description": "Request Handler Avg Idle Percent",
-      "fill": 1,
+      "fill": 0,
       "fillGradient": 0,
       "gridPos": {
         "h": 6,
@@ -2098,7 +2098,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "kafka_server_kafkarequesthandlerpool_requesthandleravgidlepercent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}*100",
+          "expr": "kafka_network_processor_idlepercent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}*100",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -2110,7 +2110,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Request Handler Avg Idle Percent",
+      "title": "kafka_network_processor_idlepercent",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2587,5 +2587,5 @@
   "timezone": "",
   "title": "Kafka",
   "uid": "8wCTC5Tmz",
-  "version": 24
+  "version": 25
 }
