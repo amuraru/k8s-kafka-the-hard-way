@@ -20,7 +20,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 4,
-      "iteration": 1583995041547,
+      "iteration": 1583998649581,
       "links": [],
       "panels": [
         {
@@ -1315,7 +1315,7 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 6,
+            "w": 4,
             "x": 0,
             "y": 21
           },
@@ -1389,7 +1389,7 @@ data:
             "#299c46"
           ],
           "datasource": null,
-          "description": "Total Outgoing Byte Rate",
+          "description": "Replication IN + OUT across the entire cluster",
           "format": "Bps",
           "gauge": {
             "maxValue": 100,
@@ -1400,8 +1400,8 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 6,
-            "x": 6,
+            "w": 5,
+            "x": 4,
             "y": 21
           },
           "id": 99,
@@ -1443,7 +1443,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) + sum(irate(kafka_server_brokertopicmetrics_replicationbytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -1452,7 +1452,92 @@ data:
             }
           ],
           "thresholds": "0,2",
-          "title": "Total Outgoing Byte Rate",
+          "title": "Total Cluster Replication Rate",
+          "type": "singlestat",
+          "valueFontSize": "100%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#d44a3a",
+            "rgba(237, 129, 40, 0.89)",
+            "#299c46"
+          ],
+          "datasource": null,
+          "description": "Total Incoming Byte Rate",
+          "format": "Bps",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 9,
+            "y": 21
+          },
+          "id": 112,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "0",
+              "to": "null"
+            }
+          ],
+          "repeatDirection": "h",
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "0,2",
+          "title": "Total Incoming Byte Rate",
           "type": "singlestat",
           "valueFontSize": "100%",
           "valueMaps": [
@@ -1485,8 +1570,8 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 6,
-            "x": 12,
+            "w": 5,
+            "x": 13,
             "y": 21
           },
           "id": 100,
@@ -1644,7 +1729,7 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 8,
             "x": 0,
             "y": 25
@@ -1654,6 +1739,8 @@ data:
           "legend": {
             "avg": false,
             "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
             "max": false,
             "min": false,
             "show": true,
@@ -1678,18 +1765,18 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Total Produce Request Rate",
+              "legendFormat": "{{brokerId}}",
               "refId": "A"
             },
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_failedproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_failedproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
-              "legendFormat": "Failed Produce Request Rate",
+              "legendFormat": "failed-{{brokerId}}",
               "refId": "B"
             }
           ],
@@ -1740,11 +1827,11 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
-          "description": "Byte Rate",
+          "description": "Broker traffic excluding replication",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 8,
             "x": 8,
             "y": 25
@@ -1755,8 +1842,8 @@ data:
             "alignAsTable": false,
             "avg": false,
             "current": false,
-            "hideEmpty": false,
-            "hideZero": false,
+            "hideEmpty": true,
+            "hideZero": true,
             "max": false,
             "min": false,
             "rightSide": false,
@@ -1776,27 +1863,32 @@ data:
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
-          "seriesOverrides": [],
+          "seriesOverrides": [
+            {
+              "alias": "/out-.*/i",
+              "transform": "negative-Y"
+            }
+          ],
           "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "Total Incoming Byte Rate",
+              "legendFormat": "in-{{brokerId}}",
               "refId": "A"
             },
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))  by (brokerId)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
-              "legendFormat": "Total Outgoing Byte Rate",
+              "legendFormat": "out-{{brokerId}}",
               "refId": "B"
             }
           ],
@@ -1851,7 +1943,7 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 8,
             "x": 16,
             "y": 25
@@ -1886,10 +1978,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_messagesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_messagesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Total Incoming Messages Rate",
+              "legendFormat": "{{brokerId}}",
               "refId": "D"
             }
           ],
@@ -1947,13 +2039,15 @@ data:
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 30
+            "y": 31
           },
           "hiddenSeries": false,
           "id": 56,
           "legend": {
             "avg": false,
             "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
             "max": false,
             "min": false,
             "show": true,
@@ -1972,23 +2066,28 @@ data:
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
-          "seriesOverrides": [],
+          "seriesOverrides": [
+            {
+              "alias": "/failed-.*/i",
+              "transform": "negative-Y"
+            }
+          ],
           "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Fetch Request Rate",
+              "legendFormat": "{{brokerId}}",
               "refId": "A"
             },
             {
-              "expr": "  sum(irate(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "  sum(irate(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Failed Fetch Request Rate",
+              "legendFormat": "failed-{{brokerId}}",
               "refId": "B"
             }
           ],
@@ -2039,20 +2138,22 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
-          "description": "Request Handler Avg Idle Percent",
-          "fill": 0,
+          "description": "Replication Rate Per Second",
+          "fill": 1,
           "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 30
+            "y": 31
           },
           "hiddenSeries": false,
-          "id": 62,
+          "id": 111,
           "legend": {
             "avg": false,
             "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
             "max": false,
             "min": false,
             "show": true,
@@ -2071,28 +2172,39 @@ data:
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
-          "seriesOverrides": [],
+          "seriesOverrides": [
+            {
+              "alias": "/out-.*/i",
+              "transform": "negative-Y"
+            }
+          ],
           "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "kafka_network_processor_idlepercent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}*100",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
-              "hide": false,
               "intervalFactor": 1,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "in-{{brokerId}}",
               "refId": "A"
+            },
+            {
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "out-{{brokerId}}",
+              "refId": "B"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "kafka_network_processor_idlepercent",
+          "title": "Replication Rate Per Second",
           "tooltip": {
             "shared": true,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -2105,7 +2217,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "percent",
+              "format": "Bps",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -2139,7 +2251,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 30
+            "y": 31
           },
           "hiddenSeries": false,
           "id": 60,
@@ -2173,7 +2285,7 @@ data:
               "expr": "kafka_network_socketserver_networkprocessoravgidlepercent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}*100",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{brokerId}}",
               "refId": "A"
             }
           ],
@@ -2230,7 +2342,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 36
+            "y": 37
           },
           "hiddenSeries": false,
           "id": 91,
@@ -2327,7 +2439,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 36
+            "y": 37
           },
           "hiddenSeries": false,
           "id": 104,
@@ -2476,7 +2588,6 @@ data:
             "allValue": ".*",
             "current": {
               "selected": false,
-              "tags": [],
               "text": "All",
               "value": "$__all"
             },
@@ -2585,8 +2696,8 @@ data:
       "timezone": "",
       "title": "Kafka",
       "uid": "8wCTC5Tmz",
-      "version": 3
-    }   
+      "version": 4
+    }
 kind: ConfigMap
 metadata:
   labels:
