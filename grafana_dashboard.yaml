@@ -967,7 +967,7 @@ data:
           "title": "Available Disk Space",
           "tooltip": {
             "shared": true,
-            "sort": 0,
+            "sort": 1,
             "value_type": "individual"
           },
           "type": "graph",
@@ -980,6 +980,7 @@ data:
           },
           "yaxes": [
             {
+              "decimals": 1,
               "format": "bytes",
               "label": null,
               "logBase": 1,
@@ -2580,7 +2581,7 @@ data:
       "title": "Kafka",
       "uid": "8wCTC5Tmz",
       "version": 3
-    }
+    }    
 kind: ConfigMap
 metadata:
   labels:
