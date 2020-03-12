@@ -1,7 +1,7 @@
 ---
 apiVersion: v1
 data:
-  kafka-birca.json: |-
+  pipeline-kafka.json: |-
     {
       "annotations": {
         "list": [
@@ -2890,11 +2890,11 @@ data:
       },
       "timezone": "",
       "title": "Kafka",
-      "uid": "8wCTC5Tmz",
+      "uid": "0x0x0x0x",
       "version": 5
     }
 kind: ConfigMap
 metadata:
   labels:
     grafana_dashboard: 'true'
-  name: kafka-birca
+  name: pipeline-kafka
