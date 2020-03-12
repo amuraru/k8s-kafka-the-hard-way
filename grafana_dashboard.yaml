@@ -20,7 +20,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 4,
-      "iteration": 1583995041543,
+      "iteration": 1583995041547,
       "links": [],
       "panels": [
         {
@@ -739,7 +739,7 @@ data:
             "current": false,
             "max": false,
             "min": false,
-            "show": true,
+            "show": false,
             "total": false,
             "values": false
           },
@@ -822,7 +822,7 @@ data:
           "dashes": false,
           "datasource": "Prometheus_ethos",
           "description": "Aggregated Kafka Broker Pods CPU Usage",
-          "fill": 1,
+          "fill": 0,
           "fillGradient": 0,
           "gridPos": {
             "h": 7,
@@ -837,7 +837,7 @@ data:
             "current": false,
             "max": false,
             "min": false,
-            "show": true,
+            "show": false,
             "total": false,
             "values": false
           },
@@ -859,12 +859,17 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_user_seconds_total{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\"}[5m])) by (pod)",
+              "expr": "sum(irate(container_cpu_usage_seconds_total{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\"}[4m])) by (pod)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "used-{{pod}}",
               "refId": "A"
+            },
+            {
+              "expr": "sum by(pod,container) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\", resource=\"cpu\"})",
+              "legendFormat": "limits-{{pod}}",
+              "refId": "B"
             }
           ],
           "thresholds": [],
@@ -930,7 +935,7 @@ data:
             "current": false,
             "max": false,
             "min": false,
-            "show": true,
+            "show": false,
             "total": false,
             "values": false
           },
@@ -1023,7 +1028,7 @@ data:
             "current": false,
             "max": false,
             "min": false,
-            "show": true,
+            "show": false,
             "total": false,
             "values": false
           },
@@ -1114,7 +1119,7 @@ data:
             "current": false,
             "max": false,
             "min": false,
-            "show": true,
+            "show": false,
             "total": false,
             "values": false
           },
@@ -1205,7 +1210,7 @@ data:
             "current": false,
             "max": false,
             "min": false,
-            "show": true,
+            "show": false,
             "total": false,
             "values": false
           },
@@ -2581,7 +2586,7 @@ data:
       "title": "Kafka",
       "uid": "8wCTC5Tmz",
       "version": 3
-    }    
+    }   
 kind: ConfigMap
 metadata:
   labels:
