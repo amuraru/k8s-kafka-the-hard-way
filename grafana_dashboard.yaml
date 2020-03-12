@@ -1,7 +1,7 @@
 ---
 apiVersion: v1
 data:
-  kafka.json: |-
+  kafka-birca.json: |-
     {
       "annotations": {
         "list": [
@@ -19,7 +19,8 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "iteration": 1583941680349,
+      "id": 4,
+      "iteration": 1583995041543,
       "links": [],
       "panels": [
         {
@@ -764,8 +765,13 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "used-{{pod}}",
               "refId": "A"
+            },
+            {
+              "expr": "sum (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\", resource=\"memory\", pod=~\"$cluster_name-$kafka_broker\", container=~\"kafka\"}) by(pod,container) ",
+              "legendFormat": "limits-{{pod}}",
+              "refId": "B"
             }
           ],
           "thresholds": [],
@@ -792,7 +798,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": "0",
               "show": true
             },
             {
@@ -2573,10 +2579,10 @@ data:
       "timezone": "",
       "title": "Kafka",
       "uid": "8wCTC5Tmz",
-      "version": 2
+      "version": 3
     }
 kind: ConfigMap
 metadata:
   labels:
     grafana_dashboard: 'true'
-  name: kafka
+  name: kafka-birca
