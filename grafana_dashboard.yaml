@@ -1,7 +1,7 @@
 ---
 apiVersion: v1
 data:
-  pipeline-kafka.json: |-
+  kafka-looking-glass.json: |-
     {
         "annotations": {
           "list": [
@@ -2890,7 +2890,7 @@ data:
           ]
         },
         "timezone": "",
-        "title": "Kafka",
+        "title": "Kafka Looking Glass",
         "uid": "8wCTC5Tmz",
         "version": 2980
     }
