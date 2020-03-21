@@ -1,4 +1,6 @@
-**Inspired by Kelsey Hightower's [kubernetes-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way) this tutorial walks you through setting up Kafka on K8s using [Banzai Cloud Kafka Operator](https://github.com/banzaicloud/kafka-operator).** 
+**Inspired by Kelsey Hightower's [kubernetes-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way) this tutorial walks you through setting up Kafka on K8s using [Banzai Cloud Kafka Operator](https://github.com/banzaicloud/kafka-operator) on a local `kind` cluster. ** 
+
+# Contents 
 
 - [Intro](#intro)
 - [Install Kafka in a `kind` k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
