@@ -2898,4 +2898,4 @@ kind: ConfigMap
 metadata:
   labels:
     grafana_dashboard: 'true'
-  name: pipeline-kafka
+  name: prometheus-grafana-kafka
