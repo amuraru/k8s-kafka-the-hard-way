@@ -2891,8 +2891,8 @@ data:
         },
         "timezone": "",
         "title": "Kafka Looking Glass",
-        "uid": "8wCTC5Tmz",
-        "version": 2980
+        "uid": "1a1a1a1a1",
+        "version": 1
     }
 kind: ConfigMap
 metadata:
