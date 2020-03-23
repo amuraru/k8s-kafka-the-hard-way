@@ -19,8 +19,8 @@ data:
         "editable": true,
         "gnetId": null,
         "graphTooltip": 0,
-        "id": 2,
-        "iteration": 1584048199702,
+        "id": 15,
+        "iteration": 1584942955505,
         "links": [],
         "panels": [
           {
@@ -712,586 +712,9 @@ data:
               "x": 0,
               "y": 5
             },
-            "id": 28,
-            "panels": [],
-            "title": "Resources",
-            "type": "row"
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus_ethos",
-            "description": "Kafka Broker Pods Memory Usage",
-            "fill": 0,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 7,
-              "w": 8,
-              "x": 0,
-              "y": 6
-            },
-            "hiddenSeries": false,
-            "id": 82,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": false,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-              "dataLinks": []
-            },
-            "paceLength": 10,
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "sum(container_memory_usage_bytes{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\"}) by (pod)",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "used-{{pod}}",
-                "refId": "A"
-              },
-              {
-                "expr": "sum (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\", resource=\"memory\", pod=~\"$cluster_name-$kafka_broker\", container=~\"kafka\"}) by(pod,container) ",
-                "legendFormat": "limits-{{pod}}",
-                "refId": "B"
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Container Memory Usage",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "bytes",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": "0",
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus_ethos",
-            "description": "Aggregated Kafka Broker Pods CPU Usage",
-            "fill": 0,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 7,
-              "w": 8,
-              "x": 8,
-              "y": 6
-            },
-            "hiddenSeries": false,
-            "id": 81,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": false,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-              "dataLinks": []
-            },
-            "paceLength": 10,
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "sum(irate(container_cpu_usage_seconds_total{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\"}[4m])) by (pod)",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "used-{{pod}}",
-                "refId": "A"
-              },
-              {
-                "expr": "sum by(pod,container) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\", resource=\"cpu\"})",
-                "legendFormat": "limits-{{pod}}",
-                "refId": "B"
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "CPU Usage",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": "Prometheus_ethos",
-            "description": "Kafka Broker Pods Disk Usage",
-            "fill": 0,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 7,
-              "w": 8,
-              "x": 16,
-              "y": 6
-            },
-            "hiddenSeries": false,
-            "id": 83,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": false,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-              "dataLinks": []
-            },
-            "paceLength": 10,
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "kubelet_volume_stats_available_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\"$cluster_name.*\"}",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "{{persistentvolumeclaim}}",
-                "refId": "A"
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Available Disk Space",
-            "tooltip": {
-              "shared": true,
-              "sort": 1,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "decimals": 1,
-                "format": "bytes",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 7,
-              "w": 8,
-              "x": 0,
-              "y": 13
-            },
-            "hiddenSeries": false,
-            "id": 93,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": false,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-              "dataLinks": []
-            },
-            "paceLength": 10,
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "sum(jvm_memory_bytes_used{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",kafka_cr=\"$cluster_name\"}) by (pod)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "{{pod}}",
-                "refId": "A"
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "JVM Memory Usage",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "decbytes",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 7,
-              "w": 8,
-              "x": 8,
-              "y": 13
-            },
-            "hiddenSeries": false,
-            "id": 95,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": false,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-              "dataLinks": []
-            },
-            "paceLength": 10,
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "sum(rate(jvm_gc_collection_seconds_sum{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",kafka_cr=\"$cluster_name\"}[5m])) by (pod)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "{{pod}}",
-                "refId": "A"
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "JVM GC Time",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "ms",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 7,
-              "w": 8,
-              "x": 16,
-              "y": 13
-            },
-            "hiddenSeries": false,
-            "id": 97,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": false,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-              "dataLinks": []
-            },
-            "paceLength": 10,
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "sum(rate(jvm_gc_collection_seconds_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",kafka_cr=\"$cluster_name\"}[5m])) by (pod)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "{{pod}}",
-                "refId": "A"
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "JVM GC Count",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "collapsed": false,
-            "datasource": null,
-            "gridPos": {
-              "h": 1,
-              "w": 24,
-              "x": 0,
-              "y": 20
-            },
             "id": 110,
             "panels": [],
-            "title": "Utilization",
+            "title": "Kafka Utilization",
             "type": "row"
           },
           {
@@ -1315,9 +738,9 @@ data:
             },
             "gridPos": {
               "h": 4,
-              "w": 4,
+              "w": 3,
               "x": 0,
-              "y": 21
+              "y": 6
             },
             "id": 98,
             "interval": null,
@@ -1400,9 +823,9 @@ data:
             },
             "gridPos": {
               "h": 4,
-              "w": 5,
-              "x": 4,
-              "y": 21
+              "w": 3,
+              "x": 3,
+              "y": 6
             },
             "id": 99,
             "interval": null,
@@ -1474,7 +897,7 @@ data:
               "#299c46"
             ],
             "datasource": null,
-            "description": "Total Incoming Byte Rate",
+            "description": "Total Outgoind Byte Rate",
             "format": "Bps",
             "gauge": {
               "maxValue": 100,
@@ -1485,9 +908,9 @@ data:
             },
             "gridPos": {
               "h": 4,
-              "w": 4,
-              "x": 9,
-              "y": 21
+              "w": 3,
+              "x": 6,
+              "y": 6
             },
             "id": 112,
             "interval": null,
@@ -1528,7 +951,7 @@ data:
             "tableColumn": "",
             "targets": [
               {
-                "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+                "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
                 "format": "time_series",
                 "hide": false,
                 "intervalFactor": 1,
@@ -1537,7 +960,7 @@ data:
               }
             ],
             "thresholds": "0,2",
-            "title": "Total Incoming Byte Rate",
+            "title": "Total Outgoing Byte Rate",
             "type": "singlestat",
             "valueFontSize": "100%",
             "valueMaps": [
@@ -1570,9 +993,9 @@ data:
             },
             "gridPos": {
               "h": 4,
-              "w": 5,
-              "x": 13,
-              "y": 21
+              "w": 3,
+              "x": 9,
+              "y": 6
             },
             "id": 100,
             "interval": null,
@@ -1622,7 +1045,92 @@ data:
               }
             ],
             "thresholds": "0,2",
-            "title": "Incoming Messages Rate",
+            "title": "Incoming Message Rate",
+            "type": "singlestat",
+            "valueFontSize": "100%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "0",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": true,
+            "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+            ],
+            "datasource": null,
+            "description": "Message Conversations performed by broker due to message protocol mismatch on client side.",
+            "format": "wps",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 4,
+              "x": 12,
+              "y": 6
+            },
+            "id": 123,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "options": {},
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "repeatDirection": "h",
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "tableColumn": "",
+            "targets": [
+              {
+                "expr": "sum(irate(kafka_server_brokertopicmetrics_producemessageconversions_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "",
+                "refId": "A"
+              }
+            ],
+            "thresholds": "1,100",
+            "title": "Message Conversion Rate",
             "type": "singlestat",
             "valueFontSize": "100%",
             "valueMaps": [
@@ -1655,9 +1163,94 @@ data:
             },
             "gridPos": {
               "h": 4,
-              "w": 6,
-              "x": 18,
-              "y": 21
+              "w": 4,
+              "x": 16,
+              "y": 6
+            },
+            "id": 122,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "options": {},
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "repeatDirection": "h",
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "tableColumn": "",
+            "targets": [
+              {
+                "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "",
+                "refId": "A"
+              }
+            ],
+            "thresholds": "0,2",
+            "title": "Total Fetch Request Rate",
+            "type": "singlestat",
+            "valueFontSize": "100%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "0",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": true,
+            "colors": [
+              "#d44a3a",
+              "rgba(237, 129, 40, 0.89)",
+              "#299c46"
+            ],
+            "datasource": null,
+            "description": "Total Produce Request Rate",
+            "format": "reqps",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "gridPos": {
+              "h": 4,
+              "w": 4,
+              "x": 20,
+              "y": 6
             },
             "id": 101,
             "interval": null,
@@ -1725,116 +1318,14 @@ data:
             "dashLength": 10,
             "dashes": false,
             "datasource": null,
-            "description": "Produce Request Rate.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 6,
-              "w": 8,
-              "x": 0,
-              "y": 25
-            },
-            "hiddenSeries": false,
-            "id": 50,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "hideEmpty": true,
-              "hideZero": true,
-              "max": false,
-              "min": false,
-              "show": true,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-              "dataLinks": []
-            },
-            "paceLength": 10,
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "{{brokerId}}",
-                "refId": "A"
-              },
-              {
-                "expr": "sum(irate(kafka_server_brokertopicmetrics_failedproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
-                "format": "time_series",
-                "hide": false,
-                "intervalFactor": 1,
-                "legendFormat": "failed-{{brokerId}}",
-                "refId": "B"
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Produce Request Rate",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "reqps",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
             "description": "Broker traffic excluding replication",
             "fill": 1,
             "fillGradient": 0,
             "gridPos": {
               "h": 6,
               "w": 8,
-              "x": 8,
-              "y": 25
+              "x": 0,
+              "y": 10
             },
             "hiddenSeries": false,
             "id": 44,
@@ -1945,8 +1436,8 @@ data:
             "gridPos": {
               "h": 6,
               "w": 8,
-              "x": 16,
-              "y": 25
+              "x": 8,
+              "y": 10
             },
             "hiddenSeries": false,
             "id": 58,
@@ -2032,120 +1523,14 @@ data:
             "dashLength": 10,
             "dashes": false,
             "datasource": null,
-            "description": "Fetch Request Rate",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {
-              "h": 6,
-              "w": 8,
-              "x": 0,
-              "y": 31
-            },
-            "hiddenSeries": false,
-            "id": 56,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "hideEmpty": true,
-              "hideZero": true,
-              "max": false,
-              "min": false,
-              "show": true,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "options": {
-              "dataLinks": []
-            },
-            "paceLength": 10,
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [
-              {
-                "alias": "/failed-.*/i",
-                "transform": "negative-Y"
-              }
-            ],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
-              {
-                "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "{{brokerId}}",
-                "refId": "A"
-              },
-              {
-                "expr": "  sum(irate(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
-                "format": "time_series",
-                "intervalFactor": 1,
-                "legendFormat": "failed-{{brokerId}}",
-                "refId": "B"
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Fetch Request Rate",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "reqps",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ],
-            "yaxis": {
-              "align": false,
-              "alignLevel": null
-            }
-          },
-          {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
             "description": "Replication Rate Per Second",
             "fill": 1,
             "fillGradient": 0,
             "gridPos": {
               "h": 6,
               "w": 8,
-              "x": 8,
-              "y": 31
+              "x": 16,
+              "y": 10
             },
             "hiddenSeries": false,
             "id": 111,
@@ -2244,6 +1629,214 @@ data:
             "dashLength": 10,
             "dashes": false,
             "datasource": null,
+            "description": "Produce Request Rate.",
+            "fill": 1,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 6,
+              "w": 8,
+              "x": 0,
+              "y": 16
+            },
+            "hiddenSeries": false,
+            "id": 50,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "hideEmpty": true,
+              "hideZero": true,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "{{brokerId}}",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(irate(kafka_server_brokertopicmetrics_failedproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "failed-{{brokerId}}",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Produce Request Rate",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "reqps",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "description": "Fetch Request Rate",
+            "fill": 1,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 6,
+              "w": 8,
+              "x": 8,
+              "y": 16
+            },
+            "hiddenSeries": false,
+            "id": 56,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "hideEmpty": true,
+              "hideZero": true,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [
+              {
+                "alias": "/failed-.*/i",
+                "transform": "negative-Y"
+              }
+            ],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "{{brokerId}}",
+                "refId": "A"
+              },
+              {
+                "expr": "  sum(irate(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "failed-{{brokerId}}",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Fetch Request Rate",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "reqps",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
             "description": "Network Processor Avg Idle Percent",
             "fill": 0,
             "fillGradient": 0,
@@ -2251,7 +1844,7 @@ data:
               "h": 6,
               "w": 8,
               "x": 16,
-              "y": 31
+              "y": 16
             },
             "hiddenSeries": false,
             "id": 60,
@@ -2342,7 +1935,7 @@ data:
               "h": 8,
               "w": 8,
               "x": 0,
-              "y": 37
+              "y": 22
             },
             "hiddenSeries": false,
             "id": 91,
@@ -2439,7 +2032,7 @@ data:
               "h": 8,
               "w": 8,
               "x": 8,
-              "y": 37
+              "y": 22
             },
             "hiddenSeries": false,
             "id": 104,
@@ -2511,6 +2104,682 @@ data:
               },
               {
                 "decimals": null,
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 0,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 8,
+              "w": 8,
+              "x": 16,
+              "y": 22
+            },
+            "hiddenSeries": false,
+            "id": 121,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "hideEmpty": true,
+              "hideZero": true,
+              "max": true,
+              "min": false,
+              "show": true,
+              "sort": "current",
+              "sortDesc": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "kafka_server_replicamanager_underreplicatedpartitions{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}",
+                "format": "time_series",
+                "instant": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{brokerId}}",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Under Replicated Partitions",
+            "tooltip": {
+              "shared": true,
+              "sort": 2,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "decimals": 0,
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "decimals": null,
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "collapsed": false,
+            "datasource": null,
+            "gridPos": {
+              "h": 1,
+              "w": 24,
+              "x": 0,
+              "y": 30
+            },
+            "id": 28,
+            "panels": [],
+            "title": "Brokers Resources",
+            "type": "row"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus_ethos",
+            "description": "Kafka Broker Pods Memory Usage",
+            "fill": 0,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 0,
+              "y": 31
+            },
+            "hiddenSeries": false,
+            "id": 82,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": false,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(container_memory_usage_bytes{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\"}) by (pod)",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "used-{{pod}}",
+                "refId": "A"
+              },
+              {
+                "expr": "sum (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\", resource=\"memory\", pod=~\"$cluster_name-$kafka_broker\", container=~\"kafka\"}) by(pod,container) ",
+                "legendFormat": "limits-{{pod}}",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Container Memory Usage",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus_ethos",
+            "description": "Aggregated Kafka Broker Pods CPU Usage",
+            "fill": 0,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 8,
+              "y": 31
+            },
+            "hiddenSeries": false,
+            "id": 81,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": false,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(irate(container_cpu_usage_seconds_total{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\"}[4m])) by (pod)",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "used-{{pod}}",
+                "refId": "A"
+              },
+              {
+                "expr": "sum by(pod,container) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",container=\"kafka\", resource=\"cpu\"})",
+                "legendFormat": "limits-{{pod}}",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "CPU Usage",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Prometheus_ethos",
+            "description": "Kafka Broker Pods Disk Usage",
+            "fill": 0,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 16,
+              "y": 31
+            },
+            "hiddenSeries": false,
+            "id": 83,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": false,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "kubelet_volume_stats_available_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\"$cluster_name.*\"}",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{persistentvolumeclaim}}",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Available Disk Space",
+            "tooltip": {
+              "shared": true,
+              "sort": 1,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "decimals": 1,
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 0,
+              "y": 38
+            },
+            "hiddenSeries": false,
+            "id": 93,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": false,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(jvm_memory_bytes_used{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",kafka_cr=\"$cluster_name\"}) by (pod)",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "JVM Memory Usage",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "decbytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 8,
+              "y": 38
+            },
+            "hiddenSeries": false,
+            "id": 95,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": false,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(rate(jvm_gc_collection_seconds_sum{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",kafka_cr=\"$cluster_name\"}[5m])) by (pod)",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "JVM GC Time",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 16,
+              "y": 38
+            },
+            "hiddenSeries": false,
+            "id": 97,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": false,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {
+              "dataLinks": []
+            },
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(rate(jvm_gc_collection_seconds_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-$kafka_broker\",kafka_cr=\"$cluster_name\"}[5m])) by (pod)",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "JVM GC Count",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
                 "format": "short",
                 "label": null,
                 "logBase": 1,
@@ -2633,12 +2902,107 @@ data:
             "dashLength": 10,
             "dashes": false,
             "datasource": null,
-            "fill": 1,
+            "fill": 0,
             "fillGradient": 0,
             "gridPos": {
               "h": 7,
               "w": 8,
               "x": 8,
+              "y": 46
+            },
+            "hiddenSeries": false,
+            "id": 118,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "hideEmpty": true,
+              "hideZero": true,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "nullPointMode": "null as zero",
+            "options": {
+              "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 2,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])",
+                "hide": true,
+                "legendFormat": "{{brokerId}}",
+                "refId": "A"
+              },
+              {
+                "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                "legendFormat": "{{brokerId}}",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Broker FetchConsumer time ms (p.999)",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 0,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 16,
               "y": 46
             },
             "hiddenSeries": false,
@@ -2715,9 +3079,199 @@ data:
               "align": false,
               "alignLevel": null
             }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 0,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 0,
+              "y": 53
+            },
+            "hiddenSeries": false,
+            "id": 120,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "hideEmpty": true,
+              "hideZero": true,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "nullPointMode": "null as zero",
+            "options": {
+              "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 2,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])",
+                "hide": true,
+                "legendFormat": "{{brokerId}}",
+                "refId": "A"
+              },
+              {
+                "expr": "kafka_network_requestmetrics_totaltimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                "legendFormat": "q{{brokerId}}",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Broker Produce time ms (p.999)",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 0,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 7,
+              "w": 8,
+              "x": 8,
+              "y": 53
+            },
+            "hiddenSeries": false,
+            "id": 119,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "hideEmpty": true,
+              "hideZero": true,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "nullPointMode": "null as zero",
+            "options": {
+              "dataLinks": []
+            },
+            "percentage": false,
+            "pointradius": 2,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])",
+                "hide": true,
+                "legendFormat": "{{brokerId}}",
+                "refId": "A"
+              },
+              {
+                "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                "legendFormat": "q{{brokerId}}",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Broker FetchFollower time ms (p.999)",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "ms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
           }
         ],
-        "refresh": "5s",
+        "refresh": "10s",
         "schemaVersion": 21,
         "style": "dark",
         "tags": [
@@ -2729,9 +3283,8 @@ data:
             {
               "allValue": null,
               "current": {
-                "selected": true,
-                "text": "ns-team-pipelinekafkadev",
-                "value": "ns-team-pipelinekafkadev"
+                "text": "ns-team-aep-pipeline-kafka-1",
+                "value": "ns-team-aep-pipeline-kafka-1"
               },
               "datasource": null,
               "definition": "",
@@ -2755,7 +3308,6 @@ data:
             {
               "allValue": null,
               "current": {
-                "selected": true,
                 "text": "pipeline-kafka",
                 "value": "pipeline-kafka"
               },
@@ -2781,7 +3333,7 @@ data:
             {
               "allValue": ".*",
               "current": {
-                "selected": true,
+                "selected": false,
                 "text": "All",
                 "value": "$__all"
               },
@@ -2807,8 +3359,7 @@ data:
             {
               "allValue": ".+",
               "current": {
-                "selected": true,
-                "tags": [],
+                "selected": false,
                 "text": "All",
                 "value": "$__all"
               },
@@ -2892,7 +3443,7 @@ data:
         "timezone": "",
         "title": "Kafka Looking Glass",
         "uid": "1a1a1a1a1",
-        "version": 1
+        "version": 4
     }
 kind: ConfigMap
 metadata:
