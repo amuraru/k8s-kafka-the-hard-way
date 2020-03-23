@@ -12,12 +12,16 @@ spec:
   zkPath: "/kafka"
   oneBrokerPerNode: false
   clusterImage: "amuraru/kafka:2.12_2.3.1"
-  readOnlyConfig: |
-    auto.create.topics.enable=false
+  clusterWideConfig: |
     min.insync.replicas=3
     num.network.threads=12
     num.replica.fetchers=4
+  readOnlyConfig: |
+    inter.broker.protocol.version=2.3
+    auto.create.topics.enable=false
+    auto.leader.rebalance.enable=false
     cruise.control.metrics.reporter.acks=1
+    cruise.control.metrics.topic=__CruiseControlMetrics
   rackAwareness:
     # operator will use these labels from the nodes to create the rack for Kafka
     labels:
