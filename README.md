@@ -29,6 +29,13 @@
     - [Hack around](#hack-around)
       - [Verify pod images](#verify-pod-images)
     - [Kafka samples](#kafka-samples)
+      - [List topics](#list-topics)
+      - [Create topic](#create-topic)
+      - [Set custom topic retention period](#set-custom-topic-retention-period)
+      - [Topic Describe](#topic-describe)
+      - [Start Producer perf test](#start-producer-perf-test)
+      - [Start Consumer perf test](#start-consumer-perf-test)
+      - [Check out Grafana dashboard](#check-out-grafana-dashboard)
 - [Disaster scenarios](#disaster-scenarios)
   - [Initial state](#initial-state)
   - [Broker JVM dies, is PV/PVC re-used?](#broker-jvm-dies-is-pvpvc-re-used)
@@ -376,21 +383,47 @@ kubectl get pod -o=custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[*].
 ```
 
 
-
 ### Kafka samples
 
+#### List topics
 
-1. Create topics and send messages
-
-```sh
-kubectl -n kafka run kafka-producer -it --image=wurstmeister/kafka:2.12-2.3.0 --rm=true --restart=Never bash
-
-/opt/kafka/bin/kafka-topics.sh --zookeeper zk-client.zookeeper:2181 --topic perf-topic --create --partitions 18 --replication-factor 3
-
-/opt/kafka/bin/kafka-producer-perf-test.sh --topic perf-topic --num-records 1000000 --throughput 100000 --record-size 5000 --producer-props bootstrap.servers=kafka-headless:29092
-
+```bash
+kubectl run kafka-topics --rm -i --tty=true --image=banzaicloud/kafka:2.13-2.4.1 --restart=Never -- /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka-headless:29092 --list
 ```
 
+#### Create topic
+
+```bash
+kubectl run kafka-topics --rm -i --tty=true --image=banzaicloud/kafka:2.13-2.4.1 --restart=Never -- /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka-headless:29092 --topic perf_topic --replica-assignment 100:200:300,101:201:301,100:200:300,101:201:301,100:200:300,101:201:301,100:200:300,101:201:301,100:200:300,101:201:301,100:200:300,101:201:301 --create
+```
+
+#### Set custom topic retention period
+
+```bash
+kubectl run kafka-topics --rm -i --tty=true --image=banzaicloud/kafka:2.13-2.4.1 --restart=Never -- /opt/kafka/bin/kafka-configs.sh --zookeeper zk-client.zookeeper:2181/kafka --alter --entity-name perf_topic --entity-type topics --add-config retention.ms=7200000
+```
+
+#### Topic Describe
+
+```bash
+kubectl run kafka-topics --rm -i --tty=true --image=banzaicloud/kafka:2.13-2.4.1 --restart=Never -- /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka-headless:29092 --topic perf_topic --describe
+```
+
+#### Start Producer perf test
+
+```bash
+kubectl run kafka-producer-topic --image=banzaicloud/kafka:2.13-2.4.1 --restart=Never -- /opt/kafka/bin/kafka-producer-perf-test.sh --producer-props bootstrap.servers=kafka-headless:29092 --topic perf_topic --record-size 1000 --throughput 29000 --num-records 2110000000
+```
+
+#### Start Consumer perf test
+
+```bash
+kubectl run kafka-consumer-test --image=banzaicloud/kafka:2.13-2.4.1 --restart=Never -- /opt/kafka/bin/kafka-consumer-perf-test.sh --broker-list kafka-headless:29092 --group perf-consume --messages 10000000000 --topic perf_topic --show-detailed-stats --from-latest --timeout 100000
+```
+
+#### Check out Grafana dashboard
+
+http://127.0.0.1:3000/d/1a1a1a1a1/kafka-looking-glass
 
 # Disaster scenarios
 
