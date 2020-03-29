@@ -106,7 +106,14 @@ Debug: `kind` clusters are running in docker, check containers: `docker ps`
 ### Access k8s
 
 ```sh
-export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+# switch to kind cluster context
+kubectl config use-context kafka-kind
+# test
+k get nodes
+
+# To dump kubeconfig
+kind get kubeconfig --name kafka
+
 ```
 
 
