@@ -11,13 +11,14 @@ spec:
     - "zk-client.zookeeper:2181"
   zkPath: "/kafka"
   oneBrokerPerNode: false
-  clusterImage: "amuraru/kafka:2.12_2.3.1"
+  clusterImage: "banzaicloud/kafka:2.13-2.4.1"
   clusterWideConfig: |
+    num.io.threads=12
     min.insync.replicas=3
     num.network.threads=12
     num.replica.fetchers=4
   readOnlyConfig: |
-    inter.broker.protocol.version=2.3
+    inter.broker.protocol.version=2.4
     auto.create.topics.enable=false
     auto.leader.rebalance.enable=false
     cruise.control.metrics.reporter.acks=1
@@ -184,7 +185,7 @@ spec:
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
   cruiseControlConfig:
-    image: "amuraru/kafka-cruise-control:2.0.95"
+    image: "solsson/kafka-cruise-control@sha256:9e3ae5d55f73132fbff8565f7be5fec89f79e9d71c554af0fbd485018f1078bb"
     topicConfig:
       partitions: 6
       replicationFactor: 3
