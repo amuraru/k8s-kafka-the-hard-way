@@ -1,23 +1,26 @@
 **Inspired by Kelsey Hightower's [kubernetes-the-hard-way](https://github.com/kelseyhightower/kubernetes-the-hard-way), this tutorial walks you through setting up Kafka on K8s using [BanzaiCloud Kafka Operator](https://github.com/banzaicloud/kafka-operator) on a local [`kind`](https://kind.sigs.k8s.io/) cluster.** 
 
-# Contents 
 
 - [Intro](#intro)
 - [Install Kafka in a `kind` k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
   - [Install `kind`](#install-kind)
   - [Create a mini k8s cluster using `kind`](#create-a-mini-k8s-cluster-using-kind)
     - [Create cluster configuration](#create-cluster-configuration)
-    - [Start k8s 1.14 cluster](#start-k8s-114-cluster)
+    - [Start k8s kind cluster](#start-k8s-kind-cluster)
     - [Access k8s](#access-k8s)
   - [Emulate multi-az nodes](#emulate-multi-az-nodes)
-  - [Install disk provisioner and custom storage class](#install-disk-provisioner-and-custom-storage-class)
-- [BanzaiCloud Kafka](#banzaicloud-kafka)
+- [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator)
   - [Install pre-reqs](#install-pre-reqs)
-    - [Cert-Manager 0.13](#cert-manager-013)
-    - [Install Zookeeper Operator](#install-zookeeper-operator)
+    - [Install `cert-manager`](#install-cert-manager)
+    - [Install Dell Pravega `zookeeper-operator`](#install-dell-pravega-zookeeper-operator)
       - [Create a ZK cluster with 3 zk nodes](#create-a-zk-cluster-with-3-zk-nodes)
     - [Install Prometheus Operator](#install-prometheus-operator)
-  - [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator)
+      - [Access the dashboards](#access-the-dashboards)
+        - [Prometheus](#prometheus)
+          - [View all metrics in Prometheus](#view-all-metrics-in-prometheus)
+        - [Grafana](#grafana)
+        - [Alert Manager](#alert-manager)
+  - [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator-1)
     - [Create a KafkaCluster](#create-a-kafkacluster)
     - [Hack around](#hack-around)
       - [Verify pod images](#verify-pod-images)
@@ -84,13 +87,13 @@ nodes:
 EOF
 ```
 
-### Start k8s 1.14 cluster
+### Start k8s kind cluster
 
 ```sh
 kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
---image kindest/node:v1.14.6
+--image kindest/node:v1.15.7
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -123,31 +126,7 @@ kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failu
 ```
 
 
-## Install disk provisioner and custom storage class
-
-
-- Using https://github.com/rancher/local-path-provisioner as this emulates better individual disks
-
-```sh
-kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
-
-# Check
-kubectl get all -n local-path-storage
-
-# Create a custom storage class for Kafka
-kubectl apply -f - <<EOF
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: examplestorageclass
-provisioner: rancher.io/local-path
-volumeBindingMode: WaitForFirstConsumer
-reclaimPolicy: Retain
-EOF
-
-```
-
-# BanzaiCloud Kafka
+# BanzaiCloud Kafka Operator
 
 - Version 0.10.0: https://github.com/banzaicloud/kafka-operator/blob/0.10.0/README.md#installation
 
@@ -156,7 +135,7 @@ EOF
 
 **Note: The installation below assumes you're using `helm3`**
 
-### Cert-Manager 0.13
+### Install `cert-manager`
 
 See https://cert-manager.io/docs/installation/kubernetes/#steps
 
@@ -173,22 +152,21 @@ helm install cert-manager jetstack/cert-manager --namespace cert-manager --versi
 
 ```
 
-### Install Zookeeper Operator
+### Install Dell Pravega `zookeeper-operator`
 
 Make sure you use **`helm3`**
 
 ```sh
 rm -rf /tmp/zookeeper-operator
-git clone --single-branch --branch v0.2.5  https://github.com/pravega/zookeeper-operator /tmp/zookeeper-operator
+git clone --single-branch --branch master  https://github.com/adobe/zookeeper-operator /tmp/zookeeper-operator
 
 cd /tmp/zookeeper-operator
 
 kubectl create ns zookeeper
 
-helm template zookeeper-operator --namespace=zookeeper --set image.repository='amuraru/zookeeper-operator' --set image.tag='v0.2.5-15-adobe' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
+helm template zookeeper-operator --namespace=zookeeper --set image.repository='amuraru/zookeeper-operator' --set image.tag='v0.2.6-adobe-2' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
 kubectl apply -n zookeeper -f ./charts/zookeeper-operator.yaml
 ```
-
 
 #### Create a ZK cluster with 3 zk nodes
 
@@ -203,7 +181,7 @@ spec:
   replicas: 3
   image:
     repository: amuraru/zookeeper
-    tag: 3.5.7-1
+    tag: 3.6.0-adobe-2
     pullPolicy: Always
   persistence:
     reclaimPolicy: Delete
