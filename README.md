@@ -9,6 +9,7 @@
     - [Start k8s kind cluster](#start-k8s-kind-cluster)
     - [Access k8s](#access-k8s)
   - [Emulate multi-az nodes](#emulate-multi-az-nodes)
+  - [Install custom `StorageClass` for persistent volumes](#install-custom-storageclass-for-persistent-volumes)
 - [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator)
   - [Install pre-reqs](#install-pre-reqs)
     - [Install `cert-manager`](#install-cert-manager)
@@ -132,6 +133,23 @@ kubectl label nodes kafka-worker5 kafka-worker6 failure-domain.beta.kubernetes.i
 kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failure-domain.beta.kubernetes.io/zone
 ```
 
+
+## Install custom `StorageClass` for persistent volumes
+
+`kind` already ships with [rancher/local-path-provisioner](https://github.com/rancher/local-path-provisioner) to support PV/PVC
+
+```sh
+# Create a custom storage class for Kafka disks
+kubectl apply -f - <<EOF
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: examplestorageclass
+provisioner: rancher.io/local-path
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+EOF
+```
 
 # BanzaiCloud Kafka Operator
 
