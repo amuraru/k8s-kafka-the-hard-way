@@ -23,6 +23,9 @@
         - [Alert Manager](#alert-manager)
   - [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator-1)
     - [Create a KafkaCluster](#create-a-kafkacluster)
+      - [Create Prometheus `ServiceMonitor` and AlertManager `PrometheusRule` resources](#create-prometheus-servicemonitor-and-alertmanager-prometheusrule-resources)
+      - [Create `PrometheusRule` to enable auto-scaling](#create-prometheusrule-to-enable-auto-scaling)
+      - [Load Grafana `Kafka Looking Glass` dashboard](#load-grafana-kafka-looking-glass-dashboard)
     - [Hack around](#hack-around)
       - [Verify pod images](#verify-pod-images)
     - [Kafka samples](#kafka-samples)
@@ -290,12 +293,21 @@ k get all -A -l release=monitoring
 ## BanzaiCloud Kafka Operator
 
 ```sh
-
-rm -rf charts/kafka-operator
-helm fetch banzaicloud-stable/kafka-operator --version 0.2.14 --untar -d charts/
-
+# new kafka NS
 kubectl create ns kafka
-helm template kafka-operator --namespace=kafka  charts/kafka-operator  > kafka-operator.yaml
+
+# install operator using upstream helm chart
+rm -rf /tmp/kafka-operator
+git clone --single-branch --branch master  https://github.com/banzaicloud/kafka-operator /tmp/kafka-operator
+
+cd /tmp/kafka-operator
+helm template kafka-operator \
+  --namespace=kafka \
+  --set webhook.enabled=false \
+  --set operator.image.repository=amuraru/kafka-operator \
+  --set operator.image.tag=0.10.0-adobe-5 \
+  charts/kafka-operator  > kafka-operator.yaml
+
 kubectl apply -n kafka  -f kafka-operator.yaml
 
 # Check
@@ -307,22 +319,36 @@ k get all -n kafka
 
 ### Create a KafkaCluster
 
-Version 0.10.0
-
-
 ```
-kubectl create -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/simplekafkacluster.yaml
-
-# Create Prometheus instance and Kafka ServiceMonitors in monitoring NS
-kubectl create ns monitoring
-kubectl create -n monitoring -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus.yaml
-
+kubectl apply -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/simplekafkacluster.yaml
 # Check CRD created
 k get KafkaCluster kafka -n kafka
 # See CRD state
 k describe KafkaCluster kafka -n kafka
 
 ```
+
+#### Create Prometheus `ServiceMonitor` and AlertManager `PrometheusRule` resources
+
+```sh
+kubectl apply -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus-monitoring.yaml
+```
+
+#### Create `PrometheusRule` to enable auto-scaling
+
+```sh
+kubectl apply -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus-autoscale.yaml
+```
+
+
+#### Load Grafana `Kafka Looking Glass` dashboard
+
+```sh
+kubectl apply -n default -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/grafana-dashboard.yaml
+```
+This needs to be created in the same namespace as `grafana` (`default`)
+
+Dashboard should be automatically loaded and available at http://127.0.0.1:3000/d/1a1a1a1a1/kafka-looking-glass
 
 ### Hack around
 

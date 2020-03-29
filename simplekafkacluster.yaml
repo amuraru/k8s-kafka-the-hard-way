@@ -13,16 +13,17 @@ spec:
   oneBrokerPerNode: false
   clusterImage: "banzaicloud/kafka:2.13-2.4.1"
   clusterWideConfig: |
-    num.io.threads=12
-    min.insync.replicas=3
-    num.network.threads=12
-    num.replica.fetchers=4
+    # dynamic config
   readOnlyConfig: |
     inter.broker.protocol.version=2.4
     auto.create.topics.enable=false
     auto.leader.rebalance.enable=false
     cruise.control.metrics.reporter.acks=1
     cruise.control.metrics.topic=__CruiseControlMetrics
+    num.io.threads=12
+    min.insync.replicas=3
+    num.network.threads=12
+    num.replica.fetchers=4
   rackAwareness:
     # operator will use these labels from the nodes to create the rack for Kafka
     labels:
