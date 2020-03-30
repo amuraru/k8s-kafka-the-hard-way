@@ -24,6 +24,9 @@ spec:
     min.insync.replicas=3
     num.network.threads=12
     num.replica.fetchers=4
+    # KAFKA-9102; Increase default zk session timeout and replica max lag [KIP-537]
+    zookeeper.connection.timeout.ms=18000
+    replica.lag.time.max.ms=30000
   rackAwareness:
     # operator will use these labels from the nodes to create the rack for Kafka
     labels:
