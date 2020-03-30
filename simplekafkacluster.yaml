@@ -294,15 +294,15 @@ spec:
       # The minimum percentage of well monitored partitions out of all the partitions
       min.valid.partition.ratio=0.95
       # The balance threshold for CPU
-      cpu.balance.threshold=1.1
+      cpu.balance.threshold=1.3
       # The balance threshold for disk
-      disk.balance.threshold=1.1
+      disk.balance.threshold=1.3
       # The balance threshold for network inbound utilization
-      network.inbound.balance.threshold=1.1
+      network.inbound.balance.threshold=1.3
       # The balance threshold for network outbound utilization
-      network.outbound.balance.threshold=1.1
+      network.outbound.balance.threshold=1.3
       # The balance threshold for the replica count
-      replica.count.balance.threshold=1.1
+      replica.count.balance.threshold=1.2
       # The capacity threshold for CPU in percentage
       cpu.capacity.threshold=0.8
       # The capacity threshold for disk in percentage
