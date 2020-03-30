@@ -218,6 +218,10 @@ spec:
     repository: amuraru/zookeeper
     tag: 3.6.0-adobe-2
     pullPolicy: Always
+  config:
+    initLimit: 10
+    tickTime: 2000
+    syncLimit: 5
   persistence:
     reclaimPolicy: Delete
     spec:
