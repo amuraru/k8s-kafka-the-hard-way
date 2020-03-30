@@ -25,7 +25,7 @@ data:
     "gnetId": null,
     "graphTooltip": 0,
     "id": 26,
-    "iteration": 1585517805668,
+    "iteration": 1585521657583,
     "links": [],
     "panels": [
         {
@@ -1324,7 +1324,7 @@ data:
         "dashes": false,
         "datasource": null,
         "description": "Broker traffic excluding replication",
-        "fill": 1,
+        "fill": 0,
         "fillGradient": 0,
         "gridPos": {
             "h": 6,
@@ -1436,7 +1436,7 @@ data:
         "dashLength": 10,
         "dashes": false,
         "datasource": null,
-        "fill": 1,
+        "fill": 0,
         "fillGradient": 0,
         "gridPos": {
             "h": 6,
@@ -1528,17 +1528,16 @@ data:
         "dashLength": 10,
         "dashes": false,
         "datasource": null,
-        "description": "Replication Rate Per Second",
-        "fill": 1,
+        "fill": 0,
         "fillGradient": 0,
         "gridPos": {
-            "h": 6,
+            "h": 7,
             "w": 8,
             "x": 16,
             "y": 10
         },
         "hiddenSeries": false,
-        "id": 111,
+        "id": 116,
         "legend": {
             "avg": false,
             "current": false,
@@ -1552,46 +1551,30 @@ data:
         },
         "lines": true,
         "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
+        "nullPointMode": "null as zero",
         "options": {
             "dataLinks": []
         },
-        "paceLength": 10,
         "percentage": false,
-        "pointradius": 5,
+        "pointradius": 2,
         "points": false,
         "renderer": "flot",
-        "seriesOverrides": [
-            {
-            "alias": "/out-.*/i",
-            "transform": "negative-Y"
-            }
-        ],
+        "seriesOverrides": [],
         "spaceLength": 10,
         "stack": false,
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
-            "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "in-{{brokerId}}",
+            "expr": "sum(kafka_server_fetcherlagmetrics_consumerlag{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\", partition=~\"$kafka_partition\"}) by (brokerId,topic,partition)",
+            "legendFormat": "{{brokerId}}:{{topic}}::{{partition}}",
             "refId": "A"
-            },
-            {
-            "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
-            "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "out-{{brokerId}}",
-            "refId": "B"
             }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Replication Rate Per Second",
+        "title": "Replication Lag ",
         "tooltip": {
             "shared": true,
             "sort": 2,
@@ -1607,7 +1590,7 @@ data:
         },
         "yaxes": [
             {
-            "format": "Bps",
+            "format": "short",
             "label": null,
             "logBase": 1,
             "max": null,
@@ -1635,7 +1618,7 @@ data:
         "dashes": false,
         "datasource": null,
         "description": "Produce Request Rate.",
-        "fill": 1,
+        "fill": 0,
         "fillGradient": 0,
         "gridPos": {
             "h": 6,
@@ -1737,7 +1720,7 @@ data:
         "dashes": false,
         "datasource": null,
         "description": "Fetch Request Rate",
-        "fill": 1,
+        "fill": 0,
         "fillGradient": 0,
         "gridPos": {
             "h": 6,
@@ -1849,7 +1832,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 16
+            "y": 17
         },
         "hiddenSeries": false,
         "id": 60,
@@ -2134,7 +2117,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 22
+            "y": 23
         },
         "hiddenSeries": false,
         "id": 121,
@@ -2228,7 +2211,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 30
+            "y": 31
         },
         "id": 28,
         "panels": [],
@@ -2248,7 +2231,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 31
+            "y": 32
         },
         "hiddenSeries": false,
         "id": 82,
@@ -2354,7 +2337,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 31
+            "y": 32
         },
         "hiddenSeries": false,
         "id": 81,
@@ -2462,7 +2445,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 31
+            "y": 32
         },
         "hiddenSeries": false,
         "id": 83,
@@ -2560,7 +2543,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 38
+            "y": 39
         },
         "hiddenSeries": false,
         "id": 93,
@@ -2651,7 +2634,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 38
+            "y": 39
         },
         "hiddenSeries": false,
         "id": 95,
@@ -2742,7 +2725,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 38
+            "y": 39
         },
         "hiddenSeries": false,
         "id": 97,
@@ -2828,7 +2811,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 45
+            "y": 46
         },
         "id": 114,
         "panels": [],
@@ -2847,280 +2830,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 46
-        },
-        "hiddenSeries": false,
-        "id": 116,
-        "legend": {
-            "avg": false,
-            "current": false,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "nullPointMode": "null as zero",
-        "options": {
-            "dataLinks": []
-        },
-        "percentage": false,
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-            {
-            "expr": "sum(kafka_server_fetcherlagmetrics_consumerlag{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\", partition=~\"$kafka_partition\"}) by (brokerId,topic,partition)",
-            "legendFormat": "{{brokerId}}:{{topic}}::{{partition}}",
-            "refId": "A"
-            }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Replication Lag ",
-        "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-        },
-        "yaxes": [
-            {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-            },
-            {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-            }
-        ],
-        "yaxis": {
-            "align": false,
-            "alignLevel": null
-        }
-        },
-        {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": null,
-        "fill": 0,
-        "fillGradient": 0,
-        "gridPos": {
-            "h": 7,
-            "w": 8,
-            "x": 8,
-            "y": 46
-        },
-        "hiddenSeries": false,
-        "id": 118,
-        "legend": {
-            "avg": false,
-            "current": false,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "nullPointMode": "null as zero",
-        "options": {
-            "dataLinks": []
-        },
-        "percentage": false,
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-            {
-            "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])",
-            "hide": true,
-            "legendFormat": "{{brokerId}}",
-            "refId": "A"
-            },
-            {
-            "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
-            "legendFormat": "{{brokerId}}",
-            "refId": "B"
-            }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Broker FetchConsumer time ms (p.999)",
-        "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-        },
-        "yaxes": [
-            {
-            "format": "ms",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-            },
-            {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-            }
-        ],
-        "yaxis": {
-            "align": false,
-            "alignLevel": null
-        }
-        },
-        {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": null,
-        "fill": 0,
-        "fillGradient": 0,
-        "gridPos": {
-            "h": 7,
-            "w": 8,
-            "x": 16,
-            "y": 46
-        },
-        "hiddenSeries": false,
-        "id": 117,
-        "legend": {
-            "avg": false,
-            "current": false,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "nullPointMode": "null as zero",
-        "options": {
-            "dataLinks": []
-        },
-        "percentage": false,
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-            {
-            "expr": "sum(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}) by (brokerId,topic)",
-            "legendFormat": "{{brokerId}}:{{topic}}",
-            "refId": "A"
-            }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Failed Fetch Requests (Replication)",
-        "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-        },
-        "yaxes": [
-            {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-            },
-            {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-            }
-        ],
-        "yaxis": {
-            "align": false,
-            "alignLevel": null
-        }
-        },
-        {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": null,
-        "fill": 0,
-        "fillGradient": 0,
-        "gridPos": {
-            "h": 7,
-            "w": 8,
-            "x": 0,
-            "y": 53
+            "y": 47
         },
         "hiddenSeries": false,
         "id": 120,
@@ -3215,7 +2925,297 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 53
+            "y": 47
+        },
+        "hiddenSeries": false,
+        "id": 118,
+        "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null as zero",
+        "options": {
+            "dataLinks": []
+        },
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+            {
+            "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])",
+            "hide": true,
+            "legendFormat": "{{brokerId}}",
+            "refId": "A"
+            },
+            {
+            "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+            "legendFormat": "{{brokerId}}",
+            "refId": "B"
+            }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Broker FetchConsumer time ms (p.999)",
+        "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+        },
+        "yaxes": [
+            {
+            "format": "ms",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            },
+            {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            }
+        ],
+        "yaxis": {
+            "align": false,
+            "alignLevel": null
+        }
+        },
+        {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": null,
+        "fill": 0,
+        "fillGradient": 0,
+        "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 16,
+            "y": 47
+        },
+        "hiddenSeries": false,
+        "id": 117,
+        "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null as zero",
+        "options": {
+            "dataLinks": []
+        },
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+            {
+            "expr": "sum(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}) by (brokerId,topic)",
+            "legendFormat": "{{brokerId}}:{{topic}}",
+            "refId": "A"
+            }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Failed Fetch Requests (Replication)",
+        "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+        },
+        "yaxes": [
+            {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            },
+            {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            }
+        ],
+        "yaxis": {
+            "align": false,
+            "alignLevel": null
+        }
+        },
+        {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": null,
+        "description": "Replication Rate Per Second",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 0,
+            "y": 54
+        },
+        "hiddenSeries": false,
+        "id": 111,
+        "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {
+            "dataLinks": []
+        },
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [
+            {
+            "alias": "/out-.*/i",
+            "transform": "negative-Y"
+            }
+        ],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+            {
+            "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "in-{{brokerId}}",
+            "refId": "A"
+            },
+            {
+            "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])) by (brokerId)",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "out-{{brokerId}}",
+            "refId": "B"
+            }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Replication Rate Per Second",
+        "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+        },
+        "yaxes": [
+            {
+            "format": "Bps",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            },
+            {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            }
+        ],
+        "yaxis": {
+            "align": false,
+            "alignLevel": null
+        }
+        },
+        {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": null,
+        "fill": 0,
+        "fillGradient": 0,
+        "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 54
         },
         "hiddenSeries": false,
         "id": 119,
@@ -3299,7 +3299,7 @@ data:
         }
         }
     ],
-    "refresh": "10s",
+    "refresh": "30s",
     "schemaVersion": 21,
     "style": "dark",
     "tags": [
@@ -3463,5 +3463,5 @@ data:
     "timezone": "",
     "title": "Kafka Looking Glass",
     "uid": "1a1a1a1a1",
-    "version": 3
+    "version": 4
     }
