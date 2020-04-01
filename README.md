@@ -383,7 +383,7 @@ kubectl port-forward -n default svc/prometheus-operated 19090:9090 --address 10.
 #### Verify pod images
 
 ```sh
-kubectl get pod -o=custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[*].image --all-namespaces
+kubectl get pod -o=custom-columns='NAME:.metadata.name,IMAGE:.spec.containers[*].image' --all-namespaces
 ```
 
 
@@ -404,7 +404,7 @@ kubectl run kafka-topics --rm -i --tty=true --image=banzaicloud/kafka:2.13-2.4.1
 #### Set custom topic retention period
 
 ```bash
-kubectl run kafka-topics --rm -i --tty=true --image=banzaicloud/kafka:2.13-2.4.1 --restart=Never -- /opt/kafka/bin/kafka-configs.sh --zookeeper zk-client.zookeeper:2181/kafka --alter --entity-name perf_topic --entity-type topics --add-config retention.ms=7200000
+kubectl run kafka-topics --rm -i --tty=true --image=banzaicloud/kafka:2.13-2.4.1 --restart=Never -- /opt/kafka/bin/kafka-configs.sh --zookeeper zk-client.zookeeper:2181/kafka --alter --entity-name perf_topic --entity-type topics --add-config retention.ms=720000
 ```
 
 #### Topic Describe

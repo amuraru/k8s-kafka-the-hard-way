@@ -92,20 +92,6 @@ spec:
         requests:
           memory: "4Gi"
           cpu: "2"
-      # nodeAffinity can be specified, operator populates this value if new pvc added later to brokers
-      # nodeAffinity:
-      # nodeSelector can be specified, which set the pod to fit on a node
-      # nodeSelector:
-      # tolerations can be specified, which set the pod's tolerations
-      # tolerations:
-      # config parameter can be used to pass Kafka config https://kafka.apache.org/documentation/#brokerconfigs
-      # which has type per-broker
-      #config: |
-      #  sasl.enabled.mechanisms=PLAIN
-      # serviceAccountName specifies the serviceAccount used for this specific broker
-      #serviceAccountName: "kafka"
-      # imagePullSecrets specifies the secret to use when using private registry
-      #imagePullSecrets: "k8ssecret"
       # kafkaHeapOpts specifies the jvm heap size for the broker
       kafkaHeapOpts: "-XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70"
       # kafkaJvmPerfOpts specifies the jvm performance configs for the broker
@@ -135,20 +121,6 @@ spec:
         requests:
           memory: "4Gi"
           cpu: "2"
-      # nodeAffinity can be specified, operator populates this value if new pvc added later to brokers
-      # nodeAffinity:
-      # nodeSelector can be specified, which set the pod to fit on a node
-      # nodeSelector:
-      # tolerations can be specified, which set the pod's tolerations
-      # tolerations:
-      # config parameter can be used to pass Kafka config https://kafka.apache.org/documentation/#brokerconfigs
-      # which has type per-broker
-      #config: |
-      #  sasl.enabled.mechanisms=PLAIN
-      # serviceAccountName specifies the serviceAccount used for this specific broker
-      #serviceAccountName: "kafka"
-      # imagePullSecrets specifies the secret to use when using private registry
-      #imagePullSecrets: "k8ssecret"
       # kafkaHeapOpts specifies the jvm heap size for the broker
       kafkaHeapOpts: "-XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70"
       # kafkaJvmPerfOpts specifies the jvm performance configs for the broker
@@ -260,16 +232,18 @@ spec:
       broker.metric.sample.store.topic=__KafkaCruiseControlModelTrainingSamples
       # The replication factor of Kafka metric sample store topic
       sample.store.topic.replication.factor=3
+      partition.sample.store.topic.partition.count=15
+      broker.sample.store.topic.partition.count=15
       # The config for the number of Kafka sample store consumer threads
       num.sample.loading.threads=8
       # The partition assignor class for the metric samplers
       metric.sampler.partition.assignor.class=com.linkedin.kafka.cruisecontrol.monitor.sampling.DefaultMetricSamplerPartitionAssignor
       # The metric sampling interval in milliseconds
-      metric.sampling.interval.ms=120000
+      metric.sampling.interval.ms=60000
       # The partition metrics window size in milliseconds
       partition.metrics.window.ms=300000
       # The number of partition metric windows to keep in memory
-      num.partition.metrics.windows=1
+      num.partition.metrics.windows=2
       # The minimum partition metric samples required for a partition in each window
       min.samples.per.partition.metrics.window=1
       # The broker metrics window size in milliseconds
@@ -280,11 +254,10 @@ spec:
       min.samples.per.broker.metrics.window=1
       # The configuration for the BrokerCapacityConfigFileResolver (supports JBOD, non-JBOD, and heterogeneous CPU core capacities)
       capacity.config.file=config/capacity.json
-      #capacity.config.file=config/capacityJBOD.json
       # Configurations for the analyzer
       # =======================================
       # The list of goals to optimize the Kafka cluster for with pre-computed proposals
-      default.goals=com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.PotentialNwOutGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.TopicReplicaDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.LeaderReplicaDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.LeaderBytesInDistributionGoal
+      default.goals=com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundUsageDistributionGoal
       # The list of supported goals
       goals=com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.PotentialNwOutGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.TopicReplicaDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.LeaderReplicaDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.LeaderBytesInDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.kafkaassigner.KafkaAssignerDiskUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.kafkaassigner.KafkaAssignerEvenRackAwareGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.PreferredLeaderElectionGoal
       # The list of supported intra-broker goals
@@ -312,13 +285,13 @@ spec:
       # The capacity threshold for network outbound utilization in percentage
       network.outbound.capacity.threshold=0.8
       # The threshold to define the cluster to be in a low CPU utilization state
-      cpu.low.utilization.threshold=0.0
+      cpu.low.utilization.threshold=0.2
       # The threshold to define the cluster to be in a low disk utilization state
-      disk.low.utilization.threshold=0.0
+      disk.low.utilization.threshold=0.2
       # The threshold to define the cluster to be in a low network inbound utilization state
-      network.inbound.low.utilization.threshold=0.0
+      network.inbound.low.utilization.threshold=0.2
       # The threshold to define the cluster to be in a low disk utilization state
-      network.outbound.low.utilization.threshold=0.0
+      network.outbound.low.utilization.threshold=0.2
       # The metric anomaly percentile upper threshold
       metric.anomaly.percentile.upper.threshold=90.0
       # The metric anomaly percentile lower threshold
@@ -354,16 +327,14 @@ spec:
       # The goal violation notifier class
       anomaly.notifier.class=com.linkedin.kafka.cruisecontrol.detector.notifier.SelfHealingNotifier
       # The metric anomaly finder class
-      metric.anomaly.finder.class=com.linkedin.kafka.cruisecontrol.detector.KafkaMetricAnomalyFinder
+      metric.anomaly.finder.class=
       # The anomaly detection interval
-      #anomaly.detection.interval.ms=10000
+      anomaly.detection.interval.ms=300000
       # The goal violation to detect.
       anomaly.detection.goals=com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundUsageDistributionGoal
       self.healing.goals=com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundUsageDistributionGoal
       # The interested metrics for metric anomaly analyzer.
       metric.anomaly.analyzer.metrics=BROKER_PRODUCE_LOCAL_TIME_MS_MAX,BROKER_PRODUCE_LOCAL_TIME_MS_MEAN,BROKER_CONSUMER_FETCH_LOCAL_TIME_MS_MAX,BROKER_CONSUMER_FETCH_LOCAL_TIME_MS_MEAN,BROKER_FOLLOWER_FETCH_LOCAL_TIME_MS_MAX,BROKER_FOLLOWER_FETCH_LOCAL_TIME_MS_MEAN,BROKER_LOG_FLUSH_TIME_MS_MAX,BROKER_LOG_FLUSH_TIME_MS_MEAN
-      ## Adjust accordingly if your metrics reporter is an older version and does not produce these metrics.
-      #metric.anomaly.analyzer.metrics=BROKER_PRODUCE_LOCAL_TIME_MS_50TH,BROKER_PRODUCE_LOCAL_TIME_MS_999TH,BROKER_CONSUMER_FETCH_LOCAL_TIME_MS_50TH,BROKER_CONSUMER_FETCH_LOCAL_TIME_MS_999TH,BROKER_FOLLOWER_FETCH_LOCAL_TIME_MS_50TH,BROKER_FOLLOWER_FETCH_LOCAL_TIME_MS_999TH,BROKER_LOG_FLUSH_TIME_MS_50TH,BROKER_LOG_FLUSH_TIME_MS_999TH
       # True if recently demoted brokers are excluded from optimizations during broker failure self healing, false otherwise
       broker.failure.exclude.recently.demoted.brokers=true
       # True if recently removed brokers are excluded from optimizations during broker failure self healing, false otherwise
