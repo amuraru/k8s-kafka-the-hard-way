@@ -25,7 +25,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 26,
-      "iteration": 1585719545138,
+      "iteration": 1585816582194,
       "links": [],
       "panels": [
         {
@@ -62,7 +62,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 0,
             "y": 1
@@ -148,7 +148,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 3,
             "y": 1
@@ -231,7 +231,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 6,
             "y": 1
@@ -314,7 +314,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 9,
             "y": 1
@@ -396,7 +396,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 12,
             "y": 1
@@ -479,7 +479,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 15,
             "y": 1
@@ -562,7 +562,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 18,
             "y": 1
@@ -645,7 +645,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 21,
             "y": 1
@@ -715,7 +715,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 5
+            "y": 4
           },
           "id": 110,
           "panels": [],
@@ -742,10 +742,10 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 0,
-            "y": 6
+            "y": 5
           },
           "id": 98,
           "interval": null,
@@ -827,10 +827,10 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 3,
-            "y": 6
+            "y": 5
           },
           "id": 99,
           "interval": null,
@@ -912,10 +912,10 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 6,
-            "y": 6
+            "y": 5
           },
           "id": 112,
           "interval": null,
@@ -997,10 +997,10 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 3,
             "x": 9,
-            "y": 6
+            "y": 5
           },
           "id": 100,
           "interval": null,
@@ -1082,10 +1082,10 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 4,
             "x": 12,
-            "y": 6
+            "y": 5
           },
           "id": 123,
           "interval": null,
@@ -1167,10 +1167,10 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 4,
             "x": 16,
-            "y": 6
+            "y": 5
           },
           "id": 122,
           "interval": null,
@@ -1252,10 +1252,10 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 4,
             "x": 20,
-            "y": 6
+            "y": 5
           },
           "id": 101,
           "interval": null,
@@ -1330,7 +1330,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 10
+            "y": 8
           },
           "hiddenSeries": false,
           "id": 44,
@@ -1442,7 +1442,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 10
+            "y": 8
           },
           "hiddenSeries": false,
           "id": 58,
@@ -1534,7 +1534,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 10
+            "y": 8
           },
           "hiddenSeries": false,
           "id": 116,
@@ -1624,7 +1624,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 16
+            "y": 14
           },
           "hiddenSeries": false,
           "id": 50,
@@ -1726,7 +1726,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 16
+            "y": 14
           },
           "hiddenSeries": false,
           "id": 56,
@@ -1832,7 +1832,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 16
+            "y": 14
           },
           "hiddenSeries": false,
           "id": 60,
@@ -1923,7 +1923,7 @@ data:
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 22
+            "y": 20
           },
           "hiddenSeries": false,
           "id": 91,
@@ -2020,7 +2020,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 8,
-            "y": 22
+            "y": 20
           },
           "hiddenSeries": false,
           "id": 104,
@@ -2118,7 +2118,7 @@ data:
             "h": 6,
             "w": 5,
             "x": 14,
-            "y": 22
+            "y": 20
           },
           "hiddenSeries": false,
           "id": 124,
@@ -2217,7 +2217,7 @@ data:
             "h": 6,
             "w": 5,
             "x": 19,
-            "y": 22
+            "y": 20
           },
           "hiddenSeries": false,
           "id": 121,
@@ -2311,7 +2311,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 28
+            "y": 26
           },
           "id": 28,
           "panels": [],
@@ -2331,7 +2331,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 29
+            "y": 27
           },
           "hiddenSeries": false,
           "id": 82,
@@ -2437,7 +2437,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 29
+            "y": 27
           },
           "hiddenSeries": false,
           "id": 81,
@@ -2545,7 +2545,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 29
+            "y": 27
           },
           "hiddenSeries": false,
           "id": 83,
@@ -2643,7 +2643,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 36
+            "y": 34
           },
           "hiddenSeries": false,
           "id": 93,
@@ -2734,7 +2734,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 36
+            "y": 34
           },
           "hiddenSeries": false,
           "id": 95,
@@ -2825,7 +2825,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 36
+            "y": 34
           },
           "hiddenSeries": false,
           "id": 97,
@@ -2911,7 +2911,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 43
+            "y": 41
           },
           "id": 114,
           "panels": [],
@@ -2930,7 +2930,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 44
+            "y": 42
           },
           "hiddenSeries": false,
           "id": 120,
@@ -3025,7 +3025,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 44
+            "y": 42
           },
           "hiddenSeries": false,
           "id": 118,
@@ -3120,10 +3120,10 @@ data:
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 44
+            "y": 42
           },
           "hiddenSeries": false,
-          "id": 117,
+          "id": 119,
           "legend": {
             "avg": false,
             "current": false,
@@ -3151,16 +3151,22 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}) by (brokerId,topic)",
-              "legendFormat": "{{brokerId}}:{{topic}}",
+              "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])",
+              "hide": true,
+              "legendFormat": "{{brokerId}}",
               "refId": "A"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "q{{brokerId}}",
+              "refId": "B"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Failed Fetch Requests (Replication)",
+          "title": "Broker FetchFollower time ms (p.999)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3176,7 +3182,260 @@ data:
           },
           "yaxes": [
             {
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
               "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 49
+          },
+          "hiddenSeries": false,
+          "id": 125,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "/(\\d+)\\-req\\-queue/",
+              "color": "#73BF69"
+            },
+            {
+              "alias": "/(\\d+)\\-req\\-local/",
+              "color": "#F2495C"
+            },
+            {
+              "alias": "/(\\d+)\\-resp\\-send/",
+              "color": "#B877D9"
+            },
+            {
+              "alias": "/(\\d+)\\-resp\\-queue/",
+              "color": "#5794F2"
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-req-queue",
+              "refId": "B"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_localtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-req-local",
+              "refId": "C"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_remotetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-req-remote",
+              "refId": "A"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-resp-queue",
+              "refId": "D"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-resp-send",
+              "refId": "E"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Broker Produce Request Time Breakdown (p.999)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "description": "",
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 49
+          },
+          "hiddenSeries": false,
+          "id": 126,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "/(\\d+)\\-req\\-queue/",
+              "color": "#73BF69"
+            },
+            {
+              "alias": "/(\\d+)\\-req\\-local/",
+              "color": "#F2495C"
+            },
+            {
+              "alias": "/(\\d+)\\-resp\\-send/",
+              "color": "#B877D9"
+            },
+            {
+              "alias": "/(\\d+)\\-resp\\-queue/",
+              "color": "#5794F2"
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-req-queue",
+              "refId": "B"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_localtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-req-local",
+              "refId": "C"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_remotetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-req-remote",
+              "refId": "A"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-resp-queue",
+              "refId": "D"
+            },
+            {
+              "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+              "legendFormat": "{{brokerId}}-resp-send",
+              "refId": "E"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Broker Consume Request Time Breakdown (p.999)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -3207,10 +3466,10 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 6,
+            "h": 7,
             "w": 8,
-            "x": 0,
-            "y": 51
+            "x": 16,
+            "y": 49
           },
           "hiddenSeries": false,
           "id": 111,
@@ -3314,11 +3573,11 @@ data:
           "gridPos": {
             "h": 7,
             "w": 8,
-            "x": 8,
-            "y": 51
+            "x": 0,
+            "y": 56
           },
           "hiddenSeries": false,
-          "id": 119,
+          "id": 117,
           "legend": {
             "avg": false,
             "current": false,
@@ -3346,22 +3605,16 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m])",
-              "hide": true,
-              "legendFormat": "{{brokerId}}",
+              "expr": "sum(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}) by (brokerId,topic)",
+              "legendFormat": "{{brokerId}}:{{topic}}",
               "refId": "A"
-            },
-            {
-              "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
-              "legendFormat": "q{{brokerId}}",
-              "refId": "B"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Broker FetchFollower time ms (p.999)",
+          "title": "Failed Fetch Requests (Replication)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3377,7 +3630,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "ms",
+              "format": "short",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -3532,7 +3785,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-3h",
+        "from": "now-15m",
         "to": "now"
       },
       "timepicker": {
@@ -3563,5 +3816,5 @@ data:
       "timezone": "",
       "title": "Kafka Looking Glass",
       "uid": "1a1a1a1a1",
-      "version": 1
+      "version": 2
     }
