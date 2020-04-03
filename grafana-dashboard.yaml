@@ -25,7 +25,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 26,
-      "iteration": 1585903085088,
+      "iteration": 1585903085090,
       "links": [],
       "panels": [
         {
@@ -118,7 +118,7 @@ data:
           "thresholds": "0,2",
           "title": "Brokers Online",
           "type": "singlestat",
-          "valueFontSize": "200%",
+          "valueFontSize": "150%",
           "valueMaps": [
             {
               "op": "=",
@@ -201,7 +201,7 @@ data:
           "thresholds": "2",
           "title": "Active Controllers",
           "type": "singlestat",
-          "valueFontSize": "200%",
+          "valueFontSize": "150%",
           "valueMaps": [
             {
               "op": "=",
@@ -284,7 +284,7 @@ data:
           "thresholds": "2",
           "title": "Unclean Leader Election Rate",
           "type": "singlestat",
-          "valueFontSize": "200%",
+          "valueFontSize": "170%",
           "valueMaps": [
             {
               "op": "=",
@@ -366,7 +366,7 @@ data:
           "thresholds": "0,0",
           "title": "Online Replicas",
           "type": "singlestat",
-          "valueFontSize": "200%",
+          "valueFontSize": "150%",
           "valueMaps": [
             {
               "op": "=",
@@ -449,7 +449,7 @@ data:
           "thresholds": "1,5",
           "title": "Under Replicated Partitions",
           "type": "singlestat",
-          "valueFontSize": "200%",
+          "valueFontSize": "150%",
           "valueMaps": [
             {
               "op": "=",
@@ -532,7 +532,7 @@ data:
           "thresholds": "1,1000",
           "title": "Partitions at mininimum ISR",
           "type": "singlestat",
-          "valueFontSize": "200%",
+          "valueFontSize": "150%",
           "valueMaps": [
             {
               "op": "=",
@@ -615,7 +615,7 @@ data:
           "thresholds": "1,1",
           "title": "Partitions under mininimum ISR",
           "type": "singlestat",
-          "valueFontSize": "200%",
+          "valueFontSize": "150%",
           "valueMaps": [
             {
               "op": "=",
@@ -698,7 +698,7 @@ data:
           "thresholds": "1,1",
           "title": "Offline Partitions Count",
           "type": "singlestat",
-          "valueFontSize": "200%",
+          "valueFontSize": "150%",
           "valueMaps": [
             {
               "op": "=",
@@ -781,7 +781,7 @@ data:
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
@@ -810,6 +810,7 @@ data:
         {
           "cacheTimeout": null,
           "colorBackground": false,
+          "colorPostfix": false,
           "colorValue": true,
           "colors": [
             "#d44a3a",
@@ -863,10 +864,10 @@ data:
           ],
           "repeatDirection": "h",
           "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "fillColor": "rgb(28, 39, 55)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
@@ -883,13 +884,7 @@ data:
           "title": "Total Cluster Replication Rate",
           "type": "singlestat",
           "valueFontSize": "100%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "0",
-              "value": "null"
-            }
-          ],
+          "valueMaps": [],
           "valueName": "current"
         },
         {
@@ -951,7 +946,7 @@ data:
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
@@ -1157,6 +1152,7 @@ data:
             "#299c46"
           ],
           "datasource": null,
+          "decimals": 1,
           "description": "Total Produce Request Rate",
           "format": "reqps",
           "gauge": {
@@ -1242,6 +1238,7 @@ data:
             "#299c46"
           ],
           "datasource": null,
+          "decimals": 1,
           "description": "Total Produce Request Rate",
           "format": "reqps",
           "gauge": {
@@ -3563,8 +3560,25 @@ data:
           }
         },
         {
-          "aliasColors": {},
-          "bars": false,
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 56
+          },
+          "id": 128,
+          "panels": [],
+          "title": "Cruise Control",
+          "type": "row"
+        },
+        {
+          "aliasColors": {
+            "brokerId:topic": "red",
+            "goal violations": "red"
+          },
+          "bars": true,
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
@@ -3574,10 +3588,10 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 56
+            "y": 57
           },
           "hiddenSeries": false,
-          "id": 129,
+          "id": 130,
           "legend": {
             "avg": false,
             "current": false,
@@ -3589,9 +3603,9 @@ data:
             "total": false,
             "values": false
           },
-          "lines": true,
+          "lines": false,
           "linewidth": 1,
-          "nullPointMode": "null as zero",
+          "nullPointMode": "null",
           "options": {
             "dataLinks": []
           },
@@ -3605,16 +3619,16 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(kafka_log_logflushstats_logflushrateandtimems{quantile=\"0.999\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}) by (brokerId)",
-              "legendFormat": "{{brokerId}}",
+              "expr": "changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[5m])\t",
+              "legendFormat": "goal violations",
               "refId": "A"
             }
           ],
           "thresholds": [],
-          "timeFrom": null,
+          "timeFrom": "5d",
           "timeRegions": [],
           "timeShift": null,
-          "title": "Broker Flush Time",
+          "title": "Cruise Control Goal Violations",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3630,7 +3644,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "ms",
+              "format": "short",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -3663,7 +3677,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 56
+            "y": 57
           },
           "hiddenSeries": false,
           "id": 117,
@@ -3741,18 +3755,93 @@ data:
           }
         },
         {
-          "collapsed": true,
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
           "datasource": null,
+          "fill": 0,
+          "fillGradient": 0,
           "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 63
+            "h": 7,
+            "w": 8,
+            "x": 16,
+            "y": 57
           },
-          "id": 128,
-          "panels": [],
-          "title": "Errors",
-          "type": "row"
+          "hiddenSeries": false,
+          "id": 129,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(kafka_log_logflushstats_logflushrateandtimems{quantile=\"0.999\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}) by (brokerId)",
+              "legendFormat": "{{brokerId}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Broker Flush Time",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         }
       ],
       "refresh": "30s",
@@ -3886,9 +3975,9 @@ data:
             "useTags": false
           }
         ]
-      },
+      },    
       "time": {
-        "from": "now-1h",
+        "from": "now-3h",
         "to": "now"
       },
       "timepicker": {
