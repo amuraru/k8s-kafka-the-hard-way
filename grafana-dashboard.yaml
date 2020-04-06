@@ -25,7 +25,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 26,
-      "iteration": 1586163361112,
+      "iteration": 1586164383282,
       "links": [],
       "panels": [
         {
@@ -1863,10 +1863,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[15s])\t",
-              "interval": "15s",
+              "expr": "changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])",
+              "interval": "30s",
               "intervalFactor": 1,
-              "legendFormat": "goal violations",
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -3108,7 +3108,7 @@ data:
             },
             {
               "aliasColors": {},
-              "bars": false,
+              "bars": true,
               "dashLength": 10,
               "dashes": false,
               "datasource": null,
@@ -3126,16 +3126,16 @@ data:
                 "avg": false,
                 "current": false,
                 "hideEmpty": true,
-                "hideZero": false,
+                "hideZero": true,
                 "max": false,
                 "min": false,
-                "show": true,
+                "show": false,
                 "total": false,
                 "values": false
               },
-              "lines": true,
+              "lines": false,
               "linewidth": 1,
-              "nullPointMode": "null as zero",
+              "nullPointMode": "null",
               "options": {
                 "dataLinks": []
               },
@@ -3159,34 +3159,38 @@ data:
                 {
                   "alias": "/(\\d+)\\-resp\\-queue/",
                   "color": "#5794F2"
+                },
+                {
+                  "alias": "/(\\d+)\\-req\\-remote/",
+                  "color": "#FADE2A"
                 }
               ],
               "spaceLength": 10,
-              "stack": false,
+              "stack": true,
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-req-queue",
                   "refId": "B"
                 },
                 {
-                  "expr": "kafka_network_requestmetrics_localtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_localtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-req-local",
                   "refId": "C"
                 },
                 {
-                  "expr": "kafka_network_requestmetrics_remotetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_remotetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-req-remote",
                   "refId": "A"
                 },
                 {
-                  "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-resp-queue",
                   "refId": "D"
                 },
                 {
-                  "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-resp-send",
                   "refId": "E"
                 }
@@ -3198,7 +3202,7 @@ data:
               "title": "Broker Produce Request Time Breakdown (p.999)",
               "tooltip": {
                 "shared": true,
-                "sort": 0,
+                "sort": 2,
                 "value_type": "individual"
               },
               "type": "graph",
@@ -3234,7 +3238,7 @@ data:
             },
             {
               "aliasColors": {},
-              "bars": false,
+              "bars": true,
               "dashLength": 10,
               "dashes": false,
               "datasource": null,
@@ -3253,16 +3257,16 @@ data:
                 "avg": false,
                 "current": false,
                 "hideEmpty": true,
-                "hideZero": false,
+                "hideZero": true,
                 "max": false,
                 "min": false,
-                "show": true,
+                "show": false,
                 "total": false,
                 "values": false
               },
-              "lines": true,
+              "lines": false,
               "linewidth": 1,
-              "nullPointMode": "null as zero",
+              "nullPointMode": "null",
               "options": {
                 "dataLinks": []
               },
@@ -3286,34 +3290,38 @@ data:
                 {
                   "alias": "/(\\d+)\\-resp\\-queue/",
                   "color": "#5794F2"
+                },
+                {
+                  "alias": "/(\\d+)\\-req\\-remote/",
+                  "color": "#FADE2A"
                 }
               ],
               "spaceLength": 10,
-              "stack": false,
+              "stack": true,
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-req-queue",
                   "refId": "B"
                 },
                 {
-                  "expr": "kafka_network_requestmetrics_localtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_localtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-req-local",
                   "refId": "C"
                 },
                 {
-                  "expr": "kafka_network_requestmetrics_remotetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_remotetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-req-remote",
                   "refId": "A"
                 },
                 {
-                  "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-resp-queue",
                   "refId": "D"
                 },
                 {
-                  "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}",
+                  "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\", quantile=\"0.999\"}>0",
                   "legendFormat": "{{brokerId}}-resp-send",
                   "refId": "E"
                 }
@@ -3325,7 +3333,7 @@ data:
               "title": "Broker Consume Request Time Breakdown (p.999)",
               "tooltip": {
                 "shared": true,
-                "sort": 0,
+                "sort": 2,
                 "value_type": "individual"
               },
               "type": "graph",
@@ -3383,7 +3391,7 @@ data:
                 "hideZero": true,
                 "max": false,
                 "min": false,
-                "show": true,
+                "show": false,
                 "total": false,
                 "values": false
               },
@@ -4167,5 +4175,5 @@ data:
       "timezone": "",
       "title": "Kafka Looking Glass",
       "uid": "1a1a1a1a1",
-      "version": 9
+      "version": 10
     }
