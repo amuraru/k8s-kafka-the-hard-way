@@ -25,7 +25,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 26,
-      "iteration": 1586164383282,
+      "iteration": 1586469546156,
       "links": [],
       "panels": [
         {
@@ -1123,6 +1123,7 @@ data:
               "expr": "sum(irate(kafka_server_brokertopicmetrics_producemessageconversions_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
               "format": "time_series",
               "hide": false,
+              "instant": true,
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
@@ -1819,7 +1820,8 @@ data:
         {
           "aliasColors": {
             "brokerId:topic": "red",
-            "goal violations": "semi-dark-red"
+            "goal violations": "semi-dark-red",
+            "kafka-cruisecontrol-svc": "semi-dark-red"
           },
           "bars": true,
           "dashLength": 10,
@@ -1843,7 +1845,7 @@ data:
             "hideZero": true,
             "max": false,
             "min": false,
-            "show": false,
+            "show": true,
             "total": false,
             "values": false
           },
@@ -1864,9 +1866,9 @@ data:
           "targets": [
             {
               "expr": "changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])",
-              "interval": "30s",
-              "intervalFactor": 1,
-              "legendFormat": "",
+              "interval": "",
+              "intervalFactor": 4,
+              "legendFormat": "{{service}}",
               "refId": "A"
             }
           ],
@@ -1892,7 +1894,7 @@ data:
             {
               "decimals": 0,
               "format": "short",
-              "label": null,
+              "label": "",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -1900,7 +1902,7 @@ data:
             },
             {
               "format": "short",
-              "label": null,
+              "label": "",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -2163,7 +2165,7 @@ data:
               "instant": false,
               "interval": "30s",
               "intervalFactor": 1,
-              "legendFormat": "{{brokerId}}:{{topic}}:{{partition}}",
+              "legendFormat": "controller-{{brokerId}}",
               "refId": "A"
             }
           ],
@@ -2611,7 +2613,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": "0",
               "show": true
             },
             {
@@ -2702,7 +2704,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": "0",
               "show": true
             },
             {
@@ -2773,7 +2775,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "JVM GC Count",
+          "title": "JVM GC Rate",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -2793,7 +2795,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": "0",
               "show": true
             },
             {
@@ -4175,5 +4177,5 @@ data:
       "timezone": "",
       "title": "Kafka Looking Glass",
       "uid": "1a1a1a1a1",
-      "version": 10
+      "version": 12
     }
