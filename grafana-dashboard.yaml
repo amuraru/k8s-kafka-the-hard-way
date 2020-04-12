@@ -25,7 +25,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 26,
-      "iteration": 1586469546156,
+      "iteration": 1586629589279,
       "links": [],
       "panels": [
         {
@@ -1105,9 +1105,9 @@ data:
           "prefixFontSize": "50%",
           "rangeMaps": [
             {
-              "from": "null",
+              "from": "0",
               "text": "N/A",
-              "to": "null"
+              "to": "0"
             }
           ],
           "repeatDirection": "h",
@@ -1120,7 +1120,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_producemessageconversions_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_producemessageconversions_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}[1m]))",
               "format": "time_series",
               "hide": false,
               "instant": true,
@@ -1137,7 +1137,7 @@ data:
             {
               "op": "=",
               "text": "0",
-              "value": "null"
+              "value": "0"
             }
           ],
           "valueName": "current"
@@ -2117,7 +2117,7 @@ data:
           "dashes": false,
           "datasource": null,
           "decimals": 0,
-          "description": "This shows the partition reassignments triggered manually or by CC automatically during rebalance.\nNote that the count is not the total number of partitions reassigned but rather the reassignments events.",
+          "description": "",
           "fill": 0,
           "fillGradient": 0,
           "gridPos": {
@@ -2160,12 +2160,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(kafka_controller_controllerstats_partitionreassignmentrateandtimems_count[30s])",
+              "expr": "sum(kafka_server_replicamanager_reassigningpartitions{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}) by (brokerId) > 0",
               "format": "time_series",
               "instant": false,
-              "interval": "30s",
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "controller-{{brokerId}}",
+              "legendFormat": "{{brokerId}}",
               "refId": "A"
             }
           ],
@@ -2173,7 +2173,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Partition Reassignments",
+          "title": "Reassigning Partitions",
           "tooltip": {
             "shared": true,
             "sort": 2,
@@ -4024,6 +4024,10 @@ data:
         "list": [
           {
             "allValue": null,
+            "current": {
+              "text": "kafka",
+              "value": "kafka"
+            },
             "datasource": null,
             "definition": "",
             "hide": 0,
@@ -4045,6 +4049,10 @@ data:
           },
           {
             "allValue": null,
+            "current": {
+              "text": "kafka",
+              "value": "kafka"
+            },
             "datasource": null,
             "definition": "query_result(kafka_server_replicamanager_leadercount{namespace=\"$kubernetes_namespace\"})",
             "hide": 0,
@@ -4068,6 +4076,7 @@ data:
             "allValue": ".*",
             "current": {
               "selected": false,
+              "tags": [],
               "text": "All",
               "value": "$__all"
             },
@@ -4177,5 +4186,5 @@ data:
       "timezone": "",
       "title": "Kafka Looking Glass",
       "uid": "1a1a1a1a1",
-      "version": 12
+      "version": 13
     }
