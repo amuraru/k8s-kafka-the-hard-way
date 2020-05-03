@@ -318,6 +318,7 @@ spec:
       num.concurrent.intra.broker.partition.movements=2
       # The max number of leadership movement within the whole cluster at a given time.
       num.concurrent.leader.movements=1000
+      default.replica.movement.strategies=com.linkedin.kafka.cruisecontrol.executor.strategy.PrioritizeSmallReplicaMovementStrategy,com.linkedin.kafka.cruisecontrol.executor.strategy.BaseReplicaMovementStrategy
       # Default replica movement throttle. If not specified, movements unthrottled by default.
       # default.replication.throttle=
       # The interval between two execution progress checks.
