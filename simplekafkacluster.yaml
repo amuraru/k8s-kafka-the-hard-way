@@ -11,7 +11,7 @@ spec:
     - "zk-client.zookeeper:2181"
   zkPath: "/kafka"
   oneBrokerPerNode: false
-  clusterImage: "banzaicloud/kafka:2.13-2.4.1"
+  clusterImage: "adobe/kafka:2.12-2.5.0"
   clusterWideConfig: |
     # dynamic config
   readOnlyConfig: |
@@ -161,7 +161,7 @@ spec:
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
   cruiseControlConfig:
-    image: "solsson/kafka-cruise-control@sha256:6be35587f099810360154737b425b1c51bd32c93b101d84b2d096a9f6d59eaa3"
+    image: "adobe/cruise-control:2.0.101.adbe.20200424"
     topicConfig:
       partitions: 6
       replicationFactor: 3
