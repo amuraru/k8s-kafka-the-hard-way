@@ -161,7 +161,7 @@ spec:
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
   cruiseControlConfig:
-    image: "adobe/cruise-control:2.0.101.adbe.20200424"
+    image: "adobe/cruise-control:2.0.102.adbe.20200503"
     topicConfig:
       partitions: 6
       replicationFactor: 3
