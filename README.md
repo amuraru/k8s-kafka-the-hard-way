@@ -55,7 +55,7 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ```bash
 
-curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
+curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.8.1/kind-$(uname)-amd64
 chmod +x ./kind
 mv ./kind ~/bin
 
