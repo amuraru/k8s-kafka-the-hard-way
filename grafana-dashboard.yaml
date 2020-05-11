@@ -1818,15 +1818,11 @@ data:
           }
         },
         {
-          "aliasColors": {
-            "brokerId:topic": "red",
-            "goal violations": "semi-dark-red",
-            "kafka-cruisecontrol-svc": "semi-dark-red"
-          },
+          "datasource": null,
+          "aliasColors": {},
           "bars": true,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
           "decimals": 0,
           "fill": 0,
           "fillGradient": 0,
@@ -1856,27 +1852,68 @@ data:
             "dataLinks": []
           },
           "percentage": false,
-          "pointradius": 2,
-          "points": false,
+          "pointradius": 3,
+          "points": true,
           "renderer": "flot",
-          "seriesOverrides": [],
+          "seriesOverrides": [
+            {
+              "alias": "replicas_move",
+              "yaxis": 1,
+              "color": "#96D98D"
+            },
+            {
+              "alias": "leadership_move",
+              "yaxis": 1,
+              "color": "#8AB8FF"
+            },
+            {
+              "alias": "intra_broker_replica_move",
+              "yaxis": 1,
+              "color": "#DEB6F2"
+            },
+            {
+            "alias": "goal-violations",
+            "color": "#E02F44"
+            }
+          ],
           "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])",
+              "expr": "changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0",
+              "legendFormat": "goal-violations",
               "interval": "",
-              "intervalFactor": 4,
-              "legendFormat": "{{service}}",
+              "intervalFactor": 1,
               "refId": "A"
+            },
+            {
+              "expr": "-1*(sum_over_time(kafka_cruisecontrol_executor_replica_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
+              "legendFormat": "replicas_move",
+              "interval": "",
+              "intervalFactor": 1,
+              "refId": "B"
+            },
+            {
+              "expr": "-1*(sum_over_time(kafka_cruisecontrol_executor_leadership_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
+              "legendFormat": "leadership_move",
+              "interval": "",
+              "intervalFactor": 1,
+              "refId": "D"
+            },
+            {
+              "expr": "-1*(sum_over_time(kafka_cruisecontrol_executor_intra_broker_replica_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
+              "legendFormat": "intra_broker_replica_move",
+              "interval": "",
+              "intervalFactor": 1,
+              "refId": "E"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Cruise Control Goal Violations",
+          "title": "Cruise Control Auto Balance",
           "tooltip": {
             "shared": true,
             "sort": 0,
