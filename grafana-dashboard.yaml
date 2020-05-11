@@ -24,8 +24,8 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 26,
-      "iteration": 1586629589279,
+      "id": 25,
+      "iteration": 1589185804063,
       "links": [],
       "panels": [
         {
@@ -84,7 +84,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -110,6 +109,8 @@ data:
               "expr": "count(kafka_server_replicamanager_leadercount{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "format": "time_series",
               "hide": false,
+              "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
@@ -170,7 +171,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -194,7 +194,10 @@ data:
               "expr": "sum(kafka_controller_kafkacontroller_activecontrollercount{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "format": "time_series",
               "hide": false,
+              "instant": true,
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -253,7 +256,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -277,7 +279,10 @@ data:
               "expr": "count(sum(kafka_cluster_partition_replicascount{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}>0) by (topic))",
               "format": "time_series",
               "hide": false,
+              "instant": true,
+              "interval": "",
               "intervalFactor": 2,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -336,7 +341,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -359,7 +363,10 @@ data:
             {
               "expr": "sum(irate(kafka_controller_controllerstats_uncleanleaderelections_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}[5m]))",
               "format": "time_series",
+              "instant": true,
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -418,7 +425,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -441,7 +447,10 @@ data:
             {
               "expr": "sum(kafka_server_replicamanager_partitioncount{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "format": "time_series",
+              "instant": true,
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -500,7 +509,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -524,7 +532,10 @@ data:
               "expr": "sum(kafka_controller_kafkacontroller_offlinepartitionscount{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "format": "time_series",
               "hide": false,
+              "instant": true,
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -583,7 +594,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -607,7 +617,10 @@ data:
               "expr": "sum(kafka_cluster_partition_atminisr{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "format": "time_series",
               "hide": false,
+              "instant": true,
+              "interval": "",
               "intervalFactor": 2,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -666,7 +679,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -690,7 +702,10 @@ data:
               "expr": "sum(kafka_cluster_partition_underminisr{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "format": "time_series",
               "hide": false,
+              "instant": true,
+              "interval": "",
               "intervalFactor": 2,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -763,7 +778,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -849,7 +863,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -928,7 +941,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -1013,7 +1025,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -1098,7 +1109,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -1185,7 +1195,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -1271,7 +1280,6 @@ data:
           "maxDataPoints": 100,
           "nullPointMode": "connected",
           "nullText": null,
-          "options": {},
           "postfix": "",
           "postfixFontSize": "50%",
           "prefix": "",
@@ -1818,11 +1826,11 @@ data:
           }
         },
         {
-          "datasource": null,
           "aliasColors": {},
           "bars": true,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
           "decimals": 0,
           "fill": 0,
           "fillGradient": 0,
@@ -1858,22 +1866,22 @@ data:
           "seriesOverrides": [
             {
               "alias": "replicas_move",
-              "yaxis": 1,
-              "color": "#96D98D"
+              "color": "#96D98D",
+              "yaxis": 1
             },
             {
               "alias": "leadership_move",
-              "yaxis": 1,
-              "color": "#8AB8FF"
+              "color": "#8AB8FF",
+              "yaxis": 1
             },
             {
               "alias": "intra_broker_replica_move",
-              "yaxis": 1,
-              "color": "#DEB6F2"
+              "color": "#DEB6F2",
+              "yaxis": 1
             },
             {
-            "alias": "goal-violations",
-            "color": "#E02F44"
+              "alias": "goal-violations",
+              "color": "#E02F44"
             }
           ],
           "spaceLength": 10,
@@ -1882,30 +1890,30 @@ data:
           "targets": [
             {
               "expr": "changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0",
-              "legendFormat": "goal-violations",
               "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "goal-violations",
               "refId": "A"
             },
             {
               "expr": "-1*(sum_over_time(kafka_cruisecontrol_executor_replica_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
-              "legendFormat": "replicas_move",
               "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "replicas_move",
               "refId": "B"
             },
             {
               "expr": "-1*(sum_over_time(kafka_cruisecontrol_executor_leadership_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
-              "legendFormat": "leadership_move",
               "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "leadership_move",
               "refId": "D"
             },
             {
               "expr": "-1*(sum_over_time(kafka_cruisecontrol_executor_intra_broker_replica_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
-              "legendFormat": "intra_broker_replica_move",
               "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "intra_broker_replica_move",
               "refId": "E"
             }
           ],
@@ -4011,12 +4019,14 @@ data:
               "styles": [
                 {
                   "alias": "Time",
+                  "align": "auto",
                   "dateFormat": "YYYY-MM-DD HH:mm:ss",
                   "pattern": "Time",
                   "type": "date"
                 },
                 {
                   "alias": "",
+                  "align": "auto",
                   "colorMode": null,
                   "colors": [
                     "rgba(245, 54, 54, 0.9)",
@@ -4051,7 +4061,7 @@ data:
         }
       ],
       "refresh": "30s",
-      "schemaVersion": 21,
+      "schemaVersion": 22,
       "style": "dark",
       "tags": [
         "banzaicloud-operator",
@@ -4069,6 +4079,7 @@ data:
             "definition": "",
             "hide": 0,
             "includeAll": false,
+            "index": -1,
             "label": "Namespace",
             "multi": false,
             "name": "kubernetes_namespace",
@@ -4094,6 +4105,7 @@ data:
             "definition": "query_result(kafka_server_replicamanager_leadercount{namespace=\"$kubernetes_namespace\"})",
             "hide": 0,
             "includeAll": false,
+            "index": -1,
             "label": "Cluster Name",
             "multi": false,
             "name": "cluster_name",
@@ -4113,7 +4125,6 @@ data:
             "allValue": ".*",
             "current": {
               "selected": false,
-              "tags": [],
               "text": "All",
               "value": "$__all"
             },
@@ -4121,6 +4132,7 @@ data:
             "definition": "query_result(kafka_server_replicamanager_leadercount{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
             "hide": 0,
             "includeAll": true,
+            "index": -1,
             "label": "Broker",
             "multi": false,
             "name": "kafka_broker",
@@ -4147,6 +4159,7 @@ data:
             "definition": "query_result(topk(100, sum(kafka_cluster_partition_replicascount{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\"}>0) by (topic)))",
             "hide": 0,
             "includeAll": true,
+            "index": -1,
             "label": "Topic",
             "multi": false,
             "name": "kafka_topic",
@@ -4174,6 +4187,7 @@ data:
             "definition": "query_result(kafka_log_log_size{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-$kafka_broker\",topic=~\"$kafka_topic\"})",
             "hide": 0,
             "includeAll": true,
+            "index": -1,
             "label": "Partition",
             "multi": true,
             "name": "kafka_partition",
@@ -4223,5 +4237,8 @@ data:
       "timezone": "",
       "title": "Kafka Looking Glass",
       "uid": "1a1a1a1a1",
-      "version": 13
+      "variables": {
+        "list": []
+      },
+      "version": 3
     }
