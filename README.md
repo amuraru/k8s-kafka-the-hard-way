@@ -393,7 +393,7 @@ kubectl get pod -o=custom-columns='NAME:.metadata.name,IMAGE:.spec.containers[*]
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=banzaicloud/kafka:2.13-2.4.1 \
+--image=adobe/kafka:2.12-2.5.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -404,12 +404,12 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=banzaicloud/kafka:2.13-2.4.1 \
+--image=adobe/kafka:2.12-2.5.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
 --topic perf_topic \
---replica-assignment 100:200:300,101:201:301,100:200:300,101:201:301,100:200:300,101:201:301,100:200:300,101:201:301,100:200:300,101:201:301,100:200:300,101:201:301 \
+--replica-assignment 101:201:301,102:202:302,101:201:301,102:202:302,101:201:301,102:202:302,101:201:301,102:202:302,101:201:301,102:202:302,101:201:301,102:202:302 \
 --create
 ```
 
@@ -417,7 +417,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=banzaicloud/kafka:2.13-2.4.1 \
+--image=adobe/kafka:2.12-2.5.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-configs.sh \
 --zookeeper zk-client.zookeeper:2181/kafka \
@@ -430,7 +430,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=banzaicloud/kafka:2.13-2.4.1 \
+--image=adobe/kafka:2.12-2.5.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -442,7 +442,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-producer-topic \
---image=banzaicloud/kafka:2.13-2.4.1 \
+--image=adobe/kafka:2.12-2.5.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-producer-perf-test.sh \
 --producer-props bootstrap.servers=kafka-headless:29092 acks=all \
@@ -456,7 +456,7 @@ kubectl run kafka-producer-topic \
 
 ```bash
 kubectl run kafka-consumer-test \
---image=banzaicloud/kafka:2.13-2.4.1 \
+--image=adobe/kafka:2.12-2.5.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-consumer-perf-test.sh \
 --broker-list kafka-headless:29092 \
