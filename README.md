@@ -55,7 +55,7 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ```bash
 
-curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.8.1/kind-$(uname)-amd64
+curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.9.0/kind-$(uname)-amd64"
 chmod +x ./kind
 mv ./kind ~/bin
 
@@ -71,24 +71,8 @@ mkdir ~/.kind
 cat > ~/.kind/kind-config.yaml <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-networking:
-  apiServerAddress: "10.131.236.142"
 nodes:
 - role: control-plane
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "ingress-ready=true"
-        authorization-mode: "AlwaysAllow"
-  extraPortMappings:
-  - containerPort: 80
-    hostPort: 6680
-    protocol: TCP
-  - containerPort: 443
-    hostPort: 6643
-    protocol: TCP
 - role: worker
 - role: worker
 - role: worker
@@ -104,7 +88,7 @@ EOF
 kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
---image kindest/node:v1.15.7
+--image kindest/node:v1.18.8
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -118,7 +102,7 @@ Debug: `kind` clusters are running in docker, check containers: `docker ps`
 
 ```sh
 # switch to kind cluster context
-kubectl config use-context kafka-kind
+kubectl config use-context kind-kafka
 # test
 k get nodes
 
@@ -144,26 +128,9 @@ kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failu
 ```
 
 
-## Install custom `StorageClass` for persistent volumes
-
-`kind` already ships with [rancher/local-path-provisioner](https://github.com/rancher/local-path-provisioner) to support PV/PVC
-
-```sh
-# Create a custom storage class for Kafka disks
-kubectl apply -f - <<EOF
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: examplestorageclass
-provisioner: rancher.io/local-path
-volumeBindingMode: WaitForFirstConsumer
-reclaimPolicy: Retain
-EOF
-```
-
 # BanzaiCloud Kafka Operator
 
-- Version 0.10.0: https://github.com/banzaicloud/kafka-operator/blob/0.10.0/README.md#installation
+Installation instructions for [Version 0.12.4](https://github.com/banzaicloud/kafka-operator/tree/v0.12.4#installation)
 
 
 ## Install pre-reqs
@@ -177,17 +144,17 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 ```sh
 
 # Install separately CRDs
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.13.0/deploy/manifests/00-crds.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.2/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v0.13.0
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.0.2
 
 ```
 
-### Install Dell Pravega `zookeeper-operator`
+### Install Pravega `zookeeper-operator`
 
 Make sure you use **`helm3`**
 
@@ -199,7 +166,7 @@ cd /tmp/zookeeper-operator
 
 kubectl create ns zookeeper
 
-helm template zookeeper-operator --namespace=zookeeper --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.7-adobe-20200504' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
+helm template zookeeper-operator --namespace=zookeeper --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.9-adobe-2020927' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
 kubectl apply -n zookeeper -f ./charts/zookeeper-operator.yaml
 ```
 
@@ -216,8 +183,8 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
-    tag: 3.6.1
-    pullPolicy: Always
+    tag: 3.6.2-0.2.9-adobe-2020927
+    pullPolicy: IfNotPresent
   config:
     initLimit: 10
     tickTime: 2000
@@ -247,14 +214,17 @@ See more at https://github.com/pravega/zookeeper-operator
 
 ```sh
 
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/v1beta1/monitoring.coreos.com_alertmanagers.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/v1beta1/monitoring.coreos.com_prometheuses.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/v1beta1/monitoring.coreos.com_prometheusrules.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/v1beta1/monitoring.coreos.com_servicemonitors.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/v1beta1/monitoring.coreos.com_podmonitors.yaml
-kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/master/example/prometheus-operator-crd/v1beta1/monitoring.coreos.com_thanosrulers.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
 
-helm install monitoring --namespace=default stable/prometheus-operator --set prometheusOperator.createCustomResource=false
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --set prometheusOperator.createCustomResource=false
 
 ```
 
@@ -266,7 +236,7 @@ Prometheus, Grafana, and Alertmanager dashboards can be accessed quickly using `
 ##### Prometheus
 
 ```
-kubectl --namespace default port-forward svc/monitoring-prometheus-oper-prometheus 9090
+kubectl --namespace default port-forward svc/monitoring-kube-prometheus-prometheus 9090
 ```
 
 Then access via [http://localhost:9090](http://localhost:9090)
@@ -289,7 +259,7 @@ Then access via [http://localhost:3000](http://localhost:3000) and use the  graf
 #####  Alert Manager
 
 ```
-kubectl --namespace monitoring port-forward svc/monitoring-prometheus-oper-alertmanager 9093
+kubectl --namespace default port-forward svc/monitoring-kube-prometheus-alertmanager 9093
 ```
 
 Then access via [http://localhost:9093](http://localhost:9093)
@@ -312,11 +282,16 @@ rm -rf /tmp/kafka-operator
 git clone --single-branch --branch master  https://github.com/banzaicloud/kafka-operator /tmp/kafka-operator
 
 cd /tmp/kafka-operator
+
+kubectl apply -f config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
+kubectl apply -f config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
+kubectl apply -f config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
+
 helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
-  --set operator.image.tag=0.11.0-adobe-20200419 \
+  --set operator.image.tag=0.12.4-adobe-20200920 \
   charts/kafka-operator  > kafka-operator.yaml
 
 kubectl apply -n kafka  -f kafka-operator.yaml
@@ -331,7 +306,7 @@ k get all -n kafka
 ### Create a KafkaCluster
 
 ```
-kubectl apply -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/simplekafkacluster.yaml
+kubectl apply -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-the-hard-way/master/simplekafkacluster.yaml
 # Check CRD created
 k get KafkaCluster kafka -n kafka
 # See CRD state
