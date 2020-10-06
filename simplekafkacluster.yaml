@@ -102,7 +102,7 @@ spec:
           pvcSpec:
             accessModes:
               - ReadWriteOnce
-            storageClassName: examplestorageclass
+            storageClassName: default
             resources:
               requests:
                 storage: 10Gi
@@ -125,7 +125,7 @@ spec:
           pvcSpec:
             accessModes:
               - ReadWriteOnce
-            storageClassName: examplestorageclass
+            storageClassName: default
             resources:
               requests:
                 storage: 10Gi
