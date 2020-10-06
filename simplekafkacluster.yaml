@@ -11,22 +11,35 @@ spec:
     - "zk-client.zookeeper:2181"
   zkPath: "/kafka"
   oneBrokerPerNode: false
-  clusterImage: "adobe/kafka:2.12-2.5.0"
+  clusterImage: "adobe/kafka:2.12-2.5.1"
   clusterWideConfig: |
     # dynamic config
   readOnlyConfig: |
-    inter.broker.protocol.version=2.4
-    auto.create.topics.enable=false
-    auto.leader.rebalance.enable=false
-    cruise.control.metrics.reporter.acks=1
-    cruise.control.metrics.topic=__CruiseControlMetrics
-    num.io.threads=12
-    min.insync.replicas=3
-    num.network.threads=12
-    num.replica.fetchers=4
+    auto.create.topics.enable: false
+    inter.broker.protocol.version: 2.5
+    # we disable auto leader rebalance b/c Cruise Control already does that and that would conflict
+    auto.leader.rebalance.enable: false
+    cruise.control.metrics.reporter.acks: 1
+    cruise.control.metrics.topic: __CruiseControlMetrics
+    num.io.threads: 12
+    min.insync.replicas: 2
+    num.network.threads: 12
+    num.replica.fetchers: 4
+    default.replication.factor: 3
+    num.partitions: 10
     # KAFKA-9102; Increase default zk session timeout and replica max lag [KIP-537]
-    zookeeper.connection.timeout.ms=18000
-    replica.lag.time.max.ms=30000
+    zookeeper.connection.timeout.ms: 18000
+    replica.lag.time.max.ms: 30000
+    # Let underlying OS to auto-tune the socket buffers
+    socket.receive.buffer.bytes: -1
+    socket.send.buffer.bytes: -1
+    replica.socket.receive.buffer.bytes: -1
+    # Override log segment size to expedite compaction
+    log.segment.bytes: "536870912"
+    # Increase the number active consumer fetch session to avoid evictions
+    max.incremental.fetch.session.cache.slots: 4000
+    # increase the background jobs that handle consumer groups chore
+    background.threads: 20
   rackAwareness:
     # operator will use these labels from the nodes to create the rack for Kafka
     labels:
@@ -66,7 +79,7 @@ spec:
           pvcSpec:
             accessModes:
               - ReadWriteOnce
-            storageClassName: examplestorageclass
+            storageClassName: default
             resources:
               requests:
                 storage: 10Gi
@@ -143,7 +156,7 @@ spec:
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
   cruiseControlConfig:
-    image: "adobe/cruise-control:2.0.102.adbe.20200503"
+    image: "adobe/cruise-control:2.5.11.adbe.20200820"
     topicConfig:
       partitions: 6
       replicationFactor: 3
