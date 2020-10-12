@@ -14,6 +14,11 @@ spec:
   namespaceSelector:
     matchNames:
     - kafka
+  podTargetLabels:
+  - app
+  - kafka_cr
+  - configGroup
+  - brokerId
   endpoints:
   - interval: 10s
     port: metrics
@@ -24,18 +29,6 @@ spec:
       separator: ;
       regex: (.*)
       targetLabel: pod_ip
-      replacement: $1
-      action: replace
-    - sourceLabels: [__meta_kubernetes_pod_label_brokerId]
-      separator: ;
-      regex: (.*)
-      targetLabel: brokerId
-      replacement: $1
-      action: replace
-    - sourceLabels: [__meta_kubernetes_pod_label_kafka_cr]
-      separator: ;
-      regex: (.*)
-      targetLabel: kafka_cr
       replacement: $1
       action: replace
 ---
@@ -54,6 +47,10 @@ spec:
   namespaceSelector:
     matchNames:
     - kafka
+  # transfer pod labels to metrics
+  podTargetLabels:
+  - app
+  - kafka_cr
   endpoints:
   - interval: 10s
     port: metrics
