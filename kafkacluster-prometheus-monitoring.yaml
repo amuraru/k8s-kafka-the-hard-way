@@ -14,15 +14,13 @@ spec:
   namespaceSelector:
     matchNames:
     - kafka
-  # transfer service labels to metrics
-  targetLabels:
-  - cluster_name
   # transfer pod labels to metrics
   podTargetLabels:
   - app
   - kafka_cr
   - configGroup
   - brokerId
+  - cluster_name
   endpoints:
   - interval: 10s
     port: metrics
@@ -51,13 +49,11 @@ spec:
   namespaceSelector:
     matchNames:
     - kafka
-  # transfer service labels to metrics
-  targetLabels:
-  - cluster_name
   # transfer pod labels to metrics
   podTargetLabels:
   - app
   - kafka_cr
+  - cluster_name
   endpoints:
   - interval: 10s
     port: metrics
