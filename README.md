@@ -291,7 +291,7 @@ helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
-  --set operator.image.tag=0.12.4-adobe-20200920 \
+  --set operator.image.tag=0.12.4-adobe-20201010 \
   charts/kafka-operator  > kafka-operator.yaml
 
 kubectl apply -n kafka  -f kafka-operator.yaml
