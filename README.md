@@ -166,7 +166,7 @@ cd /tmp/zookeeper-operator
 
 kubectl create ns zookeeper
 
-helm template zookeeper-operator --namespace=zookeeper --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.9-adobe-2020927' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
+helm template zookeeper-operator --namespace=zookeeper --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.9-adobe-20201013' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
 kubectl apply -n zookeeper -f ./charts/zookeeper-operator.yaml
 ```
 
@@ -183,7 +183,7 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
-    tag: 3.6.2-0.2.9-adobe-2020927
+    tag: 3.6.2-0.2.9-adobe-20201013
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -201,9 +201,9 @@ EOF
 
 
 # Check
-k get all -n zookeeper
+kubectl get all -n zookeeper
 # SS up?
-k get statefulset.apps/zk -n zookeeper
+kubectl get -w statefulset.apps/zk -n zookeeper
 # Good
 ```
 
@@ -297,7 +297,7 @@ helm template kafka-operator \
 kubectl apply -n kafka  -f kafka-operator.yaml
 
 # Check
-k get all -n kafka
+kubectl get all -n kafka
 # Good
 
 ```
