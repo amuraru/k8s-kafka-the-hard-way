@@ -336,7 +336,22 @@ This needs to be created in the same namespace as `grafana` (`default`)
 
 Dashboard should be automatically loaded and available at http://127.0.0.1:3000/d/1a1a1a1a1/kafka-looking-glass
 
-### Hack around
+#### Check Cruise Control
+
+```
+kubectl -n kafka port-forward -n kafka svc/kafka-cruisecontrol-svc 18090:8090
+```
+
+#### Check Prometheus metrics for kafka
+
+```sh
+kubectl port-forward -n default svc/prometheus-operated 19090:9090 --address 10.131.236.142
+# http://10.131.236.142:19090/graph?g0.range_input=1h&g0.expr=%7B__name__%20%3D~%27kafka.*%27%7D&g0.tab=1
+
+```
+
+
+### Debugging
 
 
 ```sh
@@ -345,15 +360,8 @@ kubectl config set-context --current --namespace=kafka
 
 # See operator logs
 k logs  -l app.kubernetes.io/instance=kafka-operator  -c  manager -f
-
-# Check Cruise Control
-kubectl port-forward -n kafka svc/kafka-cruisecontrol-svc 18090:8090 --address 10.131.236.142
-
-# Check Prometheus
-kubectl port-forward -n default svc/prometheus-operated 19090:9090 --address 10.131.236.142
-# http://10.131.236.142:19090/graph?g0.range_input=1h&g0.expr=%7B__name__%20%3D~%27kafka.*%27%7D&g0.tab=1
-
 ```
+
 
 #### Verify pod images
 
