@@ -56,7 +56,7 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ```bash
 
-curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.9.0/kind-$(uname)-amd64"
+curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.10.0/kind-$(uname)-amd64"
 chmod +x ./kind
 mv ./kind ~/bin
 
@@ -89,7 +89,7 @@ EOF
 kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
---image kindest/node:v1.18.8
+--image kindest/node:v1.20.2
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -131,7 +131,7 @@ kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failu
 
 # BanzaiCloud Kafka Operator
 
-Installation instructions for [Version 0.12.4](https://github.com/banzaicloud/kafka-operator/tree/v0.12.4#installation)
+Installation instructions for [Version v0.15.1](https://github.com/banzaicloud/kafka-operator/tree/v0.15.1#installation)
 
 
 ## Install pre-reqs
@@ -145,13 +145,13 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 ```sh
 
 # Install separately CRDs
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.2/cert-manager.crds.yaml
+kubectl create --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.1.1/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.0.2
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.1.1
 
 ```
 
@@ -167,14 +167,14 @@ cd /tmp/zookeeper-operator
 
 kubectl create ns zookeeper
 
-helm template zookeeper-operator --namespace=zookeeper --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.9-adobe-20201013' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
-kubectl apply -n zookeeper -f ./charts/zookeeper-operator.yaml
+helm template zookeeper-operator --namespace=zookeeper --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.9-adobe-20201020' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
+kubectl create -n zookeeper -f ./charts/zookeeper-operator.yaml
 ```
 
 #### Create a ZK cluster with 3 zk nodes
 
 ```sh
-kubectl apply --namespace zookeeper -f - <<EOF
+kubectl create --namespace zookeeper -f - <<EOF
 apiVersion: zookeeper.pravega.io/v1beta1
 kind: ZookeeperCluster
 metadata:
@@ -184,7 +184,7 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
-    tag: 3.6.2-0.2.9-adobe-20201013
+    tag: 3.6.2-0.2.9-adobe-20201020
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -203,8 +203,8 @@ EOF
 
 # Check
 kubectl get all -n zookeeper
-# SS up?
-kubectl get -w statefulset.apps/zk -n zookeeper
+# ZookeeperCluster up?
+kubectl get -w zookeepercluster -n zookeeper -o wide
 # Good
 ```
 
@@ -215,13 +215,14 @@ See more at https://github.com/pravega/zookeeper-operator
 
 ```sh
 
-kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
-kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
-kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
-kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
-kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
-kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
-kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
@@ -284,18 +285,18 @@ git clone --single-branch --branch master  https://github.com/banzaicloud/kafka-
 
 cd /tmp/kafka-operator
 
-kubectl apply -f config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
-kubectl apply -f config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
-kubectl apply -f config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
+kubectl create -f config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
+kubectl create -f config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
+kubectl create -f config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
 
 helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
-  --set operator.image.tag=0.12.4-adobe-20201010 \
+  --set operator.image.tag=0.15.1-adobe-20210311 \
   charts/kafka-operator  > kafka-operator.yaml
 
-kubectl apply -n kafka  -f kafka-operator.yaml
+kubectl create -n kafka  -f kafka-operator.yaml
 
 # Check
 kubectl get all -n kafka
@@ -307,9 +308,9 @@ kubectl get all -n kafka
 ### Create a KafkaCluster
 
 ```
-kubectl apply -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-the-hard-way/master/simplekafkacluster.yaml
+kubectl create -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-the-hard-way/master/simplekafkacluster.yaml
 # Check CRD created
-k get KafkaCluster kafka -n kafka
+k get KafkaCluster kafka -n kafka -w -o wide
 # See CRD state
 k describe KafkaCluster kafka -n kafka
 
@@ -472,21 +473,23 @@ kafkavbsff   1/1     Running   0          6h3m
 kafkawn4l6   1/1     Running   0          6h2m
 
 # Get PV and PVC
-k get pv,pvc  | grep examplestorageclass
+k get pv,pvc  | grep standard
 
-persistentvolume/pvc-1e0b15df-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storager5t9v                    examplestorageclass            6h59m
-persistentvolume/pvc-3ab64754-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storage7g8xd                    examplestorageclass            6h58m
-persistentvolume/pvc-3ae3ae0c-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storage6sss6                    examplestorageclass            6h58m
-persistentvolume/pvc-3b5fd2ad-0236-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagezs7r7                    examplestorageclass            6h58m
-persistentvolume/pvc-a102806f-0239-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagecp57b                    examplestorageclass            6h33m
-persistentvolume/pvc-a12dafe5-0239-11ea-93d3-0242ac110002   100Gi      RWO            Retain           Bound    kafka/kafka-storagekg5j8                    examplestorageclass            6h33m
-
-persistentvolumeclaim/kafka-storage6sss6   Bound    pvc-3ae3ae0c-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h58m
-persistentvolumeclaim/kafka-storage7g8xd   Bound    pvc-3ab64754-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h58m
-persistentvolumeclaim/kafka-storagecp57b   Bound    pvc-a102806f-0239-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h33m
-persistentvolumeclaim/kafka-storagekg5j8   Bound    pvc-a12dafe5-0239-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h33m
-persistentvolumeclaim/kafka-storager5t9v   Bound    pvc-1e0b15df-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h59m
-persistentvolumeclaim/kafka-storagezs7r7   Bound    pvc-3b5fd2ad-0236-11ea-93d3-0242ac110002   100Gi      RWO            examplestorageclass   6h58m
+persistentvolume/pvc-0965737b-0886-4599-99e7-a5dec34b29bb   10Gi       RWO            Delete           Bound    kafka/kafka-301-storage-0-v2w79   standard                19m
+persistentvolume/pvc-1adee862-67a3-4be3-85a2-d2048aa71330   10Gi       RWO            Delete           Bound    kafka/kafka-101-storage-0-pss4m   standard                24m
+persistentvolume/pvc-2fc31ae1-de91-43dd-a029-d938b7fc9b67   20Gi       RWO            Delete           Bound    zookeeper/data-zk-2               standard                37m
+persistentvolume/pvc-314bca5b-8b1e-47cd-b928-a4a2dd85a6c4   10Gi       RWO            Delete           Bound    kafka/kafka-202-storage-0-2r8vm   standard                19m
+persistentvolume/pvc-485d4ca7-4129-43a5-b98f-db23ea87a36c   10Gi       RWO            Delete           Bound    kafka/kafka-201-storage-0-nw8vd   standard                19m
+persistentvolume/pvc-4e99bb66-161c-4573-bdab-1d44455eeb4f   10Gi       RWO            Delete           Bound    kafka/kafka-302-storage-0-8tsdt   standard                19m
+persistentvolume/pvc-9d53fa44-ca21-4bb8-a036-feecee95500a   20Gi       RWO            Delete           Bound    zookeeper/data-zk-1               standard                38m
+persistentvolume/pvc-a4b70cdf-28be-4c7c-b18b-1fb070624649   20Gi       RWO            Delete           Bound    zookeeper/data-zk-0               standard                39m
+persistentvolume/pvc-fb0571c5-3fe8-4dbc-8ea8-9cf93b8ad2e9   10Gi       RWO            Delete           Bound    kafka/kafka-102-storage-0-qc8bj   standard                19m
+persistentvolumeclaim/kafka-101-storage-0-pss4m   Bound    pvc-1adee862-67a3-4be3-85a2-d2048aa71330   10Gi       RWO            standard       24m
+persistentvolumeclaim/kafka-102-storage-0-qc8bj   Bound    pvc-fb0571c5-3fe8-4dbc-8ea8-9cf93b8ad2e9   10Gi       RWO            standard       24m
+persistentvolumeclaim/kafka-201-storage-0-nw8vd   Bound    pvc-485d4ca7-4129-43a5-b98f-db23ea87a36c   10Gi       RWO            standard       24m
+persistentvolumeclaim/kafka-202-storage-0-2r8vm   Bound    pvc-314bca5b-8b1e-47cd-b928-a4a2dd85a6c4   10Gi       RWO            standard       24m
+persistentvolumeclaim/kafka-301-storage-0-v2w79   Bound    pvc-0965737b-0886-4599-99e7-a5dec34b29bb   10Gi       RWO            standard       24m
+persistentvolumeclaim/kafka-302-storage-0-8tsdt   Bound    pvc-4e99bb66-161c-4573-bdab-1d44455eeb4f   10Gi       RWO            standard       24m
 
 
 ```

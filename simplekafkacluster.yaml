@@ -37,7 +37,7 @@ spec:
     socket.send.buffer.bytes: -1
     replica.socket.receive.buffer.bytes: -1
     # Override log segment size to expedite compaction
-    log.segment.bytes: "536870912"
+    log.segment.bytes: 536870912
     # Increase the number active consumer fetch session to avoid evictions
     max.incremental.fetch.session.cache.slots: 4000
     # increase the background jobs that handle consumer groups chore
