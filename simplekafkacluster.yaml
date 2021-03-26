@@ -158,7 +158,7 @@ spec:
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
   cruiseControlConfig:
-    image: "adobe/cruise-control:2.5.14.adbe.20201010"
+    image: "adobe/cruise-control:2.5.39-adbe-20210323"
     topicConfig:
       partitions: 6
       replicationFactor: 3
