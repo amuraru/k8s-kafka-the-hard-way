@@ -56,7 +56,7 @@ spec:
           memory: "5Gi"
           cpu: "5"
         requests:
-          memory: "4Gi"
+          memory: "2Gi"
           cpu: "2"
       # nodeAffinity can be specified, operator populates this value if new pvc added later to brokers
       # nodeAffinity:
@@ -93,7 +93,7 @@ spec:
           memory: "5Gi"
           cpu: "5"
         requests:
-          memory: "4Gi"
+          memory: "2Gi"
           cpu: "2"
       # kafkaHeapOpts specifies the jvm heap size for the broker
       kafkaHeapOpts: "-XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70"
@@ -116,7 +116,7 @@ spec:
           memory: "5Gi"
           cpu: "5"
         requests:
-          memory: "4Gi"
+          memory: "2Gi"
           cpu: "2"
       # kafkaHeapOpts specifies the jvm heap size for the broker
       kafkaHeapOpts: "-XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70"
@@ -177,8 +177,8 @@ spec:
        memory: "2Gi"
        cpu: "3"
      requests:
-       memory: "2Gi"
-       cpu: "3"
+       memory: "1Gi"
+       cpu: "1"
     # serviceAccountName specifies the serviceAccount used for cc
     #serviceAccountName: "envoy"
     # imagePullSecrets specifies the secret to use when using private registry
