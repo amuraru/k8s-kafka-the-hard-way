@@ -13,12 +13,12 @@ spec:
     - "zk-client.zookeeper:2181"
   zkPath: "/kafka"
   oneBrokerPerNode: false
-  clusterImage: "adobe/kafka:2.12-2.5.1"
+  clusterImage: "adobe/kafka:2.13-2.6.2"
   clusterWideConfig: |
     # dynamic config
   readOnlyConfig: |
     auto.create.topics.enable: false
-    inter.broker.protocol.version: 2.5
+    inter.broker.protocol.version: 2.6
     # we disable auto leader rebalance b/c Cruise Control already does that and that would conflict
     auto.leader.rebalance.enable: false
     cruise.control.metrics.reporter.acks: 1
@@ -29,9 +29,6 @@ spec:
     num.replica.fetchers: 4
     default.replication.factor: 3
     num.partitions: 10
-    # KAFKA-9102; Increase default zk session timeout and replica max lag [KIP-537]
-    zookeeper.connection.timeout.ms: 18000
-    replica.lag.time.max.ms: 30000
     # Let underlying OS to auto-tune the socket buffers
     socket.receive.buffer.bytes: -1
     socket.send.buffer.bytes: -1
@@ -158,7 +155,7 @@ spec:
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
   cruiseControlConfig:
-    image: "adobe/cruise-control:2.5.39-adbe-20210323"
+    image: "adobe/cruise-control:2.5.63-adbe-20210727"
     topicConfig:
       partitions: 6
       replicationFactor: 3

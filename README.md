@@ -56,7 +56,7 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ```bash
 
-curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.10.0/kind-$(uname)-amd64"
+curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.11.1/kind-$(uname)-amd64"
 chmod +x ./kind
 mv ./kind ~/bin
 
@@ -89,7 +89,7 @@ EOF
 kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
---image kindest/node:v1.20.2
+--image kindest/node:v1.20.7
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -131,7 +131,7 @@ kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failu
 
 # BanzaiCloud Kafka Operator
 
-Installation instructions for [Version v0.15.1](https://github.com/banzaicloud/kafka-operator/tree/v0.15.1#installation)
+Installation instructions for [Version v0.17.0](https://github.com/banzaicloud/kafka-operator/tree/v0.17.0#installation)
 
 
 ## Install pre-reqs
@@ -145,13 +145,13 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 ```sh
 
 # Install separately CRDs
-kubectl create --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.1.1/cert-manager.crds.yaml
+kubectl create --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.5.0/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.1.1
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.5.0
 
 ```
 
@@ -167,8 +167,9 @@ cd /tmp/zookeeper-operator
 
 kubectl create ns zookeeper
 
-helm template zookeeper-operator --namespace=zookeeper --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.9-adobe-20201020' ./charts/zookeeper-operator > ./charts/zookeeper-operator.yaml
-kubectl create -n zookeeper -f ./charts/zookeeper-operator.yaml
+kubectl create -f https://raw.githubusercontent.com/pravega/zookeeper-operator/master/deploy/crds/zookeeper.pravega.io_zookeeperclusters_crd.yaml
+
+helm template zookeeper-operator --namespace=zookeeper --set crd.create=false --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.12-adobe-20210723' ./charts/zookeeper-operator | kubectl create -n zookeeper -f -
 ```
 
 #### Create a ZK cluster with 3 zk nodes
@@ -184,7 +185,7 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
-    tag: 3.6.2-0.2.9-adobe-20201020
+    tag: 3.6.3-0.2.12-adobe-20210723
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -293,7 +294,7 @@ helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
-  --set operator.image.tag=0.15.1-adobe-20210311 \
+  --set operator.image.tag=0.17.0-adobe-20210730 \
   charts/kafka-operator  > kafka-operator.yaml
 
 kubectl create -n kafka  -f kafka-operator.yaml
@@ -378,7 +379,7 @@ kubectl get pod -o=custom-columns='NAME:.metadata.name,IMAGE:.spec.containers[*]
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.12-2.5.1 \
+--image=adobe/kafka:2.13-2.6.2 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -389,7 +390,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.12-2.5.1 \
+--image=adobe/kafka:2.13-2.6.2 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -402,7 +403,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.12-2.5.1 \
+--image=adobe/kafka:2.13-2.6.2 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-configs.sh \
 --zookeeper zk-client.zookeeper:2181/kafka \
@@ -415,7 +416,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.12-2.5.1 \
+--image=adobe/kafka:2.13-2.6.2 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -427,7 +428,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-producer-topic \
---image=adobe/kafka:2.12-2.5.1 \
+--image=adobe/kafka:2.13-2.6.2 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-producer-perf-test.sh \
 --producer-props bootstrap.servers=kafka-headless:29092 acks=all \
@@ -441,7 +442,7 @@ kubectl run kafka-producer-topic \
 
 ```bash
 kubectl run kafka-consumer-test \
---image=adobe/kafka:2.12-2.5.1 \
+--image=adobe/kafka:2.13-2.6.2 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-consumer-perf-test.sh \
 --broker-list kafka-headless:29092 \
