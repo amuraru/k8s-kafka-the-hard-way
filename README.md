@@ -169,7 +169,7 @@ kubectl create ns zookeeper
 
 kubectl create -f https://raw.githubusercontent.com/pravega/zookeeper-operator/master/deploy/crds/zookeeper.pravega.io_zookeeperclusters_crd.yaml
 
-helm template zookeeper-operator --namespace=zookeeper --set crd.create=false --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.12-adobe-20210723' ./charts/zookeeper-operator | kubectl create -n zookeeper -f -
+helm template zookeeper-operator --namespace=zookeeper --set crd.create=false --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.13-adobe-20210903' ./charts/zookeeper-operator | kubectl create -n zookeeper -f -
 ```
 
 #### Create a ZK cluster with 3 zk nodes
@@ -185,7 +185,7 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
-    tag: 3.6.3-0.2.12-adobe-20210723
+    tag: 3.6.3-0.2.13-adobe-20210903
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -294,7 +294,7 @@ helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
-  --set operator.image.tag=0.17.0-adobe-20210730 \
+  --set operator.image.tag=0.18.2-adobe-20210916 \
   charts/kafka-operator  > kafka-operator.yaml
 
 kubectl create -n kafka  -f kafka-operator.yaml
