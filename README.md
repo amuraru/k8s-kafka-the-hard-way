@@ -131,7 +131,7 @@ kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failu
 
 # BanzaiCloud Kafka Operator
 
-Installation instructions for [Version v0.17.0](https://github.com/banzaicloud/kafka-operator/tree/v0.17.0#installation)
+Installation instructions for [Version v0.17.0](https://github.com/banzaicloud/kafka-operator/tree/v0.18.3#installation)
 
 
 ## Install pre-reqs
@@ -145,13 +145,13 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 ```sh
 
 # Install separately CRDs
-kubectl create --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.5.0/cert-manager.crds.yaml
+kubectl create --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.5.4/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.5.0
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.5.4
 
 ```
 
@@ -169,7 +169,10 @@ kubectl create ns zookeeper
 
 kubectl create -f https://raw.githubusercontent.com/pravega/zookeeper-operator/master/deploy/crds/zookeeper.pravega.io_zookeeperclusters_crd.yaml
 
-helm template zookeeper-operator --namespace=zookeeper --set crd.create=false --set image.repository='adobe/zookeeper-operator' --set image.tag='0.2.13-adobe-20210903' ./charts/zookeeper-operator | kubectl create -n zookeeper -f -
+helm template zookeeper-operator --namespace=zookeeper --set crd.create=false \
+--set image.repository='adobe/zookeeper-operator' --s\
+et image.tag='0.2.13-adobe-20211008' \
+./charts/zookeeper-operator | kubectl create -n zookeeper -f -
 ```
 
 #### Create a ZK cluster with 3 zk nodes
@@ -185,7 +188,7 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
-    tag: 3.6.3-0.2.13-adobe-20210903
+    tag: 3.6.3-0.2.13-adobe-20211008
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -294,7 +297,7 @@ helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
-  --set operator.image.tag=0.18.2-adobe-20210916 \
+  --set operator.image.tag=0.18.3-adobe-20211008 \
   charts/kafka-operator  > kafka-operator.yaml
 
 kubectl create -n kafka  -f kafka-operator.yaml
@@ -348,7 +351,7 @@ kubectl -n kafka port-forward -n kafka svc/kafka-cruisecontrol-svc 18090:8090
 #### Check Prometheus metrics for kafka
 
 ```sh
-kubectl port-forward -n default svc/prometheus-operated 19090:9090 --address 10.131.236.142
+kubectl port-forward -n default svc/prometheus-operated 19090:9090
 # http://10.131.236.142:19090/graph?g0.range_input=1h&g0.expr=%7B__name__%20%3D~%27kafka.*%27%7D&g0.tab=1
 
 ```
