@@ -42,12 +42,12 @@ spec:
   rackAwareness:
     # operator will use these labels from the nodes to create the rack for Kafka
     labels:
-      - "failure-domain.beta.kubernetes.io/region"
-      - "failure-domain.beta.kubernetes.io/zone"
+      - "topology.kubernetes.io/region"
+      - "topology.kubernetes.io/zone"
   brokerConfigGroups:
     rack1:
       nodeSelector:
-        failure-domain.beta.kubernetes.io/zone: az1
+        topology.kubernetes.io/zone: az1
       resourceRequirements:
         limits:
           memory: "5Gi"
@@ -84,7 +84,7 @@ spec:
                 storage: 10Gi
     rack2:
       nodeSelector:
-        failure-domain.beta.kubernetes.io/zone: az2
+        topology.kubernetes.io/zone: az2
       resourceRequirements:
         limits:
           memory: "5Gi"
@@ -107,7 +107,7 @@ spec:
                 storage: 10Gi
     rack3:
       nodeSelector:
-        failure-domain.beta.kubernetes.io/zone: az3
+        topology.kubernetes.io/zone: az3
       resourceRequirements:
         limits:
           memory: "5Gi"

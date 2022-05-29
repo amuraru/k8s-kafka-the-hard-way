@@ -9,7 +9,7 @@
     - [Start k8s kind cluster](#start-k8s-kind-cluster)
     - [Access k8s](#access-k8s)
   - [Emulate multi-az nodes](#emulate-multi-az-nodes)
-- [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator)
+- [BanzaiCloud KOperator](#banzaicloud-koperator)
   - [Install pre-reqs](#install-pre-reqs)
     - [Install `cert-manager`](#install-cert-manager)
     - [Install Pravega `zookeeper-operator`](#install-pravega-zookeeper-operator)
@@ -20,7 +20,7 @@
           - [View all metrics in Prometheus](#view-all-metrics-in-prometheus)
         - [Grafana](#grafana)
         - [Alert Manager](#alert-manager)
-  - [BanzaiCloud Kafka Operator](#banzaicloud-kafka-operator-1)
+  - [BanzaiCloud KOperator](#banzaicloud-koperator-1)
     - [Create a KafkaCluster](#create-a-kafkacluster)
       - [Create Prometheus `ServiceMonitor` and AlertManager `PrometheusRule` resources](#create-prometheus-servicemonitor-and-alertmanager-prometheusrule-resources)
       - [Create `PrometheusRule` to enable auto-scaling](#create-prometheusrule-to-enable-auto-scaling)
@@ -44,7 +44,7 @@
 
 # Intro
 
-This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operator](https://github.com/banzaicloud/kafka-operator) in a local multi-node kind cluster.
+This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operator](https://github.com/banzaicloud/koperator) in a local multi-node kind cluster.
 
 
 # Install Kafka in a `kind` k8s cluster
@@ -56,7 +56,7 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ```bash
 
-curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.11.1/kind-$(uname)-amd64"
+curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.14.0/kind-$(uname)-amd64"
 chmod +x ./kind
 mv ./kind ~/bin
 
@@ -89,7 +89,7 @@ EOF
 kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
---image kindest/node:v1.20.7
+--image kindest/node:v1.24.1
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -117,22 +117,19 @@ kind get kubeconfig --name kafka
 
 ```
 # place all nodes in the same region
-kubectl label nodes kafka-worker kafka-worker2 kafka-worker3 kafka-worker4  kafka-worker5 kafka-worker6 failure-domain.beta.kubernetes.io/region=same_region
+kubectl label nodes kafka-worker kafka-worker2 kafka-worker3 kafka-worker4  kafka-worker5 kafka-worker6 topology.kubernetes.io/region=region1
 
 # emulate 3 AZs:
-kubectl label nodes kafka-worker  kafka-worker2 failure-domain.beta.kubernetes.io/zone=az1
-kubectl label nodes kafka-worker3 kafka-worker4 failure-domain.beta.kubernetes.io/zone=az2
-kubectl label nodes kafka-worker5 kafka-worker6 failure-domain.beta.kubernetes.io/zone=az3
+kubectl label nodes kafka-worker  kafka-worker2 topology.kubernetes.io/zone=az1
+kubectl label nodes kafka-worker3 kafka-worker4 topology.kubernetes.io/zone=az2
+kubectl label nodes kafka-worker5 kafka-worker6 topology.kubernetes.io/zone=az3
 
 # check
-kubectl get nodes --label-columns failure-domain.beta.kubernetes.io/region,failure-domain.beta.kubernetes.io/zone
+kubectl get nodes --label-columns topology.kubernetes.io/region,topology.kubernetes.io/zone
 ```
 
 
-# BanzaiCloud Kafka Operator
-
-Installation instructions for [Version v0.17.0](https://github.com/banzaicloud/kafka-operator/tree/v0.18.3#installation)
-
+# BanzaiCloud KOperator
 
 ## Install pre-reqs
 
@@ -145,13 +142,13 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 ```sh
 
 # Install separately CRDs
-kubectl create --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.5.4/cert-manager.crds.yaml
+kubectl create --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.8.0/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.5.4
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.8.0
 
 ```
 
@@ -167,11 +164,11 @@ cd /tmp/zookeeper-operator
 
 kubectl create ns zookeeper
 
-kubectl create -f https://raw.githubusercontent.com/pravega/zookeeper-operator/master/deploy/crds/zookeeper.pravega.io_zookeeperclusters_crd.yaml
+kubectl create -f https://raw.githubusercontent.com/adobe/zookeeper-operator/master/config/crd/bases/zookeeper.pravega.io_zookeeperclusters.yaml
 
 helm template zookeeper-operator --namespace=zookeeper --set crd.create=false \
 --set image.repository='adobe/zookeeper-operator' --s\
-et image.tag='0.2.13-adobe-20211008' \
+et image.tag='0.2.13-adobe-20220513' \
 ./charts/zookeeper-operator | kubectl create -n zookeeper -f -
 ```
 
@@ -188,7 +185,7 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
-    tag: 3.6.3-0.2.13-adobe-20211008
+    tag: 3.7.1-0.2.13-adobe-20220513
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -236,7 +233,7 @@ helm install monitoring --namespace=default prometheus-community/kube-prometheus
 
 #### Access the dashboards
 
-Prometheus, Grafana, and Alertmanager dashboards can be accessed quickly using `kubectl port-forward` after running the quickstart via the commands below. Kubernetes 1.10 or later is required.
+Prometheus, Grafana, and Alertmanager dashboards can be accessed quickly using `kubectl port-forward` after running the quickstart via the commands below.
 
 
 ##### Prometheus
@@ -277,7 +274,7 @@ k get all -A -l release=monitoring
 ```
 
 
-## BanzaiCloud Kafka Operator
+## BanzaiCloud KOperator
 
 ```sh
 # new kafka NS
@@ -285,7 +282,7 @@ kubectl create ns kafka
 
 # install operator using upstream helm chart
 rm -rf /tmp/kafka-operator
-git clone --single-branch --branch master  https://github.com/banzaicloud/kafka-operator /tmp/kafka-operator
+git clone --single-branch --branch master  https://github.com/banzaicloud/koperator /tmp/kafka-operator
 
 cd /tmp/kafka-operator
 
@@ -297,7 +294,7 @@ helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
-  --set operator.image.tag=0.18.3-adobe-20211008 \
+  --set operator.image.tag=0.21.2-adobe-20220523 \
   charts/kafka-operator  > kafka-operator.yaml
 
 kubectl create -n kafka  -f kafka-operator.yaml
@@ -382,7 +379,7 @@ kubectl get pod -o=custom-columns='NAME:.metadata.name,IMAGE:.spec.containers[*]
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.13-2.6.2 \
+--image=adobe/kafka:2.13-2.8.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -393,7 +390,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.13-2.6.2 \
+--image=adobe/kafka:2.13-2.8.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -406,7 +403,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.13-2.6.2 \
+--image=adobe/kafka:2.13-2.8.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-configs.sh \
 --zookeeper zk-client.zookeeper:2181/kafka \
@@ -419,7 +416,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.13-2.6.2 \
+--image=adobe/kafka:2.13-2.8.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -431,7 +428,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-producer-topic \
---image=adobe/kafka:2.13-2.6.2 \
+--image=adobe/kafka:2.13-2.8.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-producer-perf-test.sh \
 --producer-props bootstrap.servers=kafka-headless:29092 acks=all \
@@ -445,7 +442,7 @@ kubectl run kafka-producer-topic \
 
 ```bash
 kubectl run kafka-consumer-test \
---image=adobe/kafka:2.13-2.6.2 \
+--image=adobe/kafka:2.13-2.8.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-consumer-perf-test.sh \
 --broker-list kafka-headless:29092 \
