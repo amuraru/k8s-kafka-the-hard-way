@@ -18,7 +18,7 @@ spec:
     # dynamic config
   readOnlyConfig: |
     auto.create.topics.enable: false
-    inter.broker.protocol.version: 2.6
+    inter.broker.protocol.version: 2.8
     # we disable auto leader rebalance b/c Cruise Control already does that and that would conflict
     auto.leader.rebalance.enable: false
     cruise.control.metrics.reporter.acks: 1

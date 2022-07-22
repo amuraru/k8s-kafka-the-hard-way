@@ -89,7 +89,7 @@ EOF
 kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
---image kindest/node:v1.24.1
+--image kindest/node:v1.24.2
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -142,13 +142,13 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 ```sh
 
 # Install separately CRDs
-kubectl create --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.8.0/cert-manager.crds.yaml
+kubectl create --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
-helm repo add jetstack https://charts.jetstack.io
+helm repo add cert-manager https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.8.0
+helm install cert-manager cert-manager/cert-manager --namespace cert-manager --version v1.8.2
 
 ```
 
@@ -167,8 +167,8 @@ kubectl create ns zookeeper
 kubectl create -f https://raw.githubusercontent.com/adobe/zookeeper-operator/master/config/crd/bases/zookeeper.pravega.io_zookeeperclusters.yaml
 
 helm template zookeeper-operator --namespace=zookeeper --set crd.create=false \
---set image.repository='adobe/zookeeper-operator' --s\
-et image.tag='0.2.13-adobe-20220513' \
+--set image.repository='adobe/zookeeper-operator' \
+--set image.tag='0.2.14-adobe-20220610' \
 ./charts/zookeeper-operator | kubectl create -n zookeeper -f -
 ```
 
@@ -185,12 +185,15 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
-    tag: 3.7.1-0.2.13-adobe-20220513
+    tag: 3.7.1-0.2.14-adobe-20220610
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
     tickTime: 2000
     syncLimit: 5
+  probes:
+    livenessProbe:
+      initialDelaySeconds: 41
   persistence:
     reclaimPolicy: Delete
     spec:
@@ -294,7 +297,7 @@ helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
-  --set operator.image.tag=0.21.2-adobe-20220523 \
+  --set operator.image.tag=0.21.3-adobe-20220712 \
   charts/kafka-operator  > kafka-operator.yaml
 
 kubectl create -n kafka  -f kafka-operator.yaml
