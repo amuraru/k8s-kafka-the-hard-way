@@ -89,7 +89,8 @@ EOF
 kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
---image kindest/node:v1.24.2
+`# renovate: datasource=docker depName=kindest/node ` \
+--image kindest/node:v1.24.1
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -142,12 +143,14 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 ```sh
 
 # Install separately CRDs
+# renovate: datasource=github-releases depName=cert-manager/cert-manager
 kubectl create --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
 helm repo add cert-manager https://charts.jetstack.io
 helm repo update
+# renovate: datasource=github-releases depName=cert-manager/cert-manager
 helm install cert-manager cert-manager/cert-manager --namespace cert-manager --version v1.8.2
 
 ```
@@ -168,6 +171,7 @@ kubectl create -f https://raw.githubusercontent.com/adobe/zookeeper-operator/mas
 
 helm template zookeeper-operator --namespace=zookeeper --set crd.create=false \
 --set image.repository='adobe/zookeeper-operator' \
+`# renovate: datasource=docker depName=adobe/zookeeper-operator ` \
 --set image.tag='0.2.14-adobe-20220610' \
 ./charts/zookeeper-operator | kubectl create -n zookeeper -f -
 ```
@@ -185,6 +189,7 @@ spec:
   replicas: 3
   image:
     repository: adobe/zookeeper
+    # renovate: datasource=docker depName=adobe/zookeeper
     tag: 3.7.1-0.2.14-adobe-20220610
     pullPolicy: IfNotPresent
   config:
@@ -297,6 +302,7 @@ helm template kafka-operator \
   --namespace=kafka \
   --set webhook.enabled=false \
   --set operator.image.repository=adobe/kafka-operator \
+  `# renovate: datasource=docker depName=adobe/kafka-operator ` \
   --set operator.image.tag=0.21.3-adobe-20220712 \
   charts/kafka-operator  > kafka-operator.yaml
 
