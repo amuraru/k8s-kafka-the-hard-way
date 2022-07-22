@@ -1,6 +1,53 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    ":dependencyDashboard",
+    ":separateMajorReleases",
+    ":combinePatchMinorReleases",
+    ":ignoreUnstable",
+    ":prImmediately",
+    ":semanticPrefixFixDepsChoreOthers",
+    ":updateNotScheduled",
+    ":automergeDisabled",
+    ":ignoreModulesAndTests",
+    ":autodetectPinVersions",
+    "group:monorepos",
+    "group:recommended",
+    "helpers:disableTypesNodeMajor",
+    ":prHourlyLimitNone",
+    "docker:enableMajor",
+    "regexManagers:dockerfileVersions"
+  ],
+  "pinDigests": true,
+  "prConcurrentLimit": 10,
+  "enabledManagers": [
+    "dockerfile",
+    "kubernetes",
+    "regex"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": false
+    }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": [
+        "^.+$"
+      ],
+      "matchStringsStrategy": "any",
+      "matchStrings": [
+        "datasource=(?<datasource>.*?)( packageName=(?<packageName>.*?))?( versioning=(?<versioning>.*?))?\\s.*: (?<depName>[a-z0-9.\\/-]+)(?::(?<currentValue>[a-zA-Z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?\\s",
+        "datasource=(?<datasource>.*?)( packageName=(?<depName>.*?))?( versioning=(?<versioning>.*?))?\\s.*: (?<currentValue>[a-zA-Z0-9.-]+)?\\s"
+      ],
+      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}docker{{/if}}",
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}"
+    }
   ]
 }
