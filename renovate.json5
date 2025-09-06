@@ -1,0 +1,1 @@
+{"regexManagers":[{"fileMatch":["README.md"],"matchStrings":["# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\s*([`'](?<currentValue>.*?)['`] )?","# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)"],"datasourceTemplate":"{{ datasource }}","depNameTemplate":"{{ depName }}","currentValueTemplate":"{{ currentValue }}"}]}
