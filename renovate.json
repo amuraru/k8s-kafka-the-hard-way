@@ -10,20 +10,19 @@
     ":updateNotScheduled",
     ":automergeDisabled",
     ":ignoreModulesAndTests",
-    ":autodetectPinVersions",
     "group:monorepos",
     "group:recommended",
     "helpers:disableTypesNodeMajor",
     ":prHourlyLimitNone",
     "docker:enableMajor",
-    "regexManagers:dockerfileVersions"
+    "customManagers:dockerfileVersions"
   ],
   "pinDigests": true,
   "prConcurrentLimit": 10,
   "enabledManagers": [
     "dockerfile",
     "kubernetes",
-    "regex"
+    "custom.regex"
   ],
   "packageRules": [
     {
@@ -36,10 +35,11 @@
       "automerge": false
     }
   ],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": [
-        "^.+$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.+$/"
       ],
       "matchStringsStrategy": "any",
       "matchStrings": [
