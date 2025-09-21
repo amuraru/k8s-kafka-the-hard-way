@@ -23,7 +23,7 @@ spec:
         storageClass: 'standard'
         mountPath: '/kafkalog'
         diskSize: '2G'
-        image: 'wurstmeister/kafka:2.12-2.3.0'
+        image: 'ghcr.io/adobe/koperator/kafka:2.13-3.9.1'
         command: 'upScale'
     - alert: BrokerUnderReplicated
       expr: kafka_server_replicamanager_underreplicatedpartitions > 0
@@ -36,7 +36,7 @@ spec:
         storageClass: 'standard'
         mountPath: '/kafkalog'
         diskSize: '2G'
-        image: 'wurstmeister/kafka:2.12-2.3.0'
+        image: 'ghcr.io/adobe/koperator/kafka:2.13-3.9.1'
         command: 'upScale'
     - alert: PartitionCountHigh
       expr: max(kafka_server_replicamanager_partitioncount)  by (namespace, kafka_cr) > 100
@@ -49,7 +49,7 @@ spec:
         storageClass: 'standard'
         mountPath: '/kafkalog'
         diskSize: '2G'
-        image: 'wurstmeister/kafka:2.12-2.3.0'
+        image: 'ghcr.io/adobe/koperator/kafka:2.13-3.9.1'
         command: 'upScale'
     - alert: PartitionCountLow
       expr: min(kafka_server_replicamanager_partitioncount)  by (namespace, kafka_cr) < 5

@@ -13,13 +13,13 @@ spec:
     - "zk-client.zookeeper:2181"
   zkPath: "/kafka"
   oneBrokerPerNode: false
-  # renovate: datasource=docker depName=adobe/kafka
-  clusterImage: "adobe/kafka:2.13-2.8.1"
+  # renovate: datasource=docker depName=ghcr.io/adobe/koperator/kafka
+  clusterImage: "ghcr.io/adobe/koperator/kafka:2.13-3.9.1"
   clusterWideConfig: |
     # dynamic config
   readOnlyConfig: |
     auto.create.topics.enable: false
-    inter.broker.protocol.version: 2.8
+    inter.broker.protocol.version: 3.9
     # we disable auto leader rebalance b/c Cruise Control already does that and that would conflict
     auto.leader.rebalance.enable: false
     cruise.control.metrics.reporter.acks: 1
@@ -156,7 +156,7 @@ spec:
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
   cruiseControlConfig:
-    image: "adobe/cruise-control:2.5.70-adbe-20210911"
+    image: "adobe/cruise-control:3.0.3-adbe-20250804"
     topicConfig:
       partitions: 6
       replicationFactor: 3

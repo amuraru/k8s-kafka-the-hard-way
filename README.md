@@ -56,7 +56,7 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ```bash
 
-curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.14.0/kind-$(uname)-amd64"
+curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.30.0/kind-$(uname)-amd64"
 chmod +x ./kind
 mv ./kind ~/bin
 
@@ -73,13 +73,25 @@ cat > ~/.kind/kind-config.yaml <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
-- role: control-plane
-- role: worker
-- role: worker
-- role: worker
-- role: worker
-- role: worker
-- role: worker
+  - role: control-plane
+    kubeadmConfigPatches:
+    - |
+      kind: InitConfiguration
+      nodeRegistration:
+        kubeletExtraArgs:
+          node-labels: "ingress-ready=true"
+  - role: worker
+  - role: worker
+  - role: worker
+  - role: worker
+  - role: worker
+  - role: worker
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".containerd]
+    snapshotter = "overlayfs"
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
+    endpoint = ["http://localhost:5000"]
 EOF
 ```
 
@@ -90,7 +102,7 @@ kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
 `# renovate: datasource=docker depName=kindest/node ` \
---image kindest/node:v1.24.1
+--image kindest/node:v1.33.4
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -144,14 +156,14 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 
 # Install separately CRDs
 # renovate: datasource=github-releases depName=cert-manager/cert-manager
-kubectl create --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.crds.yaml
+kubectl create --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
 helm repo add cert-manager https://charts.jetstack.io
 helm repo update
 # renovate: datasource=github-releases depName=cert-manager/cert-manager
-helm install cert-manager cert-manager/cert-manager --namespace cert-manager --version v1.8.2
+helm install cert-manager cert-manager/cert-manager --namespace cert-manager --version v1.18.2
 
 ```
 
@@ -172,7 +184,7 @@ kubectl create -f https://raw.githubusercontent.com/adobe/zookeeper-operator/mas
 helm template zookeeper-operator --namespace=zookeeper --set crd.create=false \
 --set image.repository='adobe/zookeeper-operator' \
 `# renovate: datasource=docker depName=adobe/zookeeper-operator ` \
---set image.tag='0.2.14-adobe-20220610' \
+--set image.tag='0.2.15-adobe-20250914' \
 ./charts/zookeeper-operator | kubectl create -n zookeeper -f -
 ```
 
@@ -190,7 +202,7 @@ spec:
   image:
     repository: adobe/zookeeper
     # renovate: datasource=docker depName=adobe/zookeeper
-    tag: 3.7.1-0.2.14-adobe-20220610
+    tag: 3.8.4-0.2.15-adobe-20250914
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -288,25 +300,16 @@ k get all -A -l release=monitoring
 # new kafka NS
 kubectl create ns kafka
 
-# install operator using upstream helm chart
-rm -rf /tmp/kafka-operator
-git clone --single-branch --branch master  https://github.com/banzaicloud/koperator /tmp/kafka-operator
+# install CRDs first
+kubectl apply -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_cruisecontroloperations.yaml
+kubectl apply -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
+kubectl apply -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
+kubectl apply -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
 
-cd /tmp/kafka-operator
-
-kubectl create -f config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
-kubectl create -f config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
-kubectl create -f config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
-
-helm template kafka-operator \
-  --namespace=kafka \
-  --set webhook.enabled=false \
-  --set operator.image.repository=adobe/kafka-operator \
-  `# renovate: datasource=docker depName=adobe/kafka-operator ` \
-  --set operator.image.tag=0.21.3-adobe-20220712 \
-  charts/kafka-operator  > kafka-operator.yaml
-
-kubectl create -n kafka  -f kafka-operator.yaml
+# install operator using OCI helm chart
+helm install kafka-operator oci://ghcr.io/adobe/koperator/kafka-operator \
+--namespace=kafka \
+--set webhook.enabled=false
 
 # Check
 kubectl get all -n kafka
@@ -329,20 +332,23 @@ k describe KafkaCluster kafka -n kafka
 #### Create Prometheus `ServiceMonitor` and AlertManager `PrometheusRule` resources
 
 ```sh
-kubectl apply -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus-monitoring.yaml
+kubectl apply -n kafka \
+-f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus-monitoring.yaml
 ```
 
 #### Create `PrometheusRule` to enable auto-scaling
 
 ```sh
-kubectl apply -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus-autoscale.yaml
+kubectl apply -n kafka \
+-f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus-autoscale.yaml
 ```
 
 
 #### Load Grafana `Kafka Looking Glass` dashboard
 
 ```sh
-kubectl apply -n default -f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/grafana-dashboard.yaml
+kubectl apply -n default \
+-f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/grafana-dashboard.yaml
 ```
 This needs to be created in the same namespace as `grafana` (`default`)
 
@@ -388,7 +394,7 @@ kubectl get pod -o=custom-columns='NAME:.metadata.name,IMAGE:.spec.containers[*]
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.13-2.8.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -399,7 +405,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.13-2.8.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -412,7 +418,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.13-2.8.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-configs.sh \
 --zookeeper zk-client.zookeeper:2181/kafka \
@@ -425,7 +431,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=adobe/kafka:2.13-2.8.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -437,7 +443,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-producer-topic \
---image=adobe/kafka:2.13-2.8.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-producer-perf-test.sh \
 --producer-props bootstrap.servers=kafka-headless:29092 acks=all \
@@ -451,7 +457,7 @@ kubectl run kafka-producer-topic \
 
 ```bash
 kubectl run kafka-consumer-test \
---image=adobe/kafka:2.13-2.8.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-consumer-perf-test.sh \
 --broker-list kafka-headless:29092 \
