@@ -301,15 +301,16 @@ k get all -A -l release=monitoring
 kubectl create ns kafka
 
 # install CRDs first
-kubectl apply -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_cruisecontroloperations.yaml
-kubectl apply -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
-kubectl apply -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
-kubectl apply -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_cruisecontroloperations.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
 
 # install operator using OCI helm chart
-helm install kafka-operator oci://ghcr.io/adobe/koperator/kafka-operator \
+helm install kafka-operator oci://ghcr.io/adobe/helm-charts/kafka-operator \
 --namespace=kafka \
---set webhook.enabled=false
+--set webhook.enabled=false \
+--version 0.28.0-adobe-20250923
 
 # Check
 kubectl get all -n kafka
