@@ -102,7 +102,7 @@ kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
 `# renovate: datasource=docker depName=kindest/node ` \
---image kindest/node:v1.33.4
+--image kindest/node:v1.34.0
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -128,7 +128,7 @@ kind get kubeconfig --name kafka
 
 ## Emulate multi-az nodes
 
-```
+```bash
 # place all nodes in the same region
 kubectl label nodes kafka-worker kafka-worker2 kafka-worker3 kafka-worker4  kafka-worker5 kafka-worker6 topology.kubernetes.io/region=region1
 
@@ -153,10 +153,9 @@ kubectl get nodes --label-columns topology.kubernetes.io/region,topology.kuberne
 See https://cert-manager.io/docs/installation/kubernetes/#steps
 
 ```sh
-
 # Install separately CRDs
 # renovate: datasource=github-releases depName=cert-manager/cert-manager
-kubectl create --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
@@ -164,7 +163,6 @@ helm repo add cert-manager https://charts.jetstack.io
 helm repo update
 # renovate: datasource=github-releases depName=cert-manager/cert-manager
 helm install cert-manager cert-manager/cert-manager --namespace cert-manager --version v1.18.2
-
 ```
 
 ### Install Pravega `zookeeper-operator`
@@ -172,20 +170,16 @@ helm install cert-manager cert-manager/cert-manager --namespace cert-manager --v
 Make sure you use **`helm3`**
 
 ```sh
-rm -rf /tmp/zookeeper-operator
-git clone --single-branch --branch master  https://github.com/adobe/zookeeper-operator /tmp/zookeeper-operator
-
-cd /tmp/zookeeper-operator
-
 kubectl create ns zookeeper
+kubectl apply -f https://raw.githubusercontent.com/adobe/zookeeper-operator/master/config/crd/bases/zookeeper.pravega.io_zookeeperclusters.yaml
 
-kubectl create -f https://raw.githubusercontent.com/adobe/zookeeper-operator/master/config/crd/bases/zookeeper.pravega.io_zookeeperclusters.yaml
-
-helm template zookeeper-operator --namespace=zookeeper --set crd.create=false \
---set image.repository='adobe/zookeeper-operator' \
+helm install zookeeper-operator --namespace=zookeeper \
+--set crd.create=false \
 `# renovate: datasource=docker depName=adobe/zookeeper-operator ` \
---set image.tag='0.2.15-adobe-20250914' \
-./charts/zookeeper-operator | kubectl create -n zookeeper -f -
+--set image.repository='ghcr.io/adobe/zookeeper-operator' \
+--set image.tag='latest' \
+--set image.pullPolicy='Always' \
+oci://ghcr.io/adobe/helm-charts/zookeeper-operator:0.2.15-adobe-20250923
 ```
 
 #### Create a ZK cluster with 3 zk nodes
@@ -200,9 +194,9 @@ metadata:
 spec:
   replicas: 3
   image:
-    repository: adobe/zookeeper
-    # renovate: datasource=docker depName=adobe/zookeeper
-    tag: 3.8.4-0.2.15-adobe-20250914
+    repository: ghcr.io/adobe/zookeeper-operator/zookeeper
+    # renovate: datasource=docker depName=ghcr.io/adobe/zookeeper-operator/zookeeper
+    tag: 3.8.4-0.2.15-adobe-20250923
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -229,7 +223,7 @@ kubectl get -w zookeepercluster -n zookeeper -o wide
 # Good
 ```
 
-See more at https://github.com/pravega/zookeeper-operator
+See more at https://github.com/adobe/zookeeper-operator
 
 
 ### Install Prometheus Operator
@@ -244,10 +238,12 @@ kubectl create -f https://raw.githubusercontent.com/prometheus-operator/promethe
 kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
 kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
 kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml
+kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
-helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --set prometheusOperator.createCustomResource=false
+helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --set crds.enabled=false
 
 ```
 
@@ -301,16 +297,16 @@ k get all -A -l release=monitoring
 kubectl create ns kafka
 
 # install CRDs first
-kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_cruisecontroloperations.yaml
-kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
-kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
-kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
+kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_cruisecontroloperations.yaml
+kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
+kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
+kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
 
 # install operator using OCI helm chart
-helm install kafka-operator oci://ghcr.io/adobe/helm-charts/kafka-operator \
+helm install kafka-operator  \
 --namespace=kafka \
 --set webhook.enabled=false \
---version 0.28.0-adobe-20250923
+oci://ghcr.io/adobe/helm-charts/kafka-operator
 
 # Check
 kubectl get all -n kafka
