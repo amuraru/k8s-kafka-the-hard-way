@@ -14,7 +14,7 @@ spec:
   zkPath: "/kafka"
   oneBrokerPerNode: false
   # renovate: datasource=docker depName=ghcr.io/adobe/koperator/kafka
-  clusterImage: "ghcr.io/adobe/koperator/kafka:2.13-3.9.1"
+  clusterImage: "ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.12"
   clusterWideConfig: |
     # dynamic config
   readOnlyConfig: |
@@ -156,7 +156,8 @@ spec:
         usedForInnerBrokerCommunication: false
         usedForControllerCommunication: true
   cruiseControlConfig:
-    image: "adobe/cruise-control:3.0.3-adbe-20250804"
+    # renovate: datasource=docker depName=adobe/cruise-control
+    image: "adobe/cruise-control:3.1.0-adbe-20261029"
     topicConfig:
       partitions: 6
       replicationFactor: 3
@@ -305,8 +306,6 @@ spec:
       #goal.balancedness.strictness.weight
       # Configurations for the executor
       # =======================================
-      # If true, appropriate zookeeper Client { .. } entry required in jaas file located at $base_dir/config/cruise_control_jaas.conf
-      zookeeper.security.enabled=false
       # The max number of partitions to move in/out on a given broker at a given time.
       num.concurrent.partition.movements.per.broker=10
       # The max number of partitions to move between disks within a given broker at a given time.
@@ -331,19 +330,12 @@ spec:
       self.healing.goals=com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal,com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundUsageDistributionGoal
       # The interested metrics for metric anomaly analyzer.
       metric.anomaly.analyzer.metrics=BROKER_PRODUCE_LOCAL_TIME_MS_MAX,BROKER_PRODUCE_LOCAL_TIME_MS_MEAN,BROKER_CONSUMER_FETCH_LOCAL_TIME_MS_MAX,BROKER_CONSUMER_FETCH_LOCAL_TIME_MS_MEAN,BROKER_FOLLOWER_FETCH_LOCAL_TIME_MS_MAX,BROKER_FOLLOWER_FETCH_LOCAL_TIME_MS_MEAN,BROKER_LOG_FLUSH_TIME_MS_MAX,BROKER_LOG_FLUSH_TIME_MS_MEAN
-      # True if recently demoted brokers are excluded from optimizations during broker failure self healing, false otherwise
-      broker.failure.exclude.recently.demoted.brokers=true
-      # True if recently removed brokers are excluded from optimizations during broker failure self healing, false otherwise
-      broker.failure.exclude.recently.removed.brokers=true
-      # True if recently demoted brokers are excluded from optimizations during goal violation self healing, false otherwise
-      goal.violation.exclude.recently.demoted.brokers=true
-      # True if recently removed brokers are excluded from optimizations during goal violation self healing, false otherwise
-      goal.violation.exclude.recently.removed.brokers=true
-      # The zk path to store failed broker information.
-      failed.brokers.zk.path=/CruiseControlBrokerList
+      # Exclude recently demoted or removed brokers from self-healing optimizations.
+      self.healing.exclude.recently.demoted.brokers=true
+      self.healing.exclude.recently.removed.brokers=true
       # Topic config provider class
-      topic.config.provider.class=com.linkedin.kafka.cruisecontrol.config.KafkaTopicConfigProvider
-      # The cluster configurations for the KafkaTopicConfigProvider
+      topic.config.provider.class=com.linkedin.kafka.cruisecontrol.config.KafkaAdminTopicConfigProvider
+      # The cluster configurations for the KafkaAdminTopicConfigProvider
       cluster.configs.file=config/clusterConfigs.json
       # The maximum time in milliseconds to store the response and access details of a completed kafka monitoring user task.
       completed.kafka.monitor.user.task.retention.time.ms=86400000

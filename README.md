@@ -2,6 +2,7 @@
 
 
 - [Intro](#intro)
+  - [Software versions](#software-versions)
 - [Install Kafka in a `kind` k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
   - [Install `kind`](#install-kind)
   - [Create a mini k8s cluster using `kind`](#create-a-mini-k8s-cluster-using-kind)
@@ -46,6 +47,31 @@
 
 This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operator](https://github.com/banzaicloud/koperator) in a local multi-node kind cluster.
 
+## Software versions
+
+Release pins checked on 2026-10-29:
+
+| Component | Version |
+| --- | --- |
+| [kind](https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0) | 0.33.0 |
+| Kubernetes (kind node image) | 1.36.4 |
+| [cert-manager](https://github.com/cert-manager/cert-manager/releases/tag/v1.21.3) | 1.21.3 |
+| [ZooKeeper operator](https://github.com/adobe/zookeeper-operator/releases/tag/0.2.15-adobe-20260924) | 0.2.15-adobe-20260924 |
+| ZooKeeper | 3.9.6 |
+| [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/releases/tag/kube-prometheus-stack-92.16.0) | 92.16.0 (Prometheus Operator 0.94.2) |
+| Prometheus (bundled with monitoring chart) | 3.15.1 |
+| Grafana (bundled with monitoring chart) | 13.3.0 |
+| Alertmanager (bundled with monitoring chart) | 0.34.2 |
+| [KOperator](https://github.com/adobe/koperator/releases/tag/0.32.0) | 0.32.0 |
+| Kafka image | 2.13-3.9.2-jdk21.0.12 |
+| [Cruise Control](https://github.com/adobe/cruise-control/releases/tag/3.1.0-adbe-20261029) | 3.1.0-adbe-20261029 |
+
+Kafka stays on the 3.9 release line because this tutorial uses ZooKeeper; Kafka 4.x requires a separate KRaft migration. Kubernetes 1.36.4 is the newest 1.36 image published for kind 0.33.0 and stays within cert-manager 1.21's [supported Kubernetes versions](https://cert-manager.io/docs/releases/). Prometheus, Grafana, and Alertmanager use the versions bundled with the pinned monitoring chart. Use Helm 3 and a kubectl client within one minor version of the cluster.
+
+These instructions create a fresh cluster. For an existing cluster, follow each project's upgrade instructions and back up persistent data before applying the new versions.
+
+Run the manifest commands below from the root of this repository checkout so they use the same release pins.
+
 
 # Install Kafka in a `kind` k8s cluster
 
@@ -56,9 +82,20 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ```bash
 
-curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.30.0/kind-$(uname)-amd64"
+# Select the binary for Linux/macOS and Intel/ARM hosts.
+os=$(uname -s | tr '[:upper:]' '[:lower:]')
+case "$(uname -m)" in
+  x86_64) arch=amd64 ;;
+  arm64|aarch64) arch=arm64 ;;
+  *) echo "Unsupported architecture" >&2; exit 1 ;;
+esac
+# renovate: datasource=github-releases depName=kubernetes-sigs/kind
+curl -fLo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-${os}-${arch}"
 chmod +x ./kind
+mkdir -p ~/bin
 mv ./kind ~/bin
+export PATH="$HOME/bin:$PATH"
+kind version
 
 ```
 
@@ -67,31 +104,21 @@ mv ./kind ~/bin
 
 ### Create cluster configuration
 ```bash
-mkdir ~/.kind
-# Create a 6 node cluster configuration
+mkdir -p ~/.kind
+# Create a 7-node cluster: one control plane and six workers.
 cat > ~/.kind/kind-config.yaml <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
   - role: control-plane
-    kubeadmConfigPatches:
-    - |
-      kind: InitConfiguration
-      nodeRegistration:
-        kubeletExtraArgs:
-          node-labels: "ingress-ready=true"
+    labels:
+      ingress-ready: "true"
   - role: worker
   - role: worker
   - role: worker
   - role: worker
   - role: worker
   - role: worker
-containerdConfigPatches:
-- |-
-  [plugins."io.containerd.grpc.v1.cri".containerd]
-    snapshotter = "overlayfs"
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
-    endpoint = ["http://localhost:5000"]
 EOF
 ```
 
@@ -102,7 +129,7 @@ kind create cluster \
 --name kafka \
 --config ~/.kind/kind-config.yaml \
 `# renovate: datasource=docker depName=kindest/node ` \
---image kindest/node:v1.34.0
+--image kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
 ```
 
 Once the cluster is created your `KUBECONFIG` is updated to include
@@ -155,14 +182,14 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 ```sh
 # Install separately CRDs
 # renovate: datasource=github-releases depName=cert-manager/cert-manager
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
+kubectl apply --server-side -f https://github.com/cert-manager/cert-manager/releases/download/v1.21.3/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
 # Install operator using helm3
 helm repo add cert-manager https://charts.jetstack.io
 helm repo update
 # renovate: datasource=github-releases depName=cert-manager/cert-manager
-helm install cert-manager cert-manager/cert-manager --namespace cert-manager --version v1.18.2
+helm install cert-manager cert-manager/cert-manager --namespace cert-manager --version v1.21.3
 ```
 
 ### Install Pravega `zookeeper-operator`
@@ -171,15 +198,14 @@ Make sure you use **`helm3`**
 
 ```sh
 kubectl create ns zookeeper
-kubectl apply -f https://raw.githubusercontent.com/adobe/zookeeper-operator/master/config/crd/bases/zookeeper.pravega.io_zookeeperclusters.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/zookeeper-operator/0.2.15-adobe-20260924/config/crd/bases/zookeeper.pravega.io_zookeeperclusters.yaml
 
 helm install zookeeper-operator --namespace=zookeeper \
 --set crd.create=false \
-`# renovate: datasource=docker depName=adobe/zookeeper-operator ` \
 --set image.repository='ghcr.io/adobe/zookeeper-operator' \
---set image.tag='latest' \
---set image.pullPolicy='Always' \
-oci://ghcr.io/adobe/helm-charts/zookeeper-operator:0.2.15-adobe-20250923
+--set image.tag='0.2.15-adobe-20260924' \
+--version 0.2.15-adobe-20260924 \
+oci://ghcr.io/adobe/helm-charts/zookeeper-operator
 ```
 
 #### Create a ZK cluster with 3 zk nodes
@@ -196,7 +222,7 @@ spec:
   image:
     repository: ghcr.io/adobe/zookeeper-operator/zookeeper
     # renovate: datasource=docker depName=ghcr.io/adobe/zookeeper-operator/zookeeper
-    tag: 3.8.4-0.2.15-adobe-20250923
+    tag: 3.9.6-0.2.15-adobe-20260924
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -230,20 +256,21 @@ See more at https://github.com/adobe/zookeeper-operator
 
 ```sh
 
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml
-kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
+# Match CRDs to the Prometheus Operator bundled with the chart.
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.94.2/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
-helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --set crds.enabled=false
+helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --version 92.16.0 --set crds.enabled=false
 
 ```
 
@@ -273,7 +300,7 @@ kubectl get secret --namespace default monitoring-grafana -o jsonpath="{.data.ad
 kubectl --namespace default port-forward svc/monitoring-grafana 3000:80
 ```
 
-Then access via [http://localhost:3000](http://localhost:3000) and use the  grafana user:password of `admin:prom-operator`.
+Then access via [http://localhost:3000](http://localhost:3000) with user `admin` and the password retrieved from the Secret above.
 
 #####  Alert Manager
 
@@ -297,15 +324,16 @@ k get all -A -l release=monitoring
 kubectl create ns kafka
 
 # install CRDs first
-kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_cruisecontroloperations.yaml
-kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
-kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
-kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/refs/heads/master/config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
+kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/0.32.0/config/base/crds/kafka.banzaicloud.io_cruisecontroloperations.yaml
+kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/0.32.0/config/base/crds/kafka.banzaicloud.io_kafkaclusters.yaml
+kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/0.32.0/config/base/crds/kafka.banzaicloud.io_kafkatopics.yaml
+kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/koperator/0.32.0/config/base/crds/kafka.banzaicloud.io_kafkausers.yaml
 
 # install operator using OCI helm chart
 helm install kafka-operator  \
 --namespace=kafka \
 --set webhook.enabled=false \
+--version 0.32.0 \
 oci://ghcr.io/adobe/helm-charts/kafka-operator
 
 # Check
@@ -318,7 +346,7 @@ kubectl get all -n kafka
 ### Create a KafkaCluster
 
 ```
-kubectl create -n kafka -f https://raw.githubusercontent.com/amuraru/k8s-kafka-the-hard-way/master/simplekafkacluster.yaml
+kubectl create -n kafka -f simplekafkacluster.yaml
 # Check CRD created
 k get KafkaCluster kafka -n kafka -w -o wide
 # See CRD state
@@ -330,14 +358,14 @@ k describe KafkaCluster kafka -n kafka
 
 ```sh
 kubectl apply -n kafka \
--f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus-monitoring.yaml
+-f kafkacluster-prometheus-monitoring.yaml
 ```
 
 #### Create `PrometheusRule` to enable auto-scaling
 
 ```sh
 kubectl apply -n kafka \
--f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/kafkacluster-prometheus-autoscale.yaml
+-f kafkacluster-prometheus-autoscale.yaml
 ```
 
 
@@ -345,7 +373,7 @@ kubectl apply -n kafka \
 
 ```sh
 kubectl apply -n default \
--f https://raw.githubusercontent.com/amuraru/k8s-kafka-operator/master/grafana-dashboard.yaml
+-f grafana-dashboard.yaml
 ```
 This needs to be created in the same namespace as `grafana` (`default`)
 
@@ -391,7 +419,7 @@ kubectl get pod -o=custom-columns='NAME:.metadata.name,IMAGE:.spec.containers[*]
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.12 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -402,7 +430,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.12 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -415,10 +443,10 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.12 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-configs.sh \
---zookeeper zk-client.zookeeper:2181/kafka \
+--bootstrap-server kafka-headless:29092 \
 --alter --entity-name perf_topic \
 --entity-type topics \
 --add-config retention.ms=720000
@@ -428,7 +456,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-topics --rm -i --tty=true \
---image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.12 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-topics.sh \
 --bootstrap-server kafka-headless:29092 \
@@ -440,7 +468,7 @@ kubectl run kafka-topics --rm -i --tty=true \
 
 ```bash
 kubectl run kafka-producer-topic \
---image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.12 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-producer-perf-test.sh \
 --producer-props bootstrap.servers=kafka-headless:29092 acks=all \
@@ -454,7 +482,7 @@ kubectl run kafka-producer-topic \
 
 ```bash
 kubectl run kafka-consumer-test \
---image=ghcr.io/adobe/koperator/kafka:2.13-3.9.1 \
+--image=ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.12 \
 --restart=Never \
 -- /opt/kafka/bin/kafka-consumer-perf-test.sh \
 --broker-list kafka-headless:29092 \
