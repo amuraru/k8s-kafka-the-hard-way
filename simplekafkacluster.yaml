@@ -82,7 +82,7 @@ spec:
             storageClassName: standard
             resources:
               requests:
-                storage: 10Gi
+                storage: 1Gi
     rack2:
       nodeSelector:
         topology.kubernetes.io/zone: az2
@@ -105,7 +105,7 @@ spec:
             storageClassName: standard
             resources:
               requests:
-                storage: 10Gi
+                storage: 1Gi
     rack3:
       nodeSelector:
         topology.kubernetes.io/zone: az3
@@ -128,7 +128,7 @@ spec:
             storageClassName: standard
             resources:
               requests:
-                storage: 10Gi
+                storage: 1Gi
   brokers:
     - brokerConfigGroup: rack1
       id: 101
@@ -378,7 +378,7 @@ spec:
       # configurations for the webserver
       # ================================
       # HTTP listen port
-      webserver.http.port=9090
+      webserver.http.port=8090
       # HTTP listen address
       webserver.http.address=0.0.0.0
       # Whether CORS support is enabled for API or not
@@ -428,7 +428,7 @@ spec:
           {
             "brokerId": "-1",
             "capacity": {
-              "DISK": {"/kafka-logs1/kafka": "100000"},
+               "DISK": {"/kafka-logs1/kafka": "1024"},
               "CPU": {"num.cores": "5"},
               "NW_IN": "300000",
               "NW_OUT": "300000"

@@ -1,0 +1,55 @@
+fullnameOverride: kminion
+
+image:
+  repository: ghcr.io/adobe/kminion
+  tag: "2.3.4-adobe-20261026"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+serviceMonitor:
+  create: true
+  additionalLabels:
+    release: monitoring
+  interval: 15s
+  scrapeTimeout: 10s
+  relabelings:
+    - action: replace
+      targetLabel: kafka_cr
+      replacement: kafka
+
+kminion:
+  config:
+    kafka:
+      brokers:
+        - kafka-headless.kafka.svc.cluster.local:29092
+      clientId: kminion
+    logger:
+      level: info
+    minion:
+      consumerGroups:
+        enabled: true
+        scrapeMode: adminApi
+        granularity: partition
+        allowedGroups: [".*"]
+      topics:
+        enabled: true
+        granularity: partition
+        allowedTopics: [".*"]
+      logDirs:
+        enabled: true
+      # Collect Kafka API metrics without creating a continuously written probe topic
+      # or managing partition assignments while the autoscaling fault is unresolved.
+      endToEnd:
+        enabled: false
+    exporter:
+      namespace: kminion
+      host: 0.0.0.0
+      port: 8080

@@ -1,0 +1,32 @@
+grafana:
+  nodeSelector:
+    kubernetes.io/hostname: kafka-worker4
+  sidecar:
+    dashboards:
+      env:
+        HEALTH_PORT: "8083"
+    datasources:
+      env:
+        HEALTH_PORT: "8081"
+
+alertmanager:
+  config:
+    route:
+      receiver: 'null'
+      group_by: ['namespace', 'alertname', 'kafka_cr']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      routes:
+        - receiver: koperator
+          matchers:
+            - 'namespace="kafka"'
+            - 'alertname=~"BrokerOverLoaded|BrokerUnderReplicated|PartitionCountHigh|PartitionCountLow|RemainingDiskSpaceLow"'
+    receivers:
+      - name: 'null'
+      - name: koperator
+        webhook_configs:
+          - url: http://kafka-operator-alertmanager.kafka.svc:9001/
+            send_resolved: true
+            # KOperator 0.32.0 expects []model.Alert, not Alertmanager's default envelope.
+            payload: '{{ .Alerts | toJson }}'

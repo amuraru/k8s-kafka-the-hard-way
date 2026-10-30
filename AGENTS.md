@@ -34,9 +34,17 @@
 3. Check `docker info`, `kind version`, `kubectl version --client`, and `helm version`.
 4. Check the README's Helm requirement and Kubernetes client compatibility rule.
 5. Check access to the pinned charts, images, and CRD download URLs.
+   Build a complete image inventory from the pinned Helm charts rendered with the installation values,
+   the README, and this checkout's manifests. Include regular containers, init containers, Helm hooks,
+   operator-generated workloads, metrics exporters, and Kafka clients. Inspect the pinned operators'
+   defaults for injected helper images that do not appear in chart templates.
 6. Check Docker's available CPU, memory, and disk against the manifests' resource requests and PVC sizes.
-   Include all six Kafka brokers, three ZooKeeper members, Cruise Control, and the monitoring stack.
+   Include all six Kafka brokers, three ZooKeeper members, Cruise Control, KMinion, and the monitoring stack.
    Kubernetes nodes inside kind share the Docker host's resources. Summed node capacities do not represent independent hosts.
+   Include image-preload storage: host Docker images and each kind node's containerd image store consume
+   disk space. Check both Docker filesystem space and the host space backing Docker's disk image.
+   Include retained image blobs, unpacked snapshots, and temporary export archives, not only the reported
+   image size. Imports can require approximately twice the uncompressed image size per node.
 7. Report insufficient resources before deployment. Ask before reducing broker counts, replication, storage, or resource requests.
 8. Use a temporary kind configuration if the README's configuration path already contains unrelated settings.
 
@@ -47,6 +55,23 @@
    Check that the `standard` StorageClass exists and supports dynamic provisioning.
 2. Apply the region and zone labels from the README.
    Check that each of the three zones contains two workers.
+   Before installing workloads, preload all images required by the setup into kind:
+   - Pull the exact pinned image references for the Docker host's architecture. Do not substitute `latest`.
+   - Reuse matching local images and images already present in kind instead of downloading them again.
+   - Use `kind load docker-image --name kafka <image>...` to import the images into every cluster node.
+     Use bounded batches or bounded concurrency so pulls and imports do not exhaust host resources.
+   - Verify the required image references in each node's containerd store with `docker exec <node> crictl images`.
+     A successful host-side `docker pull` alone does not make an image available to Kubernetes.
+   - Check rendered image pull policies. Use `IfNotPresent` for these pinned local images where supported;
+     preloading does not prevent registry access when a workload uses `Always`.
+   - If the complete preload does not fit, report the disk shortfall and ask before deleting cached images
+     or data. Do not silently skip images, reduce the topology, or preload unrelated host images.
+   On reruns, preload only missing images. If a later phase reveals another injected image, preload it
+   before continuing and add it to the inventory. Keep this inventory outside the repository unless requested.
+   Storage-constrained exception approved for this setup: `monitoring-values.yaml` pins Grafana to
+   `kafka-worker4`. Preload the Grafana image on that worker with `kind load docker-image --name kafka
+   --nodes kafka-worker4 <grafana-image>` and verify it there. Other required images must be present on
+   every node. If the Grafana node selector changes, preload its image on all newly eligible nodes first.
 3. Install cert-manager's CRDs and Helm release.
    Wait for CRDs to become `Established` and for all cert-manager deployments to become available.
 4. Install the ZooKeeper operator's CRD and Helm release.
@@ -59,6 +84,9 @@
    Wait for the operator before applying `simplekafkacluster.yaml` in `kafka`.
    Check that all six configured broker IDs register and that Cruise Control becomes ready.
 7. Apply `kafkacluster-prometheus-monitoring.yaml` in `kafka`.
+   Install the README's pinned Adobe KMinion chart in `kafka` using `kminion-values.yaml`.
+   Preload its image first, wait for the deployment, and verify its selected ServiceMonitor
+   and `kminion_exporter_up == 1`. Keep end-to-end probes disabled unless explicitly requested.
    Apply `zookeeper-prometheus-monitoring.yaml` in `zookeeper` to include ZooKeeper monitoring.
    Apply `grafana-dashboard.yaml` in `default`.
 8. Establish the baseline with the Kafka smoke test below before applying `kafkacluster-prometheus-autoscale.yaml`.
@@ -92,7 +120,8 @@ Read each custom resource's status schema before selecting a readiness check. No
 - All seven nodes report `Ready`. All three ZooKeeper members and all six configured Kafka brokers report healthy status.
 - All expected persistent claims report `Bound`. No required workload remains `Pending` or in `CrashLoopBackOff` or `ImagePullBackOff`.
 - The smoke test receives exactly the 100 produced records. Its partitions retain three in-sync replicas.
-- Required Kafka, Cruise Control, and ZooKeeper scrape targets report `up == 1`.
+- Required Kafka, Cruise Control, ZooKeeper, and KMinion scrape targets report `up == 1`.
+  KMinion reports `kminion_exporter_up == 1` and exports the topic/group metrics used by Grafana.
   Prometheus evaluates the intended rules without errors. Alertmanager routes scaling alerts to KOperator.
 - Prometheus, Grafana, Alertmanager, and Cruise Control respond through the recorded local port-forwards.
   Grafana loads the `Kafka Looking Glass` dashboard with live Kafka data, not only an HTTP success response.
@@ -116,7 +145,7 @@ Read each custom resource's status schema before selecting a readiness check. No
 | --- | --- |
 | Kafka image | `simplekafkacluster.yaml`, `kafkacluster-prometheus-autoscale.yaml`, and README client examples |
 | Operator or chart release | README version table, install commands, and corresponding CRD URLs |
-| Metrics, labels, or namespaces | Both monitoring manifests, autoscaling rules, and `grafana-dashboard.yaml` |
+| Metrics, labels, or namespaces | Both monitoring manifests, `kminion-values.yaml`, autoscaling rules, and `grafana-dashboard.yaml` |
 
 For repository changes, run `git diff --check`. Check changed YAML and embedded dashboard JSON for syntax errors.
 For deployment changes, repeat the affected live acceptance checks.

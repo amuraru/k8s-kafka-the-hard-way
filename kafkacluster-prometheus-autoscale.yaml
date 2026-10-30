@@ -5,13 +5,14 @@ metadata:
   creationTimestamp: null
   labels:
     prometheus: kafka-rules
+    release: monitoring
   name: kafka-alerts
 spec:
   groups:
   - name: KafkaAlerts
     rules:
     - alert: BrokerOverLoaded
-      expr: avg(sum by(brokerId, kafka_cr, namespace) (rate(kafka_network_requestmetrics_requests_total[15m]))) > 30
+      expr: avg by(kafka_cr, namespace) (sum by(brokerId, kafka_cr, namespace) (rate(kafka_network_requestmetrics_requests_total[15m]))) > 30
       for: 5m
       labels:
         severity: alert

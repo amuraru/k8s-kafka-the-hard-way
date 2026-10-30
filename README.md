@@ -22,7 +22,8 @@
         - [Grafana](#grafana)
         - [Alert Manager](#alert-manager)
   - [BanzaiCloud KOperator](#banzaicloud-koperator-1)
-    - [Create a KafkaCluster](#create-a-kafkacluster)
+      - [Create a KafkaCluster](#create-a-kafkacluster)
+      - [Install Adobe KMinion](#install-adobe-kminion)
       - [Create Prometheus `ServiceMonitor` and AlertManager `PrometheusRule` resources](#create-prometheus-servicemonitor-and-alertmanager-prometheusrule-resources)
       - [Create `PrometheusRule` to enable auto-scaling](#create-prometheusrule-to-enable-auto-scaling)
       - [Load Grafana `Kafka Looking Glass` dashboard](#load-grafana-kafka-looking-glass-dashboard)
@@ -49,11 +50,12 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ## Software versions
 
-Release pins checked on 2026-10-29:
+Release pins checked on 2026-10-30:
 
 | Component | Version |
 | --- | --- |
 | [kind](https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0) | 0.33.0 |
+| Helm | 4.3.1 |
 | Kubernetes (kind node image) | 1.36.4 |
 | [cert-manager](https://github.com/cert-manager/cert-manager/releases/tag/v1.21.3) | 1.21.3 |
 | [ZooKeeper operator](https://github.com/adobe/zookeeper-operator/releases/tag/0.2.15-adobe-20260924) | 0.2.15-adobe-20260924 |
@@ -63,10 +65,15 @@ Release pins checked on 2026-10-29:
 | Grafana (bundled with monitoring chart) | 13.3.0 |
 | Alertmanager (bundled with monitoring chart) | 0.34.2 |
 | [KOperator](https://github.com/adobe/koperator/releases/tag/0.32.0) | 0.32.0 |
+| [Adobe KMinion image and chart](https://github.com/adobe/kminion/releases/tag/2.3.4-adobe-20261026) | 2.3.4-adobe-20261026 |
 | Kafka image | 2.13-3.9.2-jdk21.0.12 |
 | [Cruise Control](https://github.com/adobe/cruise-control/releases/tag/3.1.0-adbe-20261029) | 3.1.0-adbe-20261029 |
 
-Kafka stays on the 3.9 release line because this tutorial uses ZooKeeper; Kafka 4.x requires a separate KRaft migration. Kubernetes 1.36.4 is the newest 1.36 image published for kind 0.33.0 and stays within cert-manager 1.21's [supported Kubernetes versions](https://cert-manager.io/docs/releases/). Prometheus, Grafana, and Alertmanager use the versions bundled with the pinned monitoring chart. Use Helm 3 and a kubectl client within one minor version of the cluster.
+Kafka stays on the 3.9 release line because this tutorial uses ZooKeeper; Kafka 4.x requires a separate KRaft migration. Kubernetes 1.36.4 is the newest 1.36 image published for kind 0.33.0 and stays within cert-manager 1.21's [supported Kubernetes versions](https://cert-manager.io/docs/releases/). Prometheus, Grafana, and Alertmanager use the versions bundled with the pinned monitoring chart. Use Helm 4 and a kubectl client within one minor version of the cluster.
+
+For this constrained local setup, Kafka requests 1 GiB per broker and ZooKeeper requests 1 GiB per member. These sizes are intended for smoke tests, not the performance tests below. The kind `standard` StorageClass uses local-path storage; PVC sizes do not enforce disk quotas, so monitor actual Docker disk usage.
+
+`monitoring-values.yaml` pins the single Grafana replica to `kafka-worker4` so its image needs to be preloaded only on that worker. Other required setup images are preloaded on all seven kind nodes. If you change Grafana's placement, preload its image on the newly eligible nodes before changing the selector.
 
 These instructions create a fresh cluster. For an existing cluster, follow each project's upgrade instructions and back up persistent data before applying the new versions.
 
@@ -173,7 +180,7 @@ kubectl get nodes --label-columns topology.kubernetes.io/region,topology.kuberne
 
 ## Install pre-reqs
 
-**Note: The installation below assumes you're using `helm3`**
+**Note: The installation below assumes you're using Helm 4.**
 
 ### Install `cert-manager`
 
@@ -185,7 +192,7 @@ See https://cert-manager.io/docs/installation/kubernetes/#steps
 kubectl apply --server-side -f https://github.com/cert-manager/cert-manager/releases/download/v1.21.3/cert-manager.crds.yaml
 kubectl create namespace cert-manager
 
-# Install operator using helm3
+# Install operator using Helm 4
 helm repo add cert-manager https://charts.jetstack.io
 helm repo update
 # renovate: datasource=github-releases depName=cert-manager/cert-manager
@@ -194,7 +201,7 @@ helm install cert-manager cert-manager/cert-manager --namespace cert-manager --v
 
 ### Install Pravega `zookeeper-operator`
 
-Make sure you use **`helm3`**
+Make sure you use **Helm 4**.
 
 ```sh
 kubectl create ns zookeeper
@@ -238,7 +245,7 @@ spec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 20Gi
+          storage: 1Gi
 EOF
 
 
@@ -270,7 +277,7 @@ kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-oper
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
-helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --version 92.16.0 --set crds.enabled=false
+helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --version 92.16.0 --set crds.enabled=false -f monitoring-values.yaml
 
 ```
 
@@ -354,14 +361,89 @@ k describe KafkaCluster kafka -n kafka
 
 ```
 
+#### Install Adobe KMinion
+
+[Adobe KMinion](https://github.com/adobe/kminion) collects broker, topic, consumer-group,
+lag, and replica-log-size metrics through the Kafka API. Install it after Kafka is healthy
+and the Prometheus Operator CRDs are established. Both its OCI chart and container image
+are pinned to `2.3.4-adobe-20261026`; the explicit image override in
+`kminion-values.yaml` avoids relying on the chart's image default.
+
+```sh
+docker pull ghcr.io/adobe/kminion:2.3.4-adobe-20261026
+kind load docker-image --name kafka ghcr.io/adobe/kminion:2.3.4-adobe-20261026
+
+helm install kminion oci://ghcr.io/adobe/helm-charts/kminion \
+  --namespace kafka --kube-context kind-kafka \
+  --version 2.3.4-adobe-20261026 \
+  -f kminion-values.yaml --wait --timeout 180s
+
+kubectl --context kind-kafka --namespace kafka \
+  rollout status deployment/kminion --timeout=180s
+kubectl --context kind-kafka --namespace kafka \
+  get deployment/kminion service/kminion servicemonitor/kminion
+
+# Once Prometheus has scraped the exporter, expect kminion_exporter_up == 1.
+kubectl --context kind-kafka --namespace default get --raw \
+  '/api/v1/namespaces/default/services/monitoring-kube-prometheus-prometheus:9090/proxy/api/v1/query?query=kminion_exporter_up'
+```
+
+The values use the internal bootstrap service, a single exporter replica, partition-level
+topic/group metrics, and `adminApi` consumer-group scraping. The chart creates its
+ServiceMonitor with `release: monitoring`; target relabeling adds `kafka_cr="kafka"`
+so dashboard queries can select this cluster. No external bootstrap port-forward is needed.
+
+KMinion's continuous end-to-end producer/consumer probes are disabled. They would create
+and manage a probe topic and generate ongoing traffic; enable them separately only after
+checking storage and the known autoscaling behavior. Consumer lag is a committed-offset
+measurement, not the broker-to-broker replication lag exposed by Kafka JMX.
+
+`Kafka Looking Glass` uses these KMinion metrics directly, without private recording-rule aliases:
+
+| Dashboard data | Metric |
+| --- | --- |
+| Kafka API scrape health | `kminion_exporter_up` |
+| Consumer-group count | `kminion_kafka_consumer_group_info_count` |
+| Committed-offset lag by group/topic | `kminion_kafka_consumer_group_topic_lag` |
+| Topic partition counts | `kminion_kafka_topic_info_partitions_count` |
+| Broker replica-log bytes | `kminion_kafka_broker_log_dir_size_total_bytes` |
+| Topic replica-log bytes | `kminion_kafka_topic_log_dir_size_total_bytes` |
+
+Broker/topic selectors use KMinion's `broker_id` and `topic_name` labels. Kafka JMX panels
+continue to use `brokerId`, `topic`, and `partition`; the dashboard translates the selected
+IDs rather than matching generated pod-name suffixes.
+
+For reruns, inspect `helm list --namespace kafka --kube-context kind-kafka` first.
+Reuse a healthy matching release; if changing values, preserve the release's existing values
+and retain the pinned chart/image versions. Inspect
+`kubectl --context kind-kafka --namespace kafka logs deployment/kminion --tail=100`
+and the Prometheus target error if scraping fails.
+
 #### Create Prometheus `ServiceMonitor` and AlertManager `PrometheusRule` resources
 
 ```sh
 kubectl apply -n kafka \
 -f kafkacluster-prometheus-monitoring.yaml
+
+kubectl apply -n zookeeper \
+-f zookeeper-prometheus-monitoring.yaml
 ```
 
 #### Create `PrometheusRule` to enable auto-scaling
+
+Run the Kafka smoke test before enabling these rules. The monitoring values route scaling alerts
+to `http://kafka-operator-alertmanager.kafka.svc:9001/`, the alert receiver installed by the
+pinned KOperator chart. The rules must have `release: monitoring` so Prometheus selects them.
+The webhook's custom `payload` sends the flat alert array expected by KOperator 0.32.0;
+Alertmanager's default webhook envelope is not compatible with that receiver.
+Do not deliberately trigger scaling or run the performance tests without checking disk capacity.
+
+Known caveat with the pinned sample rules/operator: background broker requests can exceed the
+sample overload threshold even without client traffic. A `PartitionCountLow` alert without
+`brokerId` can also hit KOperator 0.32.0's failing fallback broker-selection path. Successful
+webhook delivery alone does not validate scale-up/down command execution. Inspect operator
+logs and current broker assignments before relying on these rules; do not remove an
+automatically added broker or its PVC without checking for data and obtaining approval.
 
 ```sh
 kubectl apply -n kafka \
@@ -378,6 +460,22 @@ kubectl apply -n default \
 This needs to be created in the same namespace as `grafana` (`default`)
 
 Dashboard should be automatically loaded and available at http://127.0.0.1:3000/d/1a1a1a1a1/kafka-looking-glass
+
+The dashboard ConfigMap uses `grafana_dashboard: '1'`, matching the pinned chart's sidecar selector.
+Its defaults select the local `kafka` namespace and cluster, and ZooKeeper panels query `zookeeper`.
+
+Local monitoring limitations:
+
+- The kind local-path provisioner does not expose `kubelet_volume_stats_*` for these PVCs. The dashboard therefore shows KMinion replica-log bytes and requested PVC capacity, clearly labeled as requests rather than quotas or physical free space. Indexes and other files are not included. `RemainingDiskSpaceLow` still has no volume-stat data; check actual disk usage separately. An error-free rule evaluation does not establish disk-based autoscaling.
+- Default kind metrics listeners for the controller manager, scheduler, etcd, and kube-proxy are loopback-only. The monitoring chart's corresponding targets remain unreachable until those listeners are reconfigured. Kafka, Cruise Control, and ZooKeeper scraping does not depend on them.
+- Envoy, Adobe IMS, and assignment-aware orphan-replica telemetry are not installed. Their panels explicitly show `Not configured`, with original queries retained but not executed, instead of implying a healthy zero or showing an unexplained empty graph. KMinion scrape health is not an external end-to-end availability probe.
+
+Healthy zero-valued counters (digest mismatches, replication lag, failures, reassignments,
+and offline log directories) are displayed as zero from real metric samples. Filters such
+as `> 0` are not used to discard those healthy samples. Legacy Angular `graph` and `table-old`
+panels have been migrated to current time-series/table panels for Grafana 13, including the
+panels inside collapsed rows. Run the dashboard regression tests
+with `python3 -B -m unittest discover -s tests -v` after changing queries or variables.
 
 #### Check Cruise Control
 

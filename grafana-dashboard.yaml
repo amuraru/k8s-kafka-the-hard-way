@@ -1,9 +1,10 @@
+# Kafka Looking Glass: Kafka JMX and Adobe KMinion metrics (Grafana 13).
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    grafana_dashboard: 'true'
+    grafana_dashboard: '1'
   name: prometheus-grafana-kafka
 data:
   kafka-looking-glass.json: |-
@@ -34,7 +35,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 3,
+      "id": null,
       "links": [
         {
           "asDropdown": true,
@@ -71,7 +72,7 @@ data:
             "type": "prometheus",
             "uid": "${data_source}"
           },
-          "description": "A producer produce 1 rps checking that the External Kafka listener is reachable",
+          "description": "Adobe KMinion reports 1 only when its Kafka API scrapes succeed. This is not an end-to-end availability probe; continuous probes are disabled.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -79,49 +80,17 @@ data:
               },
               "mappings": [
                 {
+                  "type": "value",
                   "options": {
                     "0": {
-                      "color": "red",
-                      "index": 2,
-                      "text": "UNREACHABLE"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "from": 0.8,
-                    "result": {
-                      "color": "green",
-                      "index": 0,
-                      "text": "OK"
+                      "text": "SCRAPE FAILED",
+                      "color": "red"
                     },
-                    "to": 10
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 0.1,
-                    "result": {
-                      "color": "orange",
-                      "index": 1,
-                      "text": "Intermittent Failures"
-                    },
-                    "to": 0.8
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "color": "red",
-                      "index": 3,
-                      "text": "NOT Monitored"
+                    "1": {
+                      "text": "OK",
+                      "color": "green"
                     }
-                  },
-                  "type": "special"
+                  }
                 }
               ],
               "min": 0,
@@ -129,12 +98,17 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "red",
                     "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "none",
+              "max": 1
             },
             "overrides": []
           },
@@ -169,14 +143,14 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(kafka_sdk_producer_metrics_record_send_total{cluster=\"$kafka_cluster\"}[1m])) by (type)",
+              "expr": "max(kminion_exporter_up{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "interval": "",
-              "legendFormat": "{{type}}",
+              "legendFormat": "KMinion",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Kafka Monitor Produce",
+          "title": "KMinion Kafka API scrape health",
           "transparent": true,
           "type": "bargauge"
         },
@@ -185,47 +159,13 @@ data:
             "type": "prometheus",
             "uid": "${data_source}"
           },
-          "description": "A producer produce 1 rps checking that the External Kafka listener has no errors",
+          "description": "Adobe KMinion committed-offset lag summed over selected topics per consumer group. This is consumer lag, not replication lag.",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "thresholds"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "0": {
-                      "color": "green",
-                      "index": 1,
-                      "text": "OK"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "from": 0.01,
-                    "result": {
-                      "color": "red",
-                      "index": 0,
-                      "text": "ERRORS"
-                    },
-                    "to": 1
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "match": "null+nan",
-                    "result": {
-                      "color": "red",
-                      "index": 2,
-                      "text": "NOT Monitored"
-                    }
-                  },
-                  "type": "special"
-                }
-              ],
+              "mappings": [],
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
@@ -233,10 +173,18 @@ data:
                   {
                     "color": "green",
                     "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 1000
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "short"
             },
             "overrides": []
           },
@@ -271,14 +219,14 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(kafka_sdk_producer_metrics_record_error_total{cluster=\"$kafka_cluster\"}[1m])) by (type)",
+              "expr": "sum by (group_id) (kminion_kafka_consumer_group_topic_lag{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic_name=~\"$kafka_topic\"})",
               "interval": "",
-              "legendFormat": "{{type}}",
+              "legendFormat": "{{group_id}}",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Kafka Monitor - Errors",
+          "title": "Consumer lag by group (messages)",
           "transparent": true,
           "type": "bargauge"
         },
@@ -364,10 +312,10 @@ data:
           "repeatDirection": "h",
           "targets": [
             {
-              "expr": "count by(broker_group) (kafka_server_app_info_version{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
+              "expr": "count by(kafka_cr) (kafka_server_app_info_version{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "instant": true,
               "interval": "",
-              "legendFormat": "{{broker_group}}",
+              "legendFormat": "{{kafka_cr}}",
               "refId": "B"
             }
           ],
@@ -590,7 +538,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "count(sum(kafka:cluster:partition:replicascount{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}>0) by (topic))",
+              "expr": "count(kminion_kafka_topic_info{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "format": "time_series",
               "hide": false,
               "instant": true,
@@ -684,7 +632,7 @@ data:
         },
         {
           "datasource": "$data_source",
-          "description": "Number of unhealthy kafka nodes in envoy proxy",
+          "description": "Envoy is not deployed: this cluster uses internal Kafka listeners. Original query targets are retained, hidden, for use if that integration is installed.",
           "fieldConfig": {
             "defaults": {
               "mappings": [
@@ -740,7 +688,9 @@ data:
               "values": false
             },
             "text": {},
-            "textMode": "auto"
+            "textMode": "auto",
+            "mode": "markdown",
+            "content": "### Not configured\n\nEnvoy is not deployed: this cluster uses internal Kafka listeners."
           },
           "pluginVersion": "9.5.6",
           "targets": [
@@ -749,11 +699,12 @@ data:
               "instant": true,
               "interval": "",
               "legendFormat": "",
-              "refId": "B"
+              "refId": "B",
+              "hide": true
             }
           ],
           "title": "Envoy Unhealthy Kafka",
-          "type": "stat"
+          "type": "text"
         },
         {
           "datasource": "$data_source",
@@ -902,7 +853,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum(kafka:cluster:partition:atminisr{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
+              "expr": "sum(max by (topic, partition) (kafka_cluster_partition_atminisr{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}))",
               "format": "time_series",
               "hide": false,
               "instant": true,
@@ -982,7 +933,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum(kafka:cluster:partition:underminisr{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
+              "expr": "sum(max by (topic, partition) (kafka_cluster_partition_underminisr{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}))",
               "format": "time_series",
               "hide": false,
               "instant": true,
@@ -997,7 +948,7 @@ data:
         },
         {
           "datasource": "$data_source",
-          "description": "",
+          "description": "Envoy is not deployed: this cluster uses internal Kafka listeners. Original query targets are retained, hidden, for use if that integration is installed.",
           "fieldConfig": {
             "defaults": {
               "mappings": [
@@ -1047,7 +998,9 @@ data:
               "values": false
             },
             "text": {},
-            "textMode": "auto"
+            "textMode": "auto",
+            "mode": "markdown",
+            "content": "### Not configured\n\nEnvoy is not deployed: this cluster uses internal Kafka listeners."
           },
           "pluginVersion": "9.5.6",
           "targets": [
@@ -1056,11 +1009,12 @@ data:
               "instant": true,
               "interval": "",
               "legendFormat": "{{broker_group}}",
-              "refId": "A"
+              "refId": "A",
+              "hide": true
             }
           ],
           "title": "Envoy Instances",
-          "type": "stat"
+          "type": "text"
         },
         {
           "datasource": "$data_source",
@@ -1125,7 +1079,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "count(quorum_size{namespace=\"$kubernetes_namespace\", job=~\".+-headless\"})",
+              "expr": "count(quorum_size{namespace=\"zookeeper\", job=~\".+-headless\"})",
               "format": "time_series",
               "hide": false,
               "instant": true,
@@ -1204,7 +1158,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "count(leader_uptime{namespace=\"$kubernetes_namespace\", job=~\".+-headless\"})",
+              "expr": "count(leader_uptime{namespace=\"zookeeper\", job=~\".+-headless\"})",
               "format": "time_series",
               "hide": false,
               "instant": true,
@@ -1269,7 +1223,7 @@ data:
           "targets": [
             {
               "exemplar": true,
-              "expr": "digest_mismatches_count{namespace=\"$kubernetes_namespace\"} > 0",
+              "expr": "digest_mismatches_count{namespace=\"zookeeper\"}",
               "interval": "",
               "legendFormat": "{{pod}}",
               "refId": "A"
@@ -1359,7 +1313,7 @@ data:
         },
         {
           "datasource": "$data_source",
-          "description": "Total remaining capacity in Kafka",
+          "description": "Replica-log bytes and requested PVC capacity. Local-path requests are not quotas; these values do not measure physical free disk space.",
           "fieldConfig": {
             "defaults": {
               "mappings": [
@@ -1416,21 +1370,21 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum(kubelet_volume_stats_available_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\"$cluster_name.*\"})",
+              "expr": "sum(kminion_kafka_broker_log_dir_size_total_bytes{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "instant": true,
               "interval": "",
-              "legendFormat": "Remaining",
+              "legendFormat": "Replica-log bytes",
               "refId": "A"
             },
             {
-              "expr": "sum by(cluster ) (label_replace(kubelet_volume_stats_capacity_bytes{namespace=\"$kubernetes_namespace\", persistentvolumeclaim=~\"$cluster_name.*\"}, \"cluster\", \"$1\", \"persistentvolumeclaimi\", \"(.+)-([0-9]+)-storage-.*\"))",
+              "expr": "sum(kube_persistentvolumeclaim_resource_requests_storage_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\"$cluster_name-[0-9]+-storage-.*\"})",
               "instant": true,
               "interval": "",
-              "legendFormat": "Total",
+              "legendFormat": "Requested PVC bytes (not quota)",
               "refId": "B"
             }
           ],
-          "title": "Kafka Disk Capacity",
+          "title": "Kafka log bytes / requested storage",
           "type": "stat"
         },
         {
@@ -1492,7 +1446,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum(kafka_server_replicamanager_reassigningpartitions{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"})",
+              "expr": "sum(kafka_server_replicamanager_reassigningpartitions{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"})",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1577,7 +1531,7 @@ data:
         },
         {
           "datasource": "$data_source",
-          "description": "Total number of consumer groups in cluster",
+          "description": "All consumer groups reported by Adobe KMinion, including empty groups with committed offsets.",
           "fieldConfig": {
             "defaults": {
               "mappings": [
@@ -1637,7 +1591,7 @@ data:
           "targets": [
             {
               "exemplar": true,
-              "expr": "max(kminion_kafka_consumer_group_info_count{namespace=\"$kubernetes_namespace\"})",
+              "expr": "max(kminion_kafka_consumer_group_info_count{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"})",
               "instant": false,
               "interval": "",
               "legendFormat": "",
@@ -1780,7 +1734,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_messagesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[3m])) [${__range_s}s:3m] ) > 0\n",
+              "expr": "sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_messagesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\",brokerId=~\"$kafka_broker\"}[3m])) [${__range_s}s:3m] )\n",
               "format": "table",
               "instant": true,
               "interval": "",
@@ -1917,7 +1871,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[90s])) [${__range_s}s:90s] ) > 0",
+              "expr": "sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\",brokerId=~\"$kafka_broker\"}[90s])) [${__range_s}s:90s] )",
               "format": "table",
               "instant": true,
               "interval": "90s",
@@ -2054,7 +2008,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[90s])) [${__range_s}s:90s] ) > 0",
+              "expr": "sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\",brokerId=~\"$kafka_broker\"}[90s])) [${__range_s}s:90s] )",
               "format": "table",
               "instant": true,
               "interval": "90s",
@@ -2079,7 +2033,7 @@ data:
         },
         {
           "datasource": "$data_source",
-          "description": "",
+          "description": "Kafka log bytes summed across physical replicas; includes replication and is not unique payload size.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2107,7 +2061,8 @@ data:
                     "value": 80
                   }
                 ]
-              }
+              },
+              "unit": "bytes"
             },
             "overrides": [
               {
@@ -2189,16 +2144,16 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum by (topic) (kafka:log:size:topic:broker{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}) > 0",
+              "expr": "kminion_kafka_topic_log_dir_size_total_bytes{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic_name=~\"$kafka_topic\"}",
               "format": "table",
               "instant": true,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "{{topic_name}}",
               "refId": "A"
             }
           ],
-          "title": "Topics by size",
+          "title": "Topics by replica-log size",
           "transformations": [
             {
               "id": "organize",
@@ -2215,7 +2170,7 @@ data:
         },
         {
           "datasource": "$data_source",
-          "description": "",
+          "description": "Configured partition count per topic, obtained from Adobe KMinion Kafka metadata.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2324,12 +2279,12 @@ data:
           "targets": [
             {
               "exemplar": true,
-              "expr": "sum(kminion_kafka_topic_info_partitions_count{namespace=\"$kubernetes_namespace\"}) by (topic_name)",
+              "expr": "max by (topic_name) (kminion_kafka_topic_info_partitions_count{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic_name=~\"$kafka_topic\"})",
               "format": "table",
               "hide": false,
               "instant": true,
               "interval": "",
-              "legendFormat": "{{topic}}",
+              "legendFormat": "{{topic_name}}",
               "refId": "B"
             }
           ],
@@ -2454,7 +2409,7 @@ data:
           "pluginVersion": "9.5.6",
           "targets": [
             {
-              "expr": "sum(kafka_server_fetcherlagmetrics_consumerlag{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}) by (topic) > 0",
+              "expr": "sum(kafka_server_fetcherlagmetrics_consumerlag{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\",brokerId=~\"$kafka_broker\"}) by (topic)",
               "format": "table",
               "instant": true,
               "interval": "",
@@ -2555,7 +2510,7 @@ data:
           "repeatDirection": "h",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[90s]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",brokerId=~\"$kafka_broker\"}[90s]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2657,7 +2612,7 @@ data:
           "repeatDirection": "h",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_messagesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[90s]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_messagesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",brokerId=~\"$kafka_broker\"}[90s]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2667,7 +2622,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[90s]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",brokerId=~\"$kafka_broker\"}[90s]))",
               "interval": "",
               "legendFormat": "Produce Request Rate",
               "refId": "B"
@@ -2732,7 +2687,7 @@ data:
           "repeatDirection": "h",
           "targets": [
             {
-              "expr": "sum(rate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[90s])) + sum(rate(kafka_server_brokertopicmetrics_replicationbytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[90s]))",
+              "expr": "sum(rate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[90s])) + sum(rate(kafka_server_brokertopicmetrics_replicationbytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[90s]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2809,7 +2764,7 @@ data:
           "repeatDirection": "h",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[90s]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",brokerId=~\"$kafka_broker\"}[90s]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2886,7 +2841,7 @@ data:
           "repeatDirection": "h",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[90s]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",brokerId=~\"$kafka_broker\"}[90s]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2963,7 +2918,7 @@ data:
           "repeatDirection": "h",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_producemessageconversions_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[90s]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_producemessageconversions_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[90s]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2973,7 +2928,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_fetchmessageconversions_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[90s]))",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_fetchmessageconversions_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[90s]))",
               "interval": "",
               "legendFormat": "consume",
               "refId": "B"
@@ -3256,7 +3211,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\",topic=~\"$kafka_topic\", topic!=\"\"}[1m])) by (brokerId)",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\",topic=~\"$kafka_topic\", topic!=\"\"}[1m])) by (brokerId)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -3266,7 +3221,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\",topic=~\"$kafka_topic\", topic!=\"\"}[1m]))  by (brokerId)",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\",topic=~\"$kafka_topic\", topic!=\"\"}[1m]))  by (brokerId)",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -3475,7 +3430,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_messagesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\",topic=~\"$kafka_topic\",topic!=\"\"}[1m])) by (brokerId)",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_messagesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\",topic=~\"$kafka_topic\",topic!=\"\"}[1m])) by (brokerId)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -3570,7 +3525,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(kafka_server_fetcherlagmetrics_consumerlag{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\", partition=~\"$kafka_partition\"}) by (brokerId,topic,partition) > 0",
+              "expr": "sum(kafka_server_fetcherlagmetrics_consumerlag{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",brokerId=~\"$kafka_broker\", partition=~\"$kafka_partition\"}) by (brokerId,topic,partition)",
               "interval": "",
               "legendFormat": "{{brokerId}}:{{topic}}:{{partition}}",
               "refId": "A"
@@ -3584,7 +3539,7 @@ data:
             "type": "prometheus",
             "uid": "$data_source"
           },
-          "description": "Produce Request Rate.",
+          "description": "Request-rate series follow the topic selection. The separate failure counters are broker-wide because the exporter supplies no topic label on them.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3706,7 +3661,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\",topic=~\"$kafka_topic\",topic!=\"\"}[1m])) by (brokerId)",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\",topic=~\"$kafka_topic\",topic!=\"\"}[1m])) by (brokerId)",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -3719,12 +3674,12 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_failedproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\",topic=~\"$kafka_topic\",topic!=\"\"}[1m])) by (brokerId) > 0",
+              "expr": "sum by (brokerId) (rate(kafka_server_brokertopicmetrics_failedproducerequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[$__rate_interval]))",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "failed-{{brokerId}}",
+              "legendFormat": "Broker {{brokerId}} failures (all topics)",
               "refId": "B"
             },
             {
@@ -3747,7 +3702,7 @@ data:
             "type": "prometheus",
             "uid": "$data_source"
           },
-          "description": "Fetch Request Rate",
+          "description": "Request-rate series follow the topic selection. The separate failure counters are broker-wide because the exporter supplies no topic label on them.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3888,7 +3843,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\",topic=~\"$kafka_topic\",topic!=\"\"}[1m])) by (brokerId)",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_totalfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\",topic=~\"$kafka_topic\",topic!=\"\"}[1m])) by (brokerId)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -3900,11 +3855,11 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "  sum(irate(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\",topic=~\"$kafka_topic\",topic!=\"\"}[1m])) by (brokerId) > 0",
+              "expr": "sum by (brokerId) (rate(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[$__rate_interval]))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "failed-{{brokerId}}",
+              "legendFormat": "Broker {{brokerId}} failures (all topics)",
               "refId": "B"
             },
             {
@@ -4175,7 +4130,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "(max_over_time(kafka_cruisecontrol_executor_replica_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
+              "expr": "(max_over_time(kafka_cruisecontrol_executor_replica_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval]))",
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
@@ -4183,7 +4138,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "(max_over_time(kafka_cruisecontrol_executor_leadership_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
+              "expr": "(max_over_time(kafka_cruisecontrol_executor_leadership_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval]))",
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
@@ -4191,7 +4146,7 @@ data:
               "refId": "D"
             },
             {
-              "expr": "(max_over_time(kafka_cruisecontrol_executor_intra_broker_replica_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval])>0)",
+              "expr": "(max_over_time(kafka_cruisecontrol_executor_intra_broker_replica_action_completed_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[$__interval]))",
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
@@ -4199,13 +4154,13 @@ data:
               "refId": "E"
             },
             {
-              "expr": "-1 * (kafka_cruisecontrol_anomalydetector_goal_violation_has_unfixable_goals_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"} > 0)",
+              "expr": "-1 * (kafka_cruisecontrol_anomalydetector_goal_violation_has_unfixable_goals_value{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"})",
               "interval": "5m",
               "legendFormat": "has_unfixable_goals",
               "refId": "C"
             },
             {
-              "expr": "max_over_time ( sum by (namespace) (changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[90s]))[10m:10s]) > 0\n",
+              "expr": "max_over_time ( sum by (namespace) (changes(kafka_cruisecontrol_anomalydetector_goal_violation_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[90s]))[10m:10s])\n",
               "hide": false,
               "interval": "5m",
               "intervalFactor": 1,
@@ -4213,7 +4168,7 @@ data:
               "refId": "F"
             },
             {
-              "expr": "max_over_time ( sum by (namespace) (changes(kafka_cruisecontrol_anomalydetector_broker_failure_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[90s]))[10m:10s]) > 0\n",
+              "expr": "max_over_time ( sum by (namespace) (changes(kafka_cruisecontrol_anomalydetector_broker_failure_rate_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-cruisecontrol-.+\"}[90s]))[10m:10s])\n",
               "interval": "5m",
               "legendFormat": "broker-failure",
               "refId": "A"
@@ -4224,7 +4179,7 @@ data:
         },
         {
           "datasource": "$data_source",
-          "description": "In the positive Y, number of active connections, in the negative Y, number of overflowing connections. The later should be 0. ",
+          "description": "Envoy connection telemetry is not configured because there is no external Envoy listener. Original query targets are retained, hidden, for use if that integration is installed.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4295,14 +4250,16 @@ data:
             "tooltip": {
               "mode": "multi",
               "sort": "desc"
-            }
+            },
+            "mode": "markdown",
+            "content": "### Not configured\n\nEnvoy connection telemetry is not configured because there is no external Envoy listener."
           },
           "pluginVersion": "8.5.6",
           "targets": [
             {
               "exemplar": true,
               "expr": "sum by (envoy_cluster_name)(envoy_cluster_upstream_cx_active{namespace=\"$kubernetes_namespace\", envoy_cluster_name=~\"broker.*\"})",
-              "hide": false,
+              "hide": true,
               "interval": "",
               "legendFormat": "active-{{envoy_cluster_name}}",
               "refId": "B"
@@ -4310,18 +4267,18 @@ data:
             {
               "exemplar": true,
               "expr": "sum by (envoy_cluster_name)(envoy_cluster_upstream_cx_overflow{namespace=\"$kubernetes_namespace\",envoy_cluster_name=~\"broker.*\"}) * -1 < 0",
-              "hide": false,
+              "hide": true,
               "interval": "",
               "legendFormat": "overflow-{{envoy_cluster_name}}",
               "refId": "A"
             }
           ],
           "title": "Envoy connections",
-          "type": "timeseries"
+          "type": "text"
         },
         {
           "datasource": "$data_source",
-          "description": "Shows the disk in cluster which are over-used - (size wise) compared to avg on that broker",
+          "description": "Kafka replica-log bytes by broker. Requested PVC capacity is a scheduling request, not a local-path quota or filesystem free-space measurement.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4349,7 +4306,8 @@ data:
                     "color": "light-purple"
                   }
                 ]
-              }
+              },
+              "unit": "bytes"
             },
             "overrides": [
               {
@@ -4443,17 +4401,17 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum by(broker,persistentvolumeclaim) (label_replace ( (kubelet_volume_stats_available_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\"pipeline-kafka.*\"}), \"broker\", \"$1\", \"persistentvolumeclaim\", \"pipeline-kafka-([0-9]+)-.+\"))\n\n  < on (broker) group_left()\n\n  (\n0.8 * avg by (broker)(sum by(broker,persistentvolumeclaim) (label_replace ( (kubelet_volume_stats_available_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\"pipeline-kafka.*\"}), \"broker\", \"$1\", \"persistentvolumeclaim\", \"pipeline-kafka-([0-9]+)-.+\")))\n\n  )",
+              "expr": "sum by (brokerId) (label_replace(kminion_kafka_broker_log_dir_size_total_bytes{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",broker_id=~\"$kafka_broker\"}, \"brokerId\", \"$1\", \"broker_id\", \"(.+)\"))",
               "format": "table",
               "hide": false,
               "instant": true,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "Broker {{brokerId}} logs",
               "refId": "A"
             }
           ],
-          "title": "Unbalanced disks in kafka cluster",
+          "title": "Replica-log bytes by broker",
           "transformations": [
             {
               "id": "filterFieldsByName",
@@ -4471,114 +4429,71 @@ data:
           "type": "table"
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": "$data_source",
-          "fill": 0,
-          "fillGradient": 0,
           "gridPos": {
             "h": 7,
             "w": 6,
             "x": 10,
             "y": 43
           },
-          "hiddenSeries": false,
           "id": 117,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": true,
-            "min": false,
-            "show": true,
-            "sort": "max",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
           "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "8.5.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [
-            {
-              "$$hashKey": "object:177",
-              "alias": "/fetch-failed.*/",
-              "color": "#F2495C",
-              "yaxis": 2
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            {
-              "$$hashKey": "object:184",
-              "alias": "/req-errors.*/",
-              "bars": true,
-              "color": "#FFA6B0",
-              "lines": false
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
             }
-          ],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          },
+          "pluginVersion": "13.3.0",
           "targets": [
             {
-              "expr": "sum by(brokerId, error) (rate(kafka_network_requestmetrics_errors_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",error!=\"NONE\"}[3m])) > 0",
+              "expr": "sum by(brokerId, error) (rate(kafka_network_requestmetrics_errors_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",error!=\"NONE\"}[3m]))",
               "hide": false,
               "interval": "",
               "legendFormat": "req-errors-{{brokerId}}-{{error}}",
               "refId": "B"
             },
             {
-              "expr": "sum by (brokerId,topic) (rate(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\",topic!=\"\",pod=~\"$cluster_name-($kafka_broker)\"}[3m])) > 0",
+              "expr": "sum by (brokerId) (rate(kafka_server_brokertopicmetrics_failedfetchrequests_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[$__rate_interval]))",
               "interval": "",
-              "legendFormat": "failed-fetches-{{brokerId}}:{{topic}}",
+              "legendFormat": "Broker {{brokerId}} failed fetches",
               "refId": "A"
             },
             {
-              "expr": "sum by(brokerId) (rate(kafka_server_replica_fetcher_metrics_connection_close_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}[3m])) > 0",
+              "expr": "sum by(brokerId) (rate(kafka_server_replica_fetcher_metrics_connection_close{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}[3m]))",
               "hide": false,
               "interval": "",
               "legendFormat": "fetch-failed-connections-{{brokerId}}",
               "refId": "C"
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
           "title": "Errors",
-          "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": true
+          "type": "timeseries",
+          "description": "Broker-wide request failures and replica-fetch connection closes. Real zero-valued failure counters remain visible when healthy.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              }
             },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false
+            "overrides": []
           }
         },
         {
@@ -4661,7 +4576,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(kafka_server_replicamanager_reassigningpartitions{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}) by (brokerId) > 0",
+              "expr": "sum(kafka_server_replicamanager_reassigningpartitions{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}) by (brokerId)",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -4692,7 +4607,7 @@ data:
                 "type": "prometheus",
                 "uid": "${data_source}"
               },
-              "description": "",
+              "description": "Adobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated. Original query targets are retained, hidden, for use if that integration is installed.",
               "fieldConfig": {
                 "defaults": {
                   "color": {
@@ -4747,7 +4662,9 @@ data:
                     "desc": true,
                     "displayName": "Value"
                   }
-                ]
+                ],
+                "mode": "markdown",
+                "content": "### Not configured\n\nAdobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated."
               },
               "pluginVersion": "8.5.6",
               "targets": [
@@ -4760,7 +4677,7 @@ data:
                   "exemplar": false,
                   "expr": "sum_over_time(sum by (ims_client_id) (increase(kafka_ims_handler_metrics_valid_token_count{namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[90s]))[${__range_s}s:90s] ) > 0",
                   "format": "table",
-                  "hide": false,
+                  "hide": true,
                   "instant": true,
                   "interval": "90s",
                   "legendFormat": "{{ims_client_id}}",
@@ -4795,14 +4712,14 @@ data:
                   }
                 }
               ],
-              "type": "table"
+              "type": "text"
             },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "${data_source}"
               },
-              "description": "",
+              "description": "Adobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated. Original query targets are retained, hidden, for use if that integration is installed.",
               "fieldConfig": {
                 "defaults": {
                   "color": {
@@ -4856,7 +4773,9 @@ data:
                     "desc": true,
                     "displayName": "Value"
                   }
-                ]
+                ],
+                "mode": "markdown",
+                "content": "### Not configured\n\nAdobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated."
               },
               "pluginVersion": "8.5.6",
               "targets": [
@@ -4868,7 +4787,7 @@ data:
                   "exemplar": false,
                   "expr": "sum_over_time(sum by (principal,resourceType) (increase(kafka_ims_authorization_metrics_unauthorized_count{namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[90s]))[${__range_s}s:90s] ) > 0",
                   "format": "table",
-                  "hide": false,
+                  "hide": true,
                   "instant": true,
                   "interval": "90s",
                   "legendFormat": "{{topic}}",
@@ -4906,14 +4825,14 @@ data:
                   }
                 }
               ],
-              "type": "table"
+              "type": "text"
             },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "${data_source}"
               },
-              "description": "",
+              "description": "Adobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated. Original query targets are retained, hidden, for use if that integration is installed.",
               "fieldConfig": {
                 "defaults": {
                   "color": {
@@ -4981,7 +4900,9 @@ data:
                 "tooltip": {
                   "mode": "multi",
                   "sort": "asc"
-                }
+                },
+                "mode": "markdown",
+                "content": "### Not configured\n\nAdobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated."
               },
               "pluginVersion": "8.5.3",
               "targets": [
@@ -4994,7 +4915,7 @@ data:
                   "exemplar": true,
                   "expr": "rate(kafka_ims_authorization_metrics_unauthorized_total_count{namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m])>0",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "{{brokerId}}-{{resourceType}}",
@@ -5003,14 +4924,14 @@ data:
               ],
               "title": "Unauthorized total requests",
               "transformations": [],
-              "type": "timeseries"
+              "type": "text"
             },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "${data_source}"
               },
-              "description": "",
+              "description": "Adobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated. Original query targets are retained, hidden, for use if that integration is installed.",
               "fieldConfig": {
                 "defaults": {
                   "color": {
@@ -5140,7 +5061,9 @@ data:
                 "tooltip": {
                   "mode": "multi",
                   "sort": "desc"
-                }
+                },
+                "mode": "markdown",
+                "content": "### Not configured\n\nAdobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated."
               },
               "pluginVersion": "8.5.3",
               "targets": [
@@ -5152,7 +5075,7 @@ data:
                   "exemplar": true,
                   "expr": "sum by (brokerId) (rate(kafka_ims_authorization_metrics_authorized_total_count{namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m]))",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "{{brokerId}}",
@@ -5166,7 +5089,7 @@ data:
                   "exemplar": true,
                   "expr": "sum(rate(kafka_ims_authorization_metrics_authorized_total_count{namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m]))",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "total",
@@ -5175,14 +5098,14 @@ data:
               ],
               "title": "Authorized total requests",
               "transformations": [],
-              "type": "timeseries"
+              "type": "text"
             },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "${data_source}"
               },
-              "description": "",
+              "description": "Adobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated. Original query targets are retained, hidden, for use if that integration is installed.",
               "fieldConfig": {
                 "defaults": {
                   "color": {
@@ -5250,7 +5173,9 @@ data:
                 "tooltip": {
                   "mode": "multi",
                   "sort": "desc"
-                }
+                },
+                "mode": "markdown",
+                "content": "### Not configured\n\nAdobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated."
               },
               "pluginVersion": "8.5.3",
               "targets": [
@@ -5262,7 +5187,7 @@ data:
                   "exemplar": true,
                   "expr": "sum by (pipeline_cluster) (rate(kafka_ims_authorization_metrics_authorized_service_count{resourceType=\"topic\",namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m]))",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "service",
@@ -5276,7 +5201,7 @@ data:
                   "exemplar": true,
                   "expr": "sum by (pipeline_cluster) (rate(kafka_ims_authorization_metrics_authorized_user_anonymous_count{resourceType=\"topic\",namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m]))",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "user-anonymous",
@@ -5285,14 +5210,14 @@ data:
               ],
               "title": "Authorized topic requests",
               "transformations": [],
-              "type": "timeseries"
+              "type": "text"
             },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "${data_source}"
               },
-              "description": "",
+              "description": "Adobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated. Original query targets are retained, hidden, for use if that integration is installed.",
               "fieldConfig": {
                 "defaults": {
                   "color": {
@@ -5360,7 +5285,9 @@ data:
                 "tooltip": {
                   "mode": "multi",
                   "sort": "desc"
-                }
+                },
+                "mode": "markdown",
+                "content": "### Not configured\n\nAdobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated."
               },
               "pluginVersion": "8.5.3",
               "targets": [
@@ -5372,7 +5299,7 @@ data:
                   "exemplar": true,
                   "expr": "sum by (pipeline_cluster) (rate(kafka_ims_authorization_metrics_authorized_service_count{resourceType=\"group\",namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m]))",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "service",
@@ -5386,7 +5313,7 @@ data:
                   "exemplar": true,
                   "expr": "sum by (pipeline_cluster) (rate(kafka_ims_authorization_metrics_authorized_user_anonymous_count{resourceType=\"group\",namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m]))",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "user-anonymous",
@@ -5395,14 +5322,14 @@ data:
               ],
               "title": "Authorized consumer group requests",
               "transformations": [],
-              "type": "timeseries"
+              "type": "text"
             },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "${data_source}"
               },
-              "description": "",
+              "description": "Adobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated. Original query targets are retained, hidden, for use if that integration is installed.",
               "fieldConfig": {
                 "defaults": {
                   "color": {
@@ -5470,7 +5397,9 @@ data:
                 "tooltip": {
                   "mode": "multi",
                   "sort": "desc"
-                }
+                },
+                "mode": "markdown",
+                "content": "### Not configured\n\nAdobe IMS authentication/authorization telemetry is not configured in this plaintext Kafka setup. Kafka request-error panels remain active; no zero-valued authentication result is fabricated."
               },
               "pluginVersion": "8.5.3",
               "targets": [
@@ -5482,7 +5411,7 @@ data:
                   "exemplar": true,
                   "expr": "sum by (pipeline_cluster) (rate(kafka_ims_authorization_metrics_authorized_service_count{resourceType=\"cluster\",namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m]))",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "service",
@@ -5496,7 +5425,7 @@ data:
                   "exemplar": true,
                   "expr": "sum by (pipeline_cluster) (rate(kafka_ims_authorization_metrics_authorized_user_anonymous_count{resourceType=\"cluster\",namespace=\"$kubernetes_namespace\", kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m]))",
                   "format": "time_series",
-                  "hide": false,
+                  "hide": true,
                   "instant": false,
                   "interval": "",
                   "legendFormat": "user-anonymous",
@@ -5505,7 +5434,7 @@ data:
               ],
               "title": "Authorized cluster requests",
               "transformations": [],
-              "type": "timeseries"
+              "type": "text"
             }
           ],
           "title": "Authorization",
@@ -5605,14 +5534,14 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "min(sum by(pod,container) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)\",container=\"kafka\", resource=\"cpu\"}))",
+              "expr": "min(sum by(pod,container) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)-.+\",container=\"kafka\", resource=\"cpu\"}))",
               "hide": false,
               "interval": "",
               "legendFormat": "kafka pod cpu limit",
               "refId": "B"
             },
             {
-              "expr": "irate(process_cpu_seconds_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\"}[1m])",
+              "expr": "irate(process_cpu_seconds_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\", brokerId=~\"$kafka_broker\"}[1m])",
               "hide": false,
               "interval": "",
               "legendFormat": "used-{{pod}}",
@@ -5706,7 +5635,7 @@ data:
               "datasource": {
                 "uid": "$data_source"
               },
-              "expr": "sum(container_memory_usage_bytes{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)\",container=\"kafka\"}) by (pod)",
+              "expr": "sum(container_memory_usage_bytes{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)-.+\",container=\"kafka\"}) by (pod)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -5718,7 +5647,7 @@ data:
                 "uid": "$data_source"
               },
               "editorMode": "code",
-              "expr": "min(sum (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\", resource=\"memory\", pod=~\"$cluster_name-($kafka_broker)\", container=~\"kafka\"}) by(pod,container))",
+              "expr": "min(sum (kube_pod_container_resource_limits{job=\"kube-state-metrics\", namespace=\"$kubernetes_namespace\", resource=\"memory\", pod=~\"$cluster_name-($kafka_broker)-.+\", container=~\"kafka\"}) by(pod,container))",
               "legendFormat": "max-mem",
               "range": true,
               "refId": "B"
@@ -5727,7 +5656,7 @@ data:
               "datasource": {
                 "uid": "$data_source"
               },
-              "expr": "process_resident_memory_bytes{namespace=\"$kubernetes_namespace\",  pod=~\"$cluster_name-($kafka_broker)\", brokerId=~\".+\"}\t",
+              "expr": "process_resident_memory_bytes{namespace=\"$kubernetes_namespace\",  brokerId=~\"$kafka_broker\", brokerId=~\".+\"}\t",
               "legendFormat": "rss-{{pod}}",
               "refId": "D"
             }
@@ -5740,7 +5669,7 @@ data:
             "type": "prometheus",
             "uid": "$data_source"
           },
-          "description": "Kafka Broker Pods Available Disk Space",
+          "description": "Replica-log size divided by the broker PVC request. This is not physical filesystem utilization, excludes indexes/other files, and does not imply a storage quota.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5781,11 +5710,16 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.7
                   },
                   {
                     "color": "red",
-                    "value": 80
+                    "value": 0.9
                   }
                 ]
               },
@@ -5830,23 +5764,23 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\".*kafka.*\"}) / (sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\".*kafka.*\"}))",
+              "expr": "sum by (brokerId) (label_replace(kminion_kafka_broker_log_dir_size_total_bytes{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",broker_id=~\"$kafka_broker\"}, \"brokerId\", \"$1\", \"broker_id\", \"(.+)\")) / on (brokerId) (sum by (brokerId) (label_replace(kube_persistentvolumeclaim_resource_requests_storage_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\"$cluster_name-[0-9]+-storage-.*\"}, \"brokerId\", \"$1\", \"persistentvolumeclaim\", \"$cluster_name-([0-9]+)-storage-.*\")))",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{persistentvolumeclaim}}",
+              "legendFormat": "Broker {{brokerId}}",
               "refId": "A"
             }
           ],
-          "title": "Available Disk Space",
+          "title": "Log bytes / requested capacity",
           "type": "timeseries"
         },
         {
           "datasource": {
             "uid": "$data_source"
           },
-          "description": "Kafka Broker Pods Disk Usage (Aggregated by broker)",
+          "description": "Kafka replica-log bytes by broker. Requested PVC capacity is a scheduling request, not a local-path quota or filesystem free-space measurement.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5895,7 +5829,7 @@ data:
                   }
                 ]
               },
-              "unit": "decbytes"
+              "unit": "bytes"
             },
             "overrides": []
           },
@@ -5922,30 +5856,30 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum by (broker_id) (label_replace(kubelet_volume_stats_used_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\".*kafka.*\"}, \"broker_id\", \"$1\",\"persistentvolumeclaim\", \"(.+)-storage(.*)\"))",
+              "expr": "sum by (brokerId) (label_replace(kminion_kafka_broker_log_dir_size_total_bytes{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",broker_id=~\"$kafka_broker\"}, \"brokerId\", \"$1\", \"broker_id\", \"(.+)\"))",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{broker_id}}",
+              "legendFormat": "Broker {{brokerId}} logs",
               "refId": "A"
             },
             {
-              "expr": "min(sum by (broker_id)\n(label_replace(\nkubelet_volume_stats_capacity_bytes{namespace=\"$kubernetes_namespace\", persistentvolumeclaim=~\"$cluster_name.*\"}\n,\"broker_id\", \"$1\",\"persistentvolumeclaim\", \"(.+)-storage(.*)\")))",
+              "expr": "sum by (brokerId) (label_replace(kube_persistentvolumeclaim_resource_requests_storage_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\"$cluster_name-[0-9]+-storage-.*\"}, \"brokerId\", \"$1\", \"persistentvolumeclaim\", \"$cluster_name-([0-9]+)-storage-.*\"))",
               "hide": false,
               "interval": "",
-              "legendFormat": "Broker Total Storage",
+              "legendFormat": "Broker {{brokerId}} requested",
               "refId": "B"
             }
           ],
-          "title": "Disk Usage (Broker distribution)",
+          "title": "Broker log bytes / requested bytes",
           "type": "timeseries"
         },
         {
           "datasource": {
             "uid": "$data_source"
           },
-          "description": "Zookeeper Pods Disk Usage",
+          "description": "Requested capacity for each ZooKeeper PVC. Actual PVC filesystem usage/free space is not exposed by the kind local-path provisioner.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -5981,7 +5915,6 @@ data:
               },
               "decimals": 1,
               "mappings": [],
-              "max": 1,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -5994,7 +5927,7 @@ data:
                   }
                 ]
               },
-              "unit": "percentunit"
+              "unit": "bytes"
             },
             "overrides": [
               {
@@ -6034,16 +5967,16 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum by (persistentvolumeclaim) (kubelet_volume_stats_available_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\".*zookeeper.*\"}) / ( sum by (persistentvolumeclaim) (kubelet_volume_stats_capacity_bytes{namespace=\"$kubernetes_namespace\",persistentvolumeclaim=~\".*zookeeper.*\"}))",
+              "expr": "kube_persistentvolumeclaim_resource_requests_storage_bytes{namespace=\"zookeeper\",persistentvolumeclaim=~\"data-zk-.+\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{persistentvolumeclaim}}",
+              "legendFormat": "{{persistentvolumeclaim}} requested",
               "refId": "A"
             }
           ],
-          "title": "Available Disk Space (Zookeeper)",
+          "title": "ZooKeeper requested PVC capacity",
           "type": "timeseries"
         },
         {
@@ -6146,7 +6079,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "100 - (kafka_network_socketserver_networkprocessoravgidle_percent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}*100)",
+              "expr": "100 - (kafka_network_socketserver_networkprocessoravgidle_percent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}*100)",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -6155,7 +6088,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "100-irate(kafka_server_kafkarequesthandlerpool_requesthandleravgidlepercent_count{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[1m])/10000000 > 0",
+              "expr": "clamp(100 * (1 - kafka_server_kafkarequesthandlerpool_requesthandleravgidle_oneminuterate_percent{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}), 0, 100)",
               "hide": false,
               "interval": "",
               "legendFormat": "handlers-{{brokerId}}",
@@ -6243,7 +6176,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(jvm_memory_bytes_used{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)\",kafka_cr=\"$cluster_name\"}) by (pod)",
+              "expr": "sum(jvm_memory_used_bytes{namespace=\"$kubernetes_namespace\",brokerId=~\"$kafka_broker\",kafka_cr=\"$cluster_name\"}) by (pod)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{pod}}",
@@ -6333,7 +6266,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(rate(jvm_gc_collection_seconds_sum{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)\",kafka_cr=\"$cluster_name\"}[1m])) by (pod,gc) > 0",
+              "expr": "sum(rate(jvm_gc_collection_seconds_sum{namespace=\"$kubernetes_namespace\",brokerId=~\"$kafka_broker\",kafka_cr=\"$cluster_name\"}[1m])) by (pod,gc)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -6423,7 +6356,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(rate(jvm_gc_collection_seconds_count{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)\",kafka_cr=\"$cluster_name\"}[1m])) by (pod,gc) > 0",
+              "expr": "sum(rate(jvm_gc_collection_seconds_count{namespace=\"$kubernetes_namespace\",brokerId=~\"$kafka_broker\",kafka_cr=\"$cluster_name\"}[1m])) by (pod,gc)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -6515,7 +6448,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "java_lang_operatingsystem_openfiledescriptorcount{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)\",kafka_cr=\"$cluster_name\"}/java_lang_operatingsystem_maxfiledescriptorcount{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)\",kafka_cr=\"$cluster_name\"}",
+              "expr": "java_lang_operatingsystem_openfiledescriptorcount{namespace=\"$kubernetes_namespace\",brokerId=~\"$kafka_broker\",kafka_cr=\"$cluster_name\"}/java_lang_operatingsystem_maxfiledescriptorcount{namespace=\"$kubernetes_namespace\",brokerId=~\"$kafka_broker\",kafka_cr=\"$cluster_name\"}",
               "interval": "",
               "legendFormat": "{{app}}-{{brokerId}}",
               "refId": "B"
@@ -6715,187 +6648,121 @@ data:
           "type": "timeseries"
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": {
             "uid": "$data_source"
           },
-          "fill": 0,
-          "fillGradient": 0,
           "gridPos": {
             "h": 7,
             "w": 5,
             "x": 10,
             "y": 66
           },
-          "hiddenSeries": false,
           "id": 91,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "hideEmpty": false,
-            "hideZero": false,
-            "max": true,
-            "min": false,
-            "show": true,
-            "sort": "current",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
           "links": [],
-          "nullPointMode": "null",
           "options": {
-            "alertThreshold": true
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
           },
           "paceLength": 10,
-          "percentage": false,
-          "pluginVersion": "8.5.6",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": true,
-          "steppedLine": false,
+          "pluginVersion": "13.3.0",
           "targets": [
             {
-              "expr": "topk(30, kafka:log:size:topic:broker{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\"})",
+              "expr": "topk(30, sum by (brokerId, topic) (kafka_log_log_size{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\",topic=~\"$kafka_topic\"}))",
               "interval": "",
-              "legendFormat": "{{brokerId}}:{{topic}}",
+              "legendFormat": "{{topic}} / {{brokerId}}",
               "refId": "B"
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
           "title": "Topic Size per Broker",
-          "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "decimals": 2,
-              "format": "bytes",
-              "logBase": 1,
-              "min": "0",
-              "show": true
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                }
+              }
             },
-            {
-              "decimals": 2,
-              "format": "short",
-              "label": "",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false
+            "overrides": []
           }
         },
         {
-          "aliasColors": {},
-          "bars": true,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": {
             "uid": "$data_source"
           },
           "description": "Top 10 topics wrt to number of segments per broker",
-          "fill": 0,
-          "fillGradient": 0,
           "gridPos": {
             "h": 7,
             "w": 5,
             "x": 15,
             "y": 66
           },
-          "hiddenSeries": false,
           "id": 104,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": true,
-            "min": false,
-            "show": true,
-            "sort": "current",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": false,
-          "linewidth": 1,
           "links": [],
-          "nullPointMode": "null",
           "options": {
-            "alertThreshold": true
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
           },
           "paceLength": 10,
-          "percentage": false,
-          "pluginVersion": "8.5.6",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": true,
-          "steppedLine": false,
+          "pluginVersion": "13.3.0",
           "targets": [
             {
-              "expr": "topk(30, kafka:log:numlogsegments{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\",topic=~\"$kafka_topic\"})",
+              "expr": "topk(30, sum by (brokerId, topic) (kafka_log_log_numlogsegments{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\",topic=~\"$kafka_topic\"}))",
               "format": "time_series",
               "instant": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{brokerId}}::{{topic}}",
+              "legendFormat": "{{topic}} / {{brokerId}}",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
           "title": "Topic Segments #",
-          "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "decimals": 0,
-              "format": "none",
-              "logBase": 1,
-              "min": "0",
-              "show": true
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                }
+              }
             },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false
+            "overrides": []
           }
         },
         {
@@ -6991,13 +6858,13 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[1m])",
+              "expr": "irate(kafka_network_requestmetrics_totaltimems_count_total{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[1m])",
               "hide": true,
               "legendFormat": "{{brokerId}}",
               "refId": "A"
             },
             {
-              "expr": "kafka_network_requestmetrics_totaltimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}",
+              "expr": "kafka_network_requestmetrics_totaltimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "interval": "",
               "legendFormat": "q{{brokerId}}",
               "refId": "B"
@@ -7082,13 +6949,13 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[1m])",
+              "expr": "irate(kafka_network_requestmetrics_totaltimems_count_total{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[1m])",
               "hide": true,
               "legendFormat": "{{brokerId}}",
               "refId": "A"
             },
             {
-              "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}",
+              "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "interval": "",
               "legendFormat": "{{brokerId}}",
               "refId": "B"
@@ -7173,13 +7040,13 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "irate(kafka_network_requestmetrics_totaltimems_count{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[1m])",
+              "expr": "irate(kafka_network_requestmetrics_totaltimems_count_total{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[1m])",
               "hide": true,
               "legendFormat": "{{brokerId}}",
               "refId": "A"
             },
             {
-              "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}",
+              "expr": "kafka_network_requestmetrics_totaltimems{request=\"FetchFollower\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "interval": "",
               "legendFormat": "q{{brokerId}}",
               "refId": "B"
@@ -7189,248 +7056,153 @@ data:
           "type": "timeseries"
         },
         {
-          "aliasColors": {},
-          "bars": true,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": {
             "uid": "$data_source"
           },
-          "fill": 0,
-          "fillGradient": 0,
           "gridPos": {
             "h": 7,
             "w": 8,
             "x": 0,
             "y": 81
           },
-          "hiddenSeries": false,
           "id": 125,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": false,
-            "min": false,
-            "show": false,
-            "total": false,
-            "values": false
-          },
-          "lines": false,
-          "linewidth": 1,
-          "nullPointMode": "null",
           "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "8.5.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [
-            {
-              "alias": "/(\\d+)\\-req\\-queue/",
-              "color": "#73BF69"
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            {
-              "alias": "/(\\d+)\\-req\\-local/",
-              "color": "#F2495C"
-            },
-            {
-              "alias": "/(\\d+)\\-resp\\-send/",
-              "color": "#B877D9"
-            },
-            {
-              "alias": "/(\\d+)\\-resp\\-queue/",
-              "color": "#5794F2"
-            },
-            {
-              "alias": "/(\\d+)\\-req\\-remote/",
-              "color": "#FADE2A"
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
             }
-          ],
-          "spaceLength": 10,
-          "stack": true,
-          "steppedLine": false,
+          },
+          "pluginVersion": "13.3.0",
           "targets": [
             {
-              "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-req-queue",
               "refId": "B"
             },
             {
-              "expr": "kafka_network_requestmetrics_localtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_localtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-req-local",
               "refId": "C"
             },
             {
-              "expr": "kafka_network_requestmetrics_remotetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_remotetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-req-remote",
               "refId": "A"
             },
             {
-              "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-resp-queue",
               "refId": "D"
             },
             {
-              "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"Produce\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-resp-send",
               "refId": "E"
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
           "title": "Broker Produce Request Time Breakdown (p.999)",
-          "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "ms",
-              "logBase": 1,
-              "show": true
+          "type": "timeseries",
+          "description": "Per-component p99.9 request latencies. Component quantiles are not additive, so they are not stacked.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              }
             },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false
+            "overrides": []
           }
         },
         {
-          "aliasColors": {},
-          "bars": true,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": {
             "uid": "$data_source"
           },
-          "description": "",
-          "fill": 0,
-          "fillGradient": 0,
+          "description": "Per-component p99.9 request latencies. Component quantiles are not additive, so they are not stacked.",
           "gridPos": {
             "h": 7,
             "w": 8,
             "x": 8,
             "y": 81
           },
-          "hiddenSeries": false,
           "id": 126,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": false,
-            "min": false,
-            "show": false,
-            "total": false,
-            "values": false
-          },
-          "lines": false,
-          "linewidth": 1,
-          "nullPointMode": "null",
           "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "8.5.6",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [
-            {
-              "alias": "/(\\d+)\\-req\\-queue/",
-              "color": "#73BF69"
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            {
-              "alias": "/(\\d+)\\-req\\-local/",
-              "color": "#F2495C"
-            },
-            {
-              "alias": "/(\\d+)\\-resp\\-send/",
-              "color": "#B877D9"
-            },
-            {
-              "alias": "/(\\d+)\\-resp\\-queue/",
-              "color": "#5794F2"
-            },
-            {
-              "alias": "/(\\d+)\\-req\\-remote/",
-              "color": "#FADE2A"
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
             }
-          ],
-          "spaceLength": 10,
-          "stack": true,
-          "steppedLine": false,
+          },
+          "pluginVersion": "13.3.0",
           "targets": [
             {
-              "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_requestqueuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-req-queue",
               "refId": "B"
             },
             {
-              "expr": "kafka_network_requestmetrics_localtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_localtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-req-local",
               "refId": "C"
             },
             {
-              "expr": "kafka_network_requestmetrics_remotetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_remotetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-req-remote",
               "refId": "A"
             },
             {
-              "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_responsequeuetimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-resp-queue",
               "refId": "D"
             },
             {
-              "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\", quantile=\"0.999\"}>0",
+              "expr": "kafka_network_requestmetrics_responsesendtimems{request=\"FetchConsumer\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\", quantile=\"0.999\"}",
               "legendFormat": "{{brokerId}}-resp-send",
               "refId": "E"
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
           "title": "Broker Consume Request Time Breakdown (p.999)",
-          "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "ms",
-              "logBase": 1,
-              "show": true
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              }
             },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false
+            "overrides": []
           }
         },
         {
@@ -7528,14 +7300,14 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[1m])) by (brokerId)",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "in-{{brokerId}}",
               "refId": "A"
             },
             {
-              "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}[1m])) by (brokerId)",
+              "expr": "sum(irate(kafka_server_brokertopicmetrics_replicationbytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}[1m])) by (brokerId)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "out-{{brokerId}}",
@@ -7546,57 +7318,33 @@ data:
           "type": "timeseries"
         },
         {
-          "aliasColors": {},
-          "bars": true,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": {
             "uid": "$data_source"
           },
-          "fill": 0,
-          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 8,
             "x": 0,
             "y": 88
           },
-          "hiddenSeries": false,
           "id": 121,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": true,
-            "min": false,
-            "show": true,
-            "sort": "current",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": false,
-          "linewidth": 1,
           "links": [],
-          "nullPointMode": "null as zero",
           "options": {
-            "alertThreshold": true
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
           },
           "paceLength": 10,
-          "percentage": false,
-          "pluginVersion": "8.5.6",
-          "pointradius": 0.5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": true,
-          "steppedLine": false,
+          "pluginVersion": "13.3.0",
           "targets": [
             {
-              "expr": "sort_desc(sum(kafka:cluster:broker:topic:urp{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",kafka_cr=\"$cluster_name\", pod=~\"$cluster_name-($kafka_broker)\", topic=~\"$kafka_topic\"}) by (namespace,kafka_cr,brokerId)) ",
+              "expr": "sort_desc(sum(kafka_cluster_partition_underreplicated{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\", brokerId=~\"$kafka_broker\", topic=~\"$kafka_topic\"}) by (namespace,kafka_cr,brokerId)) ",
               "format": "time_series",
               "instant": false,
               "intervalFactor": 1,
@@ -7604,35 +7352,28 @@ data:
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
           "title": "Under Replicated Partitions",
-          "tooltip": {
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "decimals": 0,
-              "format": "short",
-              "logBase": 1,
-              "show": true
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                }
+              }
             },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
+            "overrides": []
           }
         },
         {
@@ -7711,7 +7452,7 @@ data:
           "pluginVersion": "8.5.6",
           "targets": [
             {
-              "expr": "sum(kafka_log_logflushstats_logflushrateandtimems{quantile=\"0.999\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}) by (brokerId)",
+              "expr": "sum(kafka_log_logflushstats_logflushrateandtimems{quantile=\"0.999\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}) by (brokerId)",
               "legendFormat": "{{brokerId}}",
               "refId": "A"
             }
@@ -7720,109 +7461,62 @@ data:
           "type": "timeseries"
         },
         {
-          "aliasColors": {},
-          "bars": true,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": {
             "uid": "$data_source"
           },
-          "fill": 0,
-          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 8,
             "x": 16,
             "y": 88
           },
-          "hiddenSeries": false,
           "id": 161,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": false,
-            "sort": "current",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": false,
-          "linewidth": 1,
           "links": [],
-          "nullPointMode": "null",
           "options": {
-            "alertThreshold": true
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
           },
           "paceLength": 10,
-          "percentage": false,
-          "pluginVersion": "8.5.6",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [
-            {
-              "alias": "/.+BLOCKED/i",
-              "color": "#F2495C"
-            },
-            {
-              "alias": "/.+RUNNABLE/i",
-              "color": "#73BF69"
-            },
-            {
-              "alias": "/.+-WAITING/i",
-              "color": "#FADE2A"
-            },
-            {
-              "alias": "/.+-TIMED_WAITING/i",
-              "color": "#FF9830"
-            }
-          ],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "pluginVersion": "13.3.0",
           "targets": [
             {
-              "expr": "jvm_threads_state{namespace=\"$kubernetes_namespace\",pod=~\"$cluster_name-($kafka_broker)\",kafka_cr=\"$cluster_name\"}",
-              "instant": true,
+              "expr": "jvm_threads_state{namespace=\"$kubernetes_namespace\",brokerId=~\"$kafka_broker\",kafka_cr=\"$cluster_name\"}",
+              "instant": false,
               "interval": "",
               "legendFormat": "{{app}}-{{brokerId}}-{{state}}",
-              "refId": "B"
+              "refId": "B",
+              "range": true
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
           "title": "JVM Threads",
-          "tooltip": {
-            "shared": false,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "series",
-            "show": false,
-            "values": [
-              "total"
-            ]
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "logBase": 2,
-              "min": "0",
-              "show": true
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              }
             },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
+            "overrides": []
           }
         },
         {
@@ -7839,97 +7533,63 @@ data:
           "id": 128,
           "panels": [
             {
-              "aliasColors": {},
-              "bars": false,
-              "dashLength": 10,
-              "dashes": false,
               "datasource": {
                 "uid": "$data_source"
               },
-              "fill": 0,
-              "fillGradient": 0,
               "gridPos": {
                 "h": 7,
                 "w": 6,
                 "x": 0,
                 "y": 94
               },
-              "hiddenSeries": false,
               "id": 131,
-              "legend": {
-                "avg": false,
-                "current": false,
-                "hideEmpty": true,
-                "hideZero": true,
-                "max": false,
-                "min": false,
-                "show": true,
-                "total": false,
-                "values": false
-              },
-              "lines": true,
-              "linewidth": 1,
-              "nullPointMode": "null as zero",
               "options": {
-                "alertThreshold": true
+                "legend": {
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
               },
-              "percentage": false,
-              "pluginVersion": "8.5.6",
-              "pointradius": 2,
-              "points": false,
-              "renderer": "flot",
-              "seriesOverrides": [],
-              "spaceLength": 10,
-              "stack": false,
-              "steppedLine": false,
+              "pluginVersion": "13.3.0",
               "targets": [
                 {
-                  "expr": "sum(kafka_server_zookeeperclientmetrics_zookeeperrequestlatencyms{quantile=\"0.999\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}) by (brokerId)",
+                  "expr": "sum(kafka_server_zookeeperclientmetrics_zookeeperrequestlatencyms{quantile=\"0.999\", namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}) by (brokerId)",
                   "legendFormat": "{{brokerId}}",
                   "refId": "A"
                 }
               ],
-              "thresholds": [],
-              "timeRegions": [],
               "title": "Broker ZK Request Latency",
-              "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-              },
-              "type": "graph",
-              "xaxis": {
-                "mode": "time",
-                "show": true,
-                "values": []
-              },
-              "yaxes": [
-                {
-                  "format": "ms",
-                  "logBase": 1,
-                  "show": true
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ms",
+                  "min": 0,
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 0,
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "mode": "none",
+                      "group": "A"
+                    }
+                  }
                 },
-                {
-                  "format": "short",
-                  "logBase": 1,
-                  "show": true
-                }
-              ],
-              "yaxis": {
-                "align": false
+                "overrides": []
               }
             },
             {
-              "columns": [
-                {
-                  "text": "Current",
-                  "value": "current"
-                }
-              ],
               "datasource": {
                 "uid": "$data_source"
               },
-              "fontSize": "120%",
               "gridPos": {
                 "h": 7,
                 "w": 6,
@@ -7937,46 +7597,51 @@ data:
                 "y": 94
               },
               "id": 134,
-              "showHeader": true,
-              "sort": {
-                "col": 0,
-                "desc": false
-              },
-              "styles": [
-                {
-                  "alias": "Time",
-                  "align": "auto",
-                  "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                  "pattern": "Time",
-                  "type": "date"
-                },
-                {
-                  "alias": "",
-                  "align": "auto",
-                  "colors": [
-                    "rgba(245, 54, 54, 0.9)",
-                    "rgba(237, 129, 40, 0.89)",
-                    "rgba(50, 172, 45, 0.97)"
-                  ],
-                  "decimals": 2,
-                  "pattern": "/.*/",
-                  "thresholds": [],
-                  "type": "number",
-                  "unit": "short"
-                }
-              ],
               "targets": [
                 {
-                  "expr": "kafka_log_logmanager_logdirectoryoffline{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",pod=~\"$cluster_name-($kafka_broker)\"}>0",
-                  "format": "time_series",
+                  "expr": "kafka_log_logmanager_logdirectoryoffline{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",brokerId=~\"$kafka_broker\"}",
+                  "format": "table",
                   "instant": true,
                   "legendFormat": "Broker:{{brokerId}} Disk:{{logDirectory}}",
                   "refId": "A"
                 }
               ],
               "title": "Offline broker disks",
-              "transform": "timeseries_aggregations",
-              "type": "table-old"
+              "type": "table",
+              "pluginVersion": "13.3.0",
+              "description": "Observed offline-directory gauge for every selected broker. Zero is a real healthy sample, not a missing-data fallback.",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  "custom": {
+                    "cellOptions": {
+                      "type": "color-text"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "showHeader": true,
+                "cellHeight": "sm",
+                "footer": {
+                  "show": false
+                }
+              }
             },
             {
               "aliasColors": {},
@@ -8017,7 +7682,9 @@ data:
               ],
               "nullPointMode": "null",
               "options": {
-                "alertThreshold": false
+                "alertThreshold": false,
+                "mode": "markdown",
+                "content": "### Not configured\n\nOrphan-replica detection requires an assignment-aware exporter or recording rules. Broker JMX log size alone cannot identify orphan replicas."
               },
               "percentage": false,
               "pluginVersion": "8.5.6",
@@ -8036,7 +7703,8 @@ data:
                   "instant": false,
                   "interval": "",
                   "legendFormat": "{{topic}}",
-                  "refId": "A"
+                  "refId": "A",
+                  "hide": true
                 }
               ],
               "thresholds": [],
@@ -8047,7 +7715,7 @@ data:
                 "sort": 2,
                 "value_type": "individual"
               },
-              "type": "graph",
+              "type": "text",
               "xaxis": {
                 "mode": "time",
                 "show": true,
@@ -8069,7 +7737,8 @@ data:
               ],
               "yaxis": {
                 "align": false
-              }
+              },
+              "description": "Orphan-replica detection requires an assignment-aware exporter or recording rules. Broker JMX log size alone cannot identify orphan replicas. Original query targets are retained, hidden, for use if that integration is installed."
             },
             {
               "aliasColors": {},
@@ -8079,7 +7748,7 @@ data:
               "datasource": {
                 "uid": "$data_source"
               },
-              "description": "",
+              "description": "Orphan-replica detection requires an assignment-aware exporter or recording rules. It cannot be inferred safely from replica counts alone. Original query targets are retained, hidden, for use if that integration is installed.",
               "fill": 0,
               "fillGradient": 0,
               "gridPos": {
@@ -8111,7 +7780,9 @@ data:
               ],
               "nullPointMode": "null",
               "options": {
-                "alertThreshold": false
+                "alertThreshold": false,
+                "mode": "markdown",
+                "content": "### Not configured\n\nOrphan-replica detection requires an assignment-aware exporter or recording rules. It cannot be inferred safely from replica counts alone."
               },
               "percentage": false,
               "pluginVersion": "8.5.6",
@@ -8130,7 +7801,8 @@ data:
                   "instant": false,
                   "interval": "",
                   "legendFormat": "{{topic}}",
-                  "refId": "A"
+                  "refId": "A",
+                  "hide": true
                 }
               ],
               "thresholds": [],
@@ -8141,7 +7813,7 @@ data:
                 "sort": 2,
                 "value_type": "individual"
               },
-              "type": "graph",
+              "type": "text",
               "xaxis": {
                 "mode": "time",
                 "show": true,
@@ -8182,14 +7854,32 @@ data:
           {
             "current": {
               "selected": false,
-              "text": "ns-team-aep-pipeline-kafka-1-dev",
-              "value": "ns-team-aep-pipeline-kafka-1-dev"
+              "text": "Prometheus",
+              "value": "prometheus"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "multi": false,
+            "name": "data_source",
+            "options": [],
+            "query": "prometheus",
+            "queryValue": "",
+            "refresh": 1,
+            "regex": "/^(?!default)/",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "kafka",
+              "value": "kafka"
             },
             "datasource": {
               "type": "prometheus",
               "uid": "$data_source"
             },
-            "definition": "",
+            "definition": "label_values(kafka_server_app_info_version, namespace)",
             "hide": 0,
             "includeAll": false,
             "label": "Namespace",
@@ -8197,68 +7887,8 @@ data:
             "name": "kubernetes_namespace",
             "options": [],
             "query": {
-              "query": "query_result(kafka_server_app_info_version)",
+              "query": "label_values(kafka_server_app_info_version, namespace)",
               "refId": "Prometheus-kubernetes_namespace-Variable-Query"
-            },
-            "refresh": 1,
-            "regex": "/.*namespace=\"([^\"]*).*/",
-            "skipUrlSync": false,
-            "sort": 0,
-            "tagValuesQuery": "",
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          },
-          {
-            "current": {
-              "selected": false,
-              "text": "pipeline-kafka",
-              "value": "pipeline-kafka"
-            },
-            "datasource": {
-              "type": "prometheus",
-              "uid": "$data_source"
-            },
-            "definition": "query_result(kafka_server_app_info_version{namespace=\"$kubernetes_namespace\"})",
-            "hide": 0,
-            "includeAll": false,
-            "label": "Cluster Name",
-            "multi": false,
-            "name": "cluster_name",
-            "options": [],
-            "query": {
-              "query": "query_result(kafka_server_app_info_version{namespace=\"$kubernetes_namespace\"})",
-              "refId": "Prometheus-cluster_name-Variable-Query"
-            },
-            "refresh": 1,
-            "regex": "/.*kafka_cr=\"([^\"]*).*/",
-            "skipUrlSync": false,
-            "sort": 0,
-            "tagValuesQuery": "",
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          },
-          {
-            "current": {
-              "selected": false,
-              "text": "OR2_1",
-              "value": "OR2_1"
-            },
-            "datasource": {
-              "type": "prometheus",
-              "uid": "$data_source"
-            },
-            "definition": "label_values(kafka_server_replicamanager_leadercount{namespace=\\\"$kubernetes_namespace\\\"}, pipeline_cluster)",
-            "hide": 2,
-            "includeAll": false,
-            "label": "Kafka cluster",
-            "multi": false,
-            "name": "kafka_cluster",
-            "options": [],
-            "query": {
-              "query": "label_values(kafka_server_replicamanager_leadercount{namespace=\"$kubernetes_namespace\"}, pipeline_cluster)",
-              "refId": "Prometheus-kafka_cluster-Variable-Query"
             },
             "refresh": 1,
             "regex": "",
@@ -8270,7 +7900,37 @@ data:
             "useTags": false
           },
           {
-            "allValue": ".*",
+            "current": {
+              "selected": false,
+              "text": "kafka",
+              "value": "kafka"
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$data_source"
+            },
+            "definition": "label_values(kafka_server_app_info_version{namespace=\"$kubernetes_namespace\"}, kafka_cr)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Cluster Name",
+            "multi": false,
+            "name": "cluster_name",
+            "options": [],
+            "query": {
+              "query": "label_values(kafka_server_app_info_version{namespace=\"$kubernetes_namespace\"}, kafka_cr)",
+              "refId": "Prometheus-cluster_name-Variable-Query"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "allValue": "[0-9]+",
             "current": {
               "selected": false,
               "text": "All",
@@ -8280,7 +7940,7 @@ data:
               "type": "prometheus",
               "uid": "$data_source"
             },
-            "definition": "query_result(max_over_time(kafka_server_app_info_version{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}[${__range_s}s]))",
+            "definition": "label_values(kminion_kafka_broker_info{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}, broker_id)",
             "hide": 0,
             "includeAll": true,
             "label": "Broker",
@@ -8288,11 +7948,11 @@ data:
             "name": "kafka_broker",
             "options": [],
             "query": {
-              "query": "query_result(max_over_time(kafka_server_app_info_version{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}[${__range_s}s]))",
+              "query": "label_values(kminion_kafka_broker_info{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}, broker_id)",
               "refId": "Prometheus-kafka_broker-Variable-Query"
             },
             "refresh": 1,
-            "regex": "/.*pod=\"$cluster_name-([^\"]*).*/",
+            "regex": "",
             "skipUrlSync": false,
             "sort": 0,
             "tagValuesQuery": "",
@@ -8311,7 +7971,7 @@ data:
               "type": "prometheus",
               "uid": "$data_source"
             },
-            "definition": "query_result(sort_desc((sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\"}[90s])) [${__range_s}s:90s] ) )+(sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\"}[90s])) [${__range_s}s:90s] ) ) OR (sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\"}[90s])) [${__range_s}s:90s] )) OR (sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\"}[90s])) [${__range_s}s:90s] ) ) ))",
+            "definition": "label_values(kminion_kafka_topic_info{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}, topic_name)",
             "hide": 0,
             "includeAll": true,
             "label": "Topic",
@@ -8319,11 +7979,11 @@ data:
             "name": "kafka_topic",
             "options": [],
             "query": {
-              "query": "query_result(sort_desc((sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\"}[90s])) [${__range_s}s:90s] ) )+(sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\"}[90s])) [${__range_s}s:90s] ) ) OR (sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesin_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\"}[90s])) [${__range_s}s:90s] )) OR (sum_over_time( sum by(topic) (increase(kafka_server_brokertopicmetrics_bytesout_total{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\".*\",topic!=\"\"}[90s])) [${__range_s}s:90s] ) ) ))",
+              "query": "label_values(kminion_kafka_topic_info{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\"}, topic_name)",
               "refId": "Prometheus-kafka_topic-Variable-Query"
             },
             "refresh": 1,
-            "regex": "/.*topic=\"([^\"]*).*/",
+            "regex": "",
             "skipUrlSync": false,
             "sort": 0,
             "tagValuesQuery": "",
@@ -8346,7 +8006,7 @@ data:
               "type": "prometheus",
               "uid": "$data_source"
             },
-            "definition": "query_result(kafka:topic_partition_size:count{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\"})",
+            "definition": "label_values(kminion_kafka_topic_partition_high_water_mark{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic_name=~\"$kafka_topic\"}, partition_id)",
             "hide": 0,
             "includeAll": true,
             "label": "Partition",
@@ -8354,35 +8014,17 @@ data:
             "name": "kafka_partition",
             "options": [],
             "query": {
-              "query": "query_result(kafka:topic_partition_size:count{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic=~\"$kafka_topic\"})",
+              "query": "label_values(kminion_kafka_topic_partition_high_water_mark{namespace=\"$kubernetes_namespace\",kafka_cr=\"$cluster_name\",topic_name=~\"$kafka_topic\"}, partition_id)",
               "refId": "Prometheus-kafka_partition-Variable-Query"
             },
             "refresh": 1,
-            "regex": "/.*partition=\"([^\"]*).*/",
+            "regex": "",
             "skipUrlSync": false,
             "sort": 3,
             "tagValuesQuery": "",
             "tagsQuery": "",
             "type": "query",
             "useTags": false
-          },
-          {
-            "current": {
-              "selected": false,
-              "text": "Prometheus",
-              "value": "Prometheus"
-            },
-            "hide": 0,
-            "includeAll": false,
-            "multi": false,
-            "name": "data_source",
-            "options": [],
-            "query": "prometheus",
-            "queryValue": "",
-            "refresh": 1,
-            "regex": "/^(?!default)/",
-            "skipUrlSync": false,
-            "type": "datasource"
           }
         ]
       },

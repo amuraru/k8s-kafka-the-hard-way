@@ -15,7 +15,7 @@ spec:
     - zookeeper
   endpoints:
   - interval: 10s
-    port: metrics
+    port: tcp-metrics
     path: /metrics
     honorLabels: true
     relabelings:
