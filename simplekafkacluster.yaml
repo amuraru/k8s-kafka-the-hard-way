@@ -421,22 +421,8 @@ spec:
       two.step.purgatory.retention.time.ms=1209600000
       # The maximum number of requests in two-step (verification) purgatory.
       two.step.purgatory.max.requests=25
-    # CapacityConfig describes Cruise Control config capacity.json
-    capacityConfig: |
-      {
-        "brokerCapacities":[
-          {
-            "brokerId": "-1",
-            "capacity": {
-               "DISK": {"/kafka-logs1/kafka": "1024"},
-              "CPU": {"num.cores": "5"},
-              "NW_IN": "300000",
-              "NW_OUT": "300000"
-            },
-            "doc": "This is the default capacity. Capacity unit used for disk is in MB, cpu is in cores, network throughput is in KB."
-          }
-        ]
-      }
+    # Let KOperator generate capacity.json from each broker's storage and resources.
+    # A universal override would hide the different log directories added by autoscaling.
     # ClusterConfigs describes Cruise Control config clusterConfigs.json
     clusterConfig: |
       {

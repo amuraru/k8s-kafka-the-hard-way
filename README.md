@@ -442,6 +442,27 @@ The webhook's custom `payload` sends the flat alert array expected by KOperator 
 Alertmanager's default webhook envelope is not compatible with that receiver.
 Do not deliberately trigger scaling or run the performance tests without checking disk capacity.
 
+Leave `cruiseControlConfig.capacityConfig` unset so KOperator generates per-broker disk,
+CPU, and network capacities from the broker configurations. The initial brokers use
+`/kafka-logs1`, while the scaling rules can create `/kafkalog` volumes with different sizes.
+A universal `brokerId: "-1"` disk-capacity override prevents this generation and causes
+Cruise Control disk operations to fail with `Missing disk information`.
+
+For an existing cluster with the old override, remove only that field. Do not reapply the
+initial six-broker manifest over a cluster that has already added brokers through scaling:
+
+```sh
+kubectl --context kind-kafka --namespace kafka patch kafkacluster kafka \
+  --type=merge -p '{"spec":{"cruiseControlConfig":{"capacityConfig":null}}}'
+kubectl --context kind-kafka --namespace kafka rollout status deployment/kafka-cruisecontrol \
+  --timeout=180s
+```
+
+KOperator regenerates `capacity.json` and updates Cruise Control. Existing Kafka log
+directories and PVCs do not need to be moved or recreated. This also replaces the old
+manual CPU/network estimates with KOperator's generated capacities. Removing a disk still
+requires another disk on that broker to receive its replicas.
+
 Known caveat with the pinned sample rules/operator: background broker requests can exceed the
 sample overload threshold even without client traffic. A `PartitionCountLow` alert without
 `brokerId` can also hit KOperator 0.32.0's failing fallback broker-selection path. Successful
