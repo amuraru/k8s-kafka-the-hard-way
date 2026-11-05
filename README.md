@@ -50,7 +50,7 @@ This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operato
 
 ## Software versions
 
-Release pins checked on 2026-10-30:
+Release pins checked on 2026-11-03:
 
 | Component | Version |
 | --- | --- |
@@ -58,18 +58,21 @@ Release pins checked on 2026-10-30:
 | Helm | 4.3.1 |
 | Kubernetes (kind node image) | 1.36.4 |
 | [cert-manager](https://github.com/cert-manager/cert-manager/releases/tag/v1.21.3) | 1.21.3 |
-| [ZooKeeper operator](https://github.com/adobe/zookeeper-operator/releases/tag/0.2.15-adobe-20260924) | 0.2.15-adobe-20260924 |
+| [ZooKeeper operator](https://github.com/adobe/zookeeper-operator/releases/tag/0.2.15-adobe-20261101) | 0.2.15-adobe-20261101 |
 | ZooKeeper | 3.9.6 |
-| [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/releases/tag/kube-prometheus-stack-92.16.0) | 92.16.0 (Prometheus Operator 0.94.2) |
+| [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/releases/tag/kube-prometheus-stack-92.17.1) | 92.17.1 (Prometheus Operator 0.94.2) |
 | Prometheus (bundled with monitoring chart) | 3.15.1 |
 | Grafana (bundled with monitoring chart) | 13.3.0 |
 | Alertmanager (bundled with monitoring chart) | 0.34.2 |
 | [KOperator](https://github.com/adobe/koperator/releases/tag/0.32.0) | 0.32.0 |
-| [Adobe KMinion image and chart](https://github.com/adobe/kminion/releases/tag/2.3.4-adobe-20261026) | 2.3.4-adobe-20261026 |
+| KOperator metrics auth proxy | 0.23.1 |
+| [Adobe KMinion image and chart](https://github.com/adobe/kminion/releases/tag/2.4.2-adobe-20261102) | 2.4.2-adobe-20261102 |
 | Kafka image | 2.13-3.9.2-jdk21.0.12 |
 | [Cruise Control](https://github.com/adobe/cruise-control/releases/tag/3.1.0-adbe-20261029) | 3.1.0-adbe-20261029 |
 
 Kafka stays on the 3.9 release line because this tutorial uses ZooKeeper; Kafka 4.x requires a separate KRaft migration. Kubernetes 1.36.4 is the newest 1.36 image published for kind 0.33.0 and stays within cert-manager 1.21's [supported Kubernetes versions](https://cert-manager.io/docs/releases/). Prometheus, Grafana, and Alertmanager use the versions bundled with the pinned monitoring chart. Use Helm 4 and a kubectl client within one minor version of the cluster.
+
+ZooKeeper uses the newest published Adobe image, `3.9.6-0.2.15-adobe-20261101`; upstream ZooKeeper 3.9.7 does not yet have a corresponding Adobe image. KOperator stays on its latest stable release, 0.32.0, rather than the 0.33.0 KRaft prerelease. The monitoring chart also updates Grafana's sidecar to 2.14.3. KOperator's metrics auth proxy is explicitly updated to 0.23.1 instead of its chart's older default.
 
 For this constrained local setup, Kafka requests 1 GiB per broker and ZooKeeper requests 1 GiB per member. These sizes are intended for smoke tests, not the performance tests below. The kind `standard` StorageClass uses local-path storage; PVC sizes do not enforce disk quotas, so monitor actual Docker disk usage.
 
@@ -205,13 +208,13 @@ Make sure you use **Helm 4**.
 
 ```sh
 kubectl create ns zookeeper
-kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/zookeeper-operator/0.2.15-adobe-20260924/config/crd/bases/zookeeper.pravega.io_zookeeperclusters.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/adobe/zookeeper-operator/0.2.15-adobe-20261101/config/crd/bases/zookeeper.pravega.io_zookeeperclusters.yaml
 
 helm install zookeeper-operator --namespace=zookeeper \
 --set crd.create=false \
 --set image.repository='ghcr.io/adobe/zookeeper-operator' \
---set image.tag='0.2.15-adobe-20260924' \
---version 0.2.15-adobe-20260924 \
+--set image.tag='0.2.15-adobe-20261101' \
+--version 0.2.15-adobe-20261101 \
 oci://ghcr.io/adobe/helm-charts/zookeeper-operator
 ```
 
@@ -229,7 +232,7 @@ spec:
   image:
     repository: ghcr.io/adobe/zookeeper-operator/zookeeper
     # renovate: datasource=docker depName=ghcr.io/adobe/zookeeper-operator/zookeeper
-    tag: 3.9.6-0.2.15-adobe-20260924
+    tag: 3.9.6-0.2.15-adobe-20261101
     pullPolicy: IfNotPresent
   config:
     initLimit: 10
@@ -277,7 +280,7 @@ kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-oper
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
-helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --version 92.16.0 --set crds.enabled=false -f monitoring-values.yaml
+helm install monitoring --namespace=default prometheus-community/kube-prometheus-stack --version 92.17.1 --set crds.enabled=false -f monitoring-values.yaml
 
 ```
 
@@ -340,6 +343,7 @@ kubectl apply --server-side=true -f https://raw.githubusercontent.com/adobe/kope
 helm install kafka-operator  \
 --namespace=kafka \
 --set webhook.enabled=false \
+--set prometheusMetrics.authProxy.image.tag=v0.23.1 \
 --version 0.32.0 \
 oci://ghcr.io/adobe/helm-charts/kafka-operator
 
@@ -366,16 +370,16 @@ k describe KafkaCluster kafka -n kafka
 [Adobe KMinion](https://github.com/adobe/kminion) collects broker, topic, consumer-group,
 lag, and replica-log-size metrics through the Kafka API. Install it after Kafka is healthy
 and the Prometheus Operator CRDs are established. Both its OCI chart and container image
-are pinned to `2.3.4-adobe-20261026`; the explicit image override in
+are pinned to `2.4.2-adobe-20261102`; the explicit image override in
 `kminion-values.yaml` avoids relying on the chart's image default.
 
 ```sh
-docker pull ghcr.io/adobe/kminion:2.3.4-adobe-20261026
-kind load docker-image --name kafka ghcr.io/adobe/kminion:2.3.4-adobe-20261026
+docker pull ghcr.io/adobe/kminion:2.4.2-adobe-20261102
+kind load docker-image --name kafka ghcr.io/adobe/kminion:2.4.2-adobe-20261102
 
 helm install kminion oci://ghcr.io/adobe/helm-charts/kminion \
   --namespace kafka --kube-context kind-kafka \
-  --version 2.3.4-adobe-20261026 \
+  --version 2.4.2-adobe-20261102 \
   -f kminion-values.yaml --wait --timeout 180s
 
 kubectl --context kind-kafka --namespace kafka \

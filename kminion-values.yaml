@@ -2,7 +2,7 @@ fullnameOverride: kminion
 
 image:
   repository: ghcr.io/adobe/kminion
-  tag: "2.3.4-adobe-20261026"
+  tag: "2.4.2-adobe-20261102"
   pullPolicy: IfNotPresent
 
 replicaCount: 1
