@@ -14,7 +14,10 @@ spec:
   zkPath: "/kafka"
   oneBrokerPerNode: false
   # renovate: datasource=docker depName=ghcr.io/adobe/koperator/kafka
-  clusterImage: "ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.12"
+  clusterImage: "ghcr.io/adobe/koperator/kafka:2.13-3.9.2-jdk21.0.13.1"
+  monitoringConfig:
+    # renovate: datasource=docker depName=ghcr.io/adobe/koperator/jmx-javaagent
+    jmxImage: "ghcr.io/adobe/koperator/jmx-javaagent:1.7.0"
   clusterWideConfig: |
     # dynamic config
   readOnlyConfig: |
@@ -157,7 +160,7 @@ spec:
         usedForControllerCommunication: true
   cruiseControlConfig:
     # renovate: datasource=docker depName=adobe/cruise-control
-    image: "adobe/cruise-control:3.1.0-adbe-20261029"
+    image: "adobe/cruise-control:3.1.0-adbe-20261118"
     topicConfig:
       partitions: 6
       replicationFactor: 3
