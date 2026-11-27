@@ -1,0 +1,271 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="1320" viewBox="0 0 840 1320" role="img" aria-labelledby="architecture-title architecture-desc">
+  <title id="architecture-title">Kafka on a local kind cluster</title>
+  <desc id="architecture-desc">
+    Docker runs seven kind nodes on one laptop. One node runs the Kubernetes control plane.
+    Six workers share three simulated zones, with two configured Kafka brokers per zone.
+    In-cluster clients bootstrap through kafka-headless:29092, then produce and consume on the brokers.
+    Kafka copies partition data across racks and stores cluster metadata in three ZooKeeper members.
+    Brokers and ZooKeeper members each use a separate local-path persistent volume claim.
+    KOperator manages Kafka brokers and topics, and calls Cruise Control. Cruise Control reads the brokers' metrics topic and uses the Kafka Admin API.
+    The ZooKeeper operator manages ZooKeeper. cert-manager provides certificates. KOperator's admission webhook is off.
+    Prometheus Operator configures Prometheus, which scrapes Kafka and Cruise Control JMX Exporters, ZooKeeper, KMinion, node-exporter, and kube-state-metrics.
+    KMinion reads the Kafka Admin API. The Grafana sidecar loads Kafka Looking Glass from a ConfigMap. Grafana queries Prometheus.
+    If the sample scaling rules are applied, Prometheus sends alerts to Alertmanager, which calls KOperator's alert webhook.
+    The monitoring chart manages its own admission certificates. Dashboard access uses loopback port forwards.
+  </desc>
+  <style>
+    text { font-family: system-ui, sans-serif; fill: #122139; }
+    .title { font-size: 32px; font-weight: 750; }
+    .heading { font-size: 21px; font-weight: 700; }
+    .name { font-size: 18px; font-weight: 700; }
+    .label { font-size: 15px; fill: #34445b; }
+    .small { font-size: 14px; fill: #34445b; }
+    .mono { font-family: ui-monospace, monospace; }
+    .identifier { font-size: 13px; }
+    .badge { font-size: 14px; font-weight: 700; fill: #1a53ab; }
+    .panel { fill: #f5f8fc; stroke: #b7c8dd; }
+    .card { fill: #fff; stroke: #a7bad1; }
+    .kafka-card { fill: #eaf2ff; stroke: #7097cc; }
+    .monitor-card { fill: #e8f6f1; stroke: #6b9f8d; }
+    .alert-card { fill: #fff1e8; stroke: #bf906f; }
+    .rule { stroke: #d3deeb; }
+    .flow { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+    .data { stroke: #1a53ab; }
+    .control { stroke: #983c13; stroke-dasharray: 6 3.5; }
+    .metrics { stroke: #07634f; stroke-dasharray: 1 4; stroke-linecap: round; }
+    .data-head { marker-end: url(#data-arrow); }
+    .control-head { marker-end: url(#control-arrow); }
+    .metrics-head { marker-end: url(#metrics-arrow); }
+    .data-text { fill: #1a53ab; }
+    .control-text { fill: #983c13; }
+    .metrics-text { fill: #07634f; }
+  </style>
+  <defs>
+    <marker id="data-arrow" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0 0L10 5 0 10Z" fill="#1a53ab"/>
+    </marker>
+    <marker id="control-arrow" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0 0L10 5 0 10Z" fill="#983c13"/>
+    </marker>
+    <marker id="metrics-arrow" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0 0L10 5 0 10Z" fill="#07634f"/>
+    </marker>
+  </defs>
+
+  <rect width="840" height="1320" fill="#fff"/>
+  <text class="title" x="24" y="42">Kafka on a local kind cluster</text>
+  <path class="flow data data-head" d="M26 69H58"/>
+  <text class="label" x="68" y="74">Data access and copies</text>
+  <path class="flow control control-head" d="M276 69H308"/>
+  <text class="label" x="318" y="74">Control and alerts</text>
+  <path class="flow metrics metrics-head" d="M484 69H516"/>
+  <text class="label" x="526" y="74">Metrics requests</text>
+
+  <!-- The region and zones are node labels. They share the same laptop. -->
+  <rect class="panel" x="24" y="91" width="792" height="203" rx="13"/>
+  <text class="badge" x="44" y="120">01</text>
+  <text class="heading" x="72" y="121">Laptop</text>
+  <text class="label" x="796" y="120" text-anchor="end">Docker runs each kind node as a container. Colima can run Docker.</text>
+  <rect class="card" x="36" y="133" width="768" height="149" rx="9"/>
+  <text class="name" x="50" y="157">kind cluster: kafka</text>
+  <text class="small mono" x="225" y="157">kind-kafka</text>
+  <text class="label" x="788" y="157" text-anchor="end">region1 · 3 simulated zones · 7 nodes</text>
+
+  <g>
+    <rect class="panel" x="46" y="168" width="177" height="104" rx="7"/>
+    <text class="name" x="58" y="192">Control plane</text>
+    <text class="small mono" x="58" y="216">kafka-control-plane</text>
+    <text class="small" x="58" y="240">Kubernetes API</text>
+
+    <rect class="kafka-card" x="236" y="168" width="177" height="104" rx="7"/>
+    <text class="name" x="248" y="192">Zone az1</text>
+    <text class="small mono" x="248" y="213">kafka-worker</text>
+    <text class="small mono" x="248" y="233">kafka-worker2</text>
+    <text class="small" x="248" y="255">Brokers 101, 102</text>
+
+    <rect class="kafka-card" x="426" y="168" width="177" height="104" rx="7"/>
+    <text class="name" x="438" y="192">Zone az2</text>
+    <text class="small mono" x="438" y="213">kafka-worker3</text>
+    <text class="small mono" x="438" y="233">kafka-worker4</text>
+    <text class="small" x="438" y="255">Brokers 201, 202</text>
+
+    <rect class="kafka-card" x="616" y="168" width="177" height="104" rx="7"/>
+    <text class="name" x="628" y="192">Zone az3</text>
+    <text class="small mono" x="628" y="213">kafka-worker5</text>
+    <text class="small mono" x="628" y="233">kafka-worker6</text>
+    <text class="small" x="628" y="255">Brokers 301, 302</text>
+  </g>
+
+  <rect class="panel" x="24" y="308" width="792" height="485" rx="13"/>
+  <text class="badge" x="44" y="338">02</text>
+  <text class="heading" x="72" y="339">Kafka workloads</text>
+  <text class="label" x="796" y="338" text-anchor="end">Inside kind · Kafka and its clients run in the kafka namespace</text>
+
+  <!-- Kafka clients, operators, and storage. -->
+  <g>
+    <rect class="card" x="44" y="358" width="224" height="94" rx="8"/>
+    <text class="name" x="58" y="385">Kafka clients</text>
+    <text class="label" x="58" y="409">Internal bootstrap service</text>
+    <text class="label mono" x="58" y="432">kafka-headless:29092</text>
+
+    <rect class="card" x="312" y="358" width="222" height="82" rx="8"/>
+    <text class="name" x="326" y="384">KOperator</text>
+    <text class="label" x="326" y="406">Manages brokers and topics</text>
+    <text class="small" x="326" y="426">Admission webhook off</text>
+
+    <rect class="kafka-card" x="312" y="471" width="222" height="180" rx="8"/>
+    <text class="name" x="326" y="497">Six Kafka brokers</text>
+    <text class="label" x="326" y="520">Kafka 3.9 with ZooKeeper</text>
+    <text class="label" x="326" y="542">JMX Exporter in each broker</text>
+    <path class="rule" d="M326 554H520"/>
+    <text class="small" x="423" y="574" text-anchor="middle">Copies across racks (zones)</text>
+    <text class="small" x="423" y="596" text-anchor="middle">Example: one partition</text>
+    <text class="small" x="352" y="625" text-anchor="middle">Replica</text>
+    <text class="small" x="423" y="625" text-anchor="middle">Leader</text>
+    <text class="small" x="494" y="625" text-anchor="middle">Replica</text>
+    <path class="flow data data-head" d="M399 620H380"/>
+    <path class="flow data data-head" d="M447 620H466"/>
+
+    <rect class="card" x="44" y="547" width="224" height="94" rx="8"/>
+    <text class="name" x="58" y="574">Adobe KMinion</text>
+    <text class="label" x="58" y="597">Reads the Kafka Admin API</text>
+    <text class="label" x="58" y="619">Topics, group lag, log sizes</text>
+
+    <rect class="card" x="576" y="358" width="220" height="176" rx="8"/>
+    <text class="name" x="590" y="385">Cruise Control</text>
+    <text class="label" x="590" y="409">Rebalances partitions</text>
+    <text class="label" x="590" y="432">JMX Exporter</text>
+    <text class="label" x="590" y="458">Reads broker samples from</text>
+    <text class="small mono" x="590" y="481">__CruiseControlMetrics</text>
+    <text class="label" x="590" y="511">Uses Kafka Admin API</text>
+
+    <rect class="card" x="576" y="551" width="220" height="100" rx="8"/>
+    <text class="name" x="590" y="577">ZooKeeper</text>
+    <text class="label" x="590" y="600">3 members · Kafka metadata</text>
+    <text class="small mono identifier" x="590" y="623">zk-client.zookeeper:2181</text>
+    <text class="small" x="590" y="642">ZooKeeper metrics</text>
+
+    <rect class="card" x="44" y="690" width="224" height="84" rx="8"/>
+    <text class="name" x="58" y="716">cert-manager</text>
+    <text class="label" x="58" y="739">Provides cluster certificates</text>
+    <text class="small" x="58" y="760">Namespace: cert-manager</text>
+
+    <rect class="card" x="312" y="690" width="222" height="84" rx="8"/>
+    <text class="name" x="326" y="716">Local-path storage</text>
+    <text class="label" x="326" y="739">Separate PVCs on node disks</text>
+    <text class="small" x="326" y="760">standard class · 1 GiB each</text>
+
+    <rect class="card" x="576" y="690" width="220" height="84" rx="8"/>
+    <text class="name" x="590" y="716">ZooKeeper operator</text>
+    <text class="label" x="590" y="739">Manages the zk cluster</text>
+    <text class="small" x="590" y="760">Namespace: zookeeper</text>
+  </g>
+  <g>
+    <path class="flow data data-head" d="M146 452V488H311">
+      <title>Clients bootstrap, then send and receive records directly with Kafka brokers</title>
+    </path>
+    <text class="small data-text" x="156" y="480">Produce and consume</text>
+    <path class="flow control control-head" d="M423 440V470">
+      <title>KOperator manages Kafka brokers</title>
+    </path>
+    <path class="flow control control-head" d="M534 405H575">
+      <title>KOperator calls the Cruise Control REST API</title>
+    </path>
+    <text class="small control-text" x="555" y="397" text-anchor="middle">REST</text>
+    <path class="flow data data-head" d="M576 477H535">
+      <title>Cruise Control consumes the Kafka metrics topic</title>
+    </path>
+    <path class="flow control control-head" d="M576 505H535">
+      <title>Cruise Control calls the Kafka Admin API</title>
+    </path>
+    <path class="flow data data-head" d="M268 592H311">
+      <title>KMinion reads metrics through the Kafka Admin API</title>
+    </path>
+    <path class="flow control control-head" d="M534 593H575">
+      <title>Kafka brokers use ZooKeeper for cluster metadata and coordination</title>
+    </path>
+    <path class="flow data data-head" d="M423 651V689">
+      <title>Each broker stores its log files on its own persistent volume claim</title>
+    </path>
+    <text class="small data-text" x="432" y="674">Log files</text>
+    <path class="flow data data-head" d="M576 629H554V740H535">
+      <title>Each ZooKeeper member stores its data on its own persistent volume claim</title>
+    </path>
+    <path class="flow control control-head" d="M686 690V652">
+      <title>The ZooKeeper operator manages the three ZooKeeper members</title>
+    </path>
+  </g>
+
+  <rect class="panel" x="24" y="807" width="792" height="426" rx="13"/>
+  <text class="badge" x="44" y="837">03</text>
+  <text class="heading" x="72" y="838">Metrics, dashboards, and alerts</text>
+  <text class="label" x="796" y="837" text-anchor="end">Monitoring stack in default</text>
+
+  <!-- Prometheus pulls metrics. The alert path runs in the other direction. -->
+  <g>
+    <rect class="card" x="44" y="860" width="262" height="224" rx="8"/>
+    <text class="name" x="58" y="886">Scrape targets</text>
+    <path class="rule" d="M58 897H292M58 1007H292"/>
+    <text class="label" x="58" y="918">Kafka broker JMX Exporter</text>
+    <text class="label" x="58" y="945">Cruise Control JMX Exporter</text>
+    <text class="label" x="58" y="972">ZooKeeper metrics</text>
+    <text class="label" x="58" y="999">Adobe KMinion</text>
+    <text class="label" x="58" y="1032">node-exporter</text>
+    <text class="label" x="58" y="1059">kube-state-metrics</text>
+
+    <rect class="card" x="355" y="860" width="208" height="86" rx="8"/>
+    <text class="name" x="369" y="887">Prometheus Operator</text>
+    <text class="label" x="369" y="911">Uses ServiceMonitors</text>
+    <text class="label" x="369" y="932">and PrometheusRules</text>
+
+    <rect class="monitor-card" x="355" y="978" width="208" height="92" rx="8"/>
+    <text class="name" x="369" y="1005">Prometheus</text>
+    <text class="label" x="369" y="1028">Scrapes /metrics</text>
+    <text class="label" x="369" y="1050">Evaluates sample rules</text>
+
+    <rect class="card" x="576" y="860" width="220" height="86" rx="8"/>
+    <text class="name" x="590" y="894">Dashboard ConfigMap</text>
+    <text class="small mono identifier" x="590" y="919">prometheus-grafana-kafka</text>
+
+    <rect class="monitor-card" x="600" y="978" width="196" height="92" rx="8"/>
+    <text class="name" x="614" y="1005">Grafana</text>
+    <text class="label" x="614" y="1028">Kafka Looking Glass</text>
+    <text class="small" x="614" y="1050">Queries Prometheus</text>
+
+    <rect class="alert-card" x="44" y="1123" width="278" height="72" rx="8"/>
+    <text class="name" x="58" y="1150">Alertmanager</text>
+    <text class="label" x="58" y="1174">Routes matching Kafka scaling alerts</text>
+
+    <rect class="alert-card" x="410" y="1123" width="386" height="72" rx="8"/>
+    <text class="name" x="424" y="1150">KOperator alert webhook</text>
+    <text class="small mono" x="424" y="1174">kafka-operator-alertmanager.kafka.svc:9001</text>
+  </g>
+  <g>
+    <path class="flow metrics" d="M355 1013H330M330 913V1054"/>
+    <path class="flow metrics metrics-head" d="M330 913H307"/>
+    <path class="flow metrics metrics-head" d="M330 940H307"/>
+    <path class="flow metrics metrics-head" d="M330 967H307"/>
+    <path class="flow metrics metrics-head" d="M330 994H307"/>
+    <path class="flow metrics metrics-head" d="M330 1027H307"/>
+    <path class="flow metrics metrics-head" d="M330 1054H307"/>
+    <path class="flow control control-head" d="M459 946V977">
+      <title>Prometheus Operator configures Prometheus with scrape targets and alert rules</title>
+    </path>
+    <path class="flow control control-head" d="M687 978V947"/>
+    <text class="small control-text" x="697" y="968">Sidecar loads</text>
+    <path class="flow metrics metrics-head" d="M600 1033H564"/>
+    <path class="flow control control-head" d="M459 1070V1106H183V1122"/>
+    <text class="small control-text" x="449" y="1100" text-anchor="end">Sends alerts when rules are enabled</text>
+    <path class="flow control control-head" d="M322 1160H409"/>
+    <text class="small control-text" x="365" y="1152" text-anchor="middle">Webhook</text>
+  </g>
+  <text class="small" x="44" y="1218">The monitoring chart uses its own certgen for admission certificates.</text>
+
+  <rect class="panel" x="24" y="1247" width="792" height="57" rx="10"/>
+  <text class="label" x="44" y="1270">Laptop browser: loopback access via kubectl port-forward</text>
+  <text class="small" x="44" y="1291">127.0.0.1 ports:</text>
+  <text class="small" x="157" y="1291">Grafana 3000</text>
+  <text class="small" x="295" y="1291">Prometheus 9090</text>
+  <text class="small" x="462" y="1291">Alertmanager 9093</text>
+  <text class="small" x="642" y="1291">Cruise Control 18090</text>
+</svg>

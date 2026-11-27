@@ -104,6 +104,8 @@ Read each custom resource's status schema before selecting a readiness check. No
 
 ## Kafka smoke test
 
+- Run `python3 -B tests/smoke_kafka.py` for the standard live checks. See [Run the smoke tests](README.md#run-the-smoke-tests) for prerequisites and the offline Prometheus rule tests.
+- Use `--replace-broker` only on explicit request. Run that check before installing the sample autoscaling rules.
 - Run Kafka clients inside the `kafka` namespace with the Kafka image from `simplekafkacluster.yaml`.
 - Use the README's internal bootstrap address. An internal bootstrap service is not necessarily usable from the host.
 - Create a uniquely named test topic with three partitions and replication factor three.

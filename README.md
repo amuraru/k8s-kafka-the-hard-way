@@ -2,6 +2,7 @@
 
 
 - [Intro](#intro)
+  - [Architecture](#architecture)
   - [Software versions](#software-versions)
 - [Install Kafka in a `kind` k8s cluster](#install-kafka-in-a-kind-k8s-cluster)
   - [Install `kind`](#install-kind)
@@ -24,7 +25,8 @@
   - [BanzaiCloud KOperator](#banzaicloud-koperator-1)
       - [Create a KafkaCluster](#create-a-kafkacluster)
       - [Install Adobe KMinion](#install-adobe-kminion)
-      - [Create Prometheus `ServiceMonitor` and AlertManager `PrometheusRule` resources](#create-prometheus-servicemonitor-and-alertmanager-prometheusrule-resources)
+       - [Create Prometheus `ServiceMonitor` and AlertManager `PrometheusRule` resources](#create-prometheus-servicemonitor-and-alertmanager-prometheusrule-resources)
+       - [Run the smoke tests](#run-the-smoke-tests)
       - [Create `PrometheusRule` to enable auto-scaling](#create-prometheusrule-to-enable-auto-scaling)
       - [Load Grafana `Kafka Looking Glass` dashboard](#load-grafana-kafka-looking-glass-dashboard)
       - [Check Cruise Control](#check-cruise-control)
@@ -47,6 +49,10 @@
 # Intro
 
 This is a quick tutorial on how to run [the fine piece BanzaiCloud Kafka-Operator](https://github.com/banzaicloud/koperator) in a local multi-node kind cluster.
+
+## Architecture
+
+![Kafka on kind: client traffic, cross-zone replication, ZooKeeper metadata, and the metrics and alert paths through Prometheus, Grafana, Alertmanager, and KOperator.](docs/architecture.svg)
 
 ## Software versions
 
@@ -441,6 +447,36 @@ kubectl apply -n zookeeper \
 -f zookeeper-prometheus-monitoring.yaml
 ```
 
+#### Run the smoke tests
+
+Run the live test after installing KMinion and the ServiceMonitors. Run it before you enable the sample autoscaling rules. It requires Python 3.8 or later and Mike Farah `yq` v4.
+
+```sh
+python3 -B tests/smoke_kafka.py
+```
+
+If the cluster runs in the Colima `kafka` profile, set `DOCKER_CONTEXT=colima-kafka` for the command. The script gets a temporary kubeconfig from the local kind cluster named `kafka`. It creates a unique `KafkaTopic` and uses the pinned broker image for its test client.
+
+The test checks three partitions, three in-sync replicas per partition, and the requested retention. It produces 100 records, then checks that the consumer reads exactly those records and saves its positions. Five new records make KMinion report a lag of five. When the same group resumes, it reads exactly the five new records and lag returns to zero. The test removes its own topic, consumer groups, and client pod.
+
+To test broker recovery, run this command on a disposable `kind-kafka` cluster before you enable the sample autoscaling rules. It deletes one broker pod. The test checks that the replacement uses the same storage, all replicas catch up, and a new consumer group can replay the records.
+
+```sh
+python3 -B tests/smoke_kafka.py --replace-broker
+```
+
+To test alert thresholds and delays offline, use `promtool` from the pinned Prometheus release. The test reads the rules in `kafkacluster-prometheus-autoscale.yaml` and checks when alerts fire, clear, and carry the expected labels.
+
+```sh
+sh tests/test_prometheus_rules.sh
+```
+
+Run the smoke-test parser checks without a cluster:
+
+```sh
+python3 -B -m unittest discover -s tests -v
+```
+
 #### Create `PrometheusRule` to enable auto-scaling
 
 Run the Kafka smoke test before enabling these rules. The monitoring values route scaling alerts
@@ -507,8 +543,7 @@ Healthy zero-valued counters (digest mismatches, replication lag, failures, reas
 and offline log directories) are displayed as zero from real metric samples. Filters such
 as `> 0` are not used to discard those healthy samples. Legacy Angular `graph` and `table-old`
 panels have been migrated to current time-series/table panels for Grafana 13, including the
-panels inside collapsed rows. Run the dashboard regression tests
-with `python3 -B -m unittest discover -s tests -v` after changing queries or variables.
+panels inside collapsed rows.
 
 #### Check Cruise Control
 

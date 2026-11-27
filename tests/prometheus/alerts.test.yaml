@@ -1,0 +1,110 @@
+rule_files:
+  - rules.yaml
+evaluation_interval: 1m
+
+tests:
+  - name: Overload must exceed 30 requests per second for five minutes
+    interval: 1m
+    input_series:
+      - series: 'kafka_network_requestmetrics_requests_total{namespace="kafka",kafka_cr="kafka",brokerId="101"}'
+        values: '0+1920x30'
+      - series: 'kafka_network_requestmetrics_requests_total{namespace="kafka",kafka_cr="at-threshold",brokerId="101"}'
+        values: '0+1800x30'
+    # Check the firing series so the alert text's float formatting is irrelevant.
+    promql_expr_test:
+      - expr: 'ALERTS{alertname="BrokerOverLoaded",alertstate="firing"}'
+        eval_time: 19m
+        exp_samples: []
+      - expr: 'ALERTS{alertname="BrokerOverLoaded",alertstate="firing"}'
+        eval_time: 20m
+        exp_samples:
+          - labels: 'ALERTS{alertname="BrokerOverLoaded",alertstate="firing",kafka_cr="kafka",namespace="kafka",severity="alert"}'
+            value: 1
+      - expr: 'ALERTS{alertname="BrokerOverLoaded",alertstate="firing"}'
+        eval_time: 46m
+        exp_samples: []
+
+  - name: Under-replication must persist for five minutes and clear on recovery
+    interval: 1m
+    input_series:
+      - series: 'kafka_server_replicamanager_underreplicatedpartitions{namespace="kafka",kafka_cr="kafka",brokerId="101"}'
+        values: '0 1+0x5 0'
+    alert_rule_test:
+      - {eval_time: 5m, alertname: BrokerUnderReplicated, exp_alerts: []}
+      - eval_time: 6m
+        alertname: BrokerUnderReplicated
+        exp_alerts:
+          - exp_labels: {namespace: kafka, kafka_cr: kafka, brokerId: '101', severity: alert}
+            exp_annotations:
+              description: broker 101 underreplicated
+              summary: broker underreplicated
+              command: upScale
+              storageClass: standard
+              mountPath: /kafkalog
+              diskSize: 2G
+              image: KAFKA_IMAGE_FROM_CLUSTER_MANIFEST
+      - {eval_time: 7m, alertname: BrokerUnderReplicated, exp_alerts: []}
+
+  - name: High partition count must exceed 100 for three minutes
+    interval: 1m
+    input_series:
+      - series: 'kafka_server_replicamanager_partitioncount{namespace="kafka",kafka_cr="kafka",brokerId="101"}'
+        values: '100 101+0x3 100'
+      - series: 'kafka_server_replicamanager_partitioncount{namespace="kafka",kafka_cr="kafka",brokerId="102"}'
+        values: '50+0x5'
+    alert_rule_test:
+      - {eval_time: 3m, alertname: PartitionCountHigh, exp_alerts: []}
+      - eval_time: 4m
+        alertname: PartitionCountHigh
+        exp_alerts:
+          - exp_labels: {namespace: kafka, kafka_cr: kafka, severity: alert}
+            exp_annotations:
+              description: 'broker  has high partition count'
+              summary: high partition count
+              command: upScale
+              storageClass: standard
+              mountPath: /kafkalog
+              diskSize: 2G
+              image: KAFKA_IMAGE_FROM_CLUSTER_MANIFEST
+      - {eval_time: 5m, alertname: PartitionCountHigh, exp_alerts: []}
+
+  - name: Low partition count must stay below five for three minutes
+    interval: 1m
+    input_series:
+      - series: 'kafka_server_replicamanager_partitioncount{namespace="kafka",kafka_cr="kafka",brokerId="101"}'
+        values: '5 4+0x3 5'
+      - series: 'kafka_server_replicamanager_partitioncount{namespace="kafka",kafka_cr="kafka",brokerId="102"}'
+        values: '50+0x5'
+    alert_rule_test:
+      - {eval_time: 3m, alertname: PartitionCountLow, exp_alerts: []}
+      - eval_time: 4m
+        alertname: PartitionCountLow
+        exp_alerts:
+          - exp_labels: {namespace: kafka, kafka_cr: kafka, severity: alert}
+            exp_annotations:
+              description: 'broker  has low partition count'
+              summary: low partition count
+              command: downScale
+      - {eval_time: 5m, alertname: PartitionCountLow, exp_alerts: []}
+
+  - name: Low available disk space must persist for two minutes on a Kafka claim
+    interval: 1m
+    input_series:
+      - series: 'kubelet_volume_stats_available_bytes{namespace="kafka",persistentvolumeclaim="kafka-101-storage-0"}'
+        values: '1000000000 999999999+0x2 1000000000'
+      - series: 'kubelet_volume_stats_available_bytes{namespace="default",persistentvolumeclaim="other-storage"}'
+        values: '1+0x4'
+    alert_rule_test:
+      - {eval_time: 2m, alertname: RemainingDiskSpaceLow, exp_alerts: []}
+      - eval_time: 3m
+        alertname: RemainingDiskSpaceLow
+        exp_alerts:
+          - exp_labels: {namespace: kafka, persistentvolumeclaim: kafka-101-storage-0, severity: alert}
+            exp_annotations:
+              description: 'broker  has low disk space'
+              summary: low diskspace
+              command: addPVC
+              storageClass: standard
+              mountPath: /kafkalog
+              diskSize: 2G
+      - {eval_time: 4m, alertname: RemainingDiskSpaceLow, exp_alerts: []}
